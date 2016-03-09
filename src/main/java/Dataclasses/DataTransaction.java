@@ -29,6 +29,7 @@ public class DataTransaction {
 
 	    // TODO run
 	    // TODO put value into prev_out_id
+	    prev_out_id = 42;
 
 	    String query_2 = "SELECT amount, output_id" + " FROM output" + " WHERE output_id = \"" + prev_out_id + "\""
 		    + " AND output_index = \"" + input.getOutpoint().getIndex() + "\"";

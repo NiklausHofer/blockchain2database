@@ -1,19 +1,25 @@
 package Dataclasses;
 
+import java.sql.SQLException;
+
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.NetworkParameters;
+
+import com.mysql.jdbc.PreparedStatement;
+
+import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class DataBlock {
 
     private Block block;
-    private String block_hash;
-    private String prev_block_hash;
-    private int prevBlockId;
-    private int blockId;
-    NetworkParameters params;
+    private int height;
+    private long prevBlockId = -1;
+    private long blockId;
+    private NetworkParameters params;
+    private DatabaseConnection connection;
 
     private String insertBlockQuery = "INSERT INTO block"
-	    + " (magic_id, difficulty, hash, prev_blk_id, mkrl_root, time, transaction_count, height, version, nonce)"
+	    + " (difficulty, hash, prev_blk_id, mkrl_root, time, transaction_count, height, version, nonce)"
 	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     private String updateBlockQuery = "UPDATE block" + " SET output_amount = ?, input_amount = ?"
@@ -21,41 +27,68 @@ public class DataBlock {
 
     private String getPrevBlockIdQuery = "SELECT block_id FROM block WHERE block_hash = ?;";
 
-    public DataBlock(Block block, NetworkParameters params) {
+    public DataBlock(Block block, NetworkParameters params, DatabaseConnection connection, int height,
+	    long prevBlockId) {
 
 	this.block = block;
-
-	block_hash = block.getHash().toString();
-	prev_block_hash = block.getPrevBlockHash().toString();
+	this.connection = connection;
+	this.height = height;
+	this.prevBlockId = prevBlockId;
 
     }
 
-    /*
-     * Get the required data from the database
-     */
-    private void getData() {
-	if (block.getPrevBlockHash().equals(params.getGenesisBlock().getHash())) {
-	    prevBlockId = -1;
-	    return;
-	}
-	String query = "SELECT block_id FROM blocks WHERE block_hash = \"" + prev_block_hash + "\";";
-    }
+    // /*
+    // * Get the required data from the database
+    // */
+    // private void getData() {
+    // PreparedStatement statement = (PreparedStatement)
+    // connection.getPreparedStatement(getPrevBlockIdQuery);
+    //
+    // try {
+    // // Don't do this for the genesis block
+    // if (block.getPrevBlockHash().equals(params.getGenesisBlock().getHash()))
+    // return;
+    // else
+    // statement.setString(1, block.getPrevBlockHash().toString());
+    //
+    // statement.execute();
+    // ResultSet result = statement.getResultSet();
+    //
+    // prevBlockId = result.getLong(1);
+    // } catch (SQLException e) {
+    // e.printStackTrace();
+    // }
+    // }
 
     /**
      * Inserts the block into the database. Leaves the "amount" Fields empty.
      */
     public void writeBlock() {
-	getData();
+	// getData();
 
-	if (prevBlockId < 0) {
-	    // This is the genesis block. Special case. No prev block Id. Insert
-	    // NULL instead.
+	try {
+	    PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(insertBlockQuery);
+
+	    statement.setLong(1, block.getDifficultyTarget()); // difficulty
+	    statement.setString(2, block.getHashAsString()); // hash
+	    // special treatment for genesis Block
+	    if (prevBlockId >= 0)
+		statement.setLong(3, prevBlockId); // prevBlockId
+	    else
+		statement.setNull(3, java.sql.Types.NULL);
+	    statement.setString(4, block.getMerkleRoot().toString()); // mrkl_root
+	    statement.setTimestamp(5, new java.sql.Timestamp(block.getTime().getTime())); // time
+	    statement.setLong(6, block.getTransactions().size()); // transaction_count
+	    statement.setLong(7, height); // height
+	    statement.setLong(8, block.getVersion()); // version
+	    statement.setLong(9, block.getNonce()); // Nonce
+
+	    statement.execute();
+
+	    blockId = statement.getGeneratedKeys().getLong(1);
+	} catch (SQLException e) {
+	    System.err.println(e);
 	}
-
-	String query = "INSERT INTO...";
-	// TODO run
-
-	// TODO retrieve the blockID and store it
     }
 
     public void updateAmounts(int totalIn, int totalOut) {
@@ -63,7 +96,7 @@ public class DataBlock {
 	// TODO run
     }
 
-    public int getId() {
+    public long getId() {
 	return blockId;
     }
 }

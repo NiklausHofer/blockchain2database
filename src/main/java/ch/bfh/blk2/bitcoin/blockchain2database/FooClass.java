@@ -3,53 +3,56 @@ package ch.bfh.blk2.bitcoin.blockchain2database;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.MainNetParams;
-import org.spongycastle.asn1.dvcs.Data;
 
 import Dataclasses.DataBlock;
-import Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class FooClass {
 
-	private BlockProducer blockProducer;
-	private Context context;
-	private NetworkParameters params;
+    private BlockProducer blockProducer;
+    private Context context;
+    private NetworkParameters params;
+    private DatabaseConnection connection;
 
-	public static void main(String[] args) {
+    public static void main(String[] args) {
 
-		FooClass foo = new FooClass();
-		foo.generateDatabase();
-	}
+	FooClass foo = new FooClass();
+	foo.generateDatabase();
+    }
 
-	public FooClass() {
+    public FooClass() {
 
-		// Init BitcoinJ
-		params = new MainNetParams();
-		context = Context.getOrCreate(params);
+	// Init BitcoinJ
+	params = new MainNetParams();
+	context = Context.getOrCreate(params);
 
-		blockProducer = new BlockProducer(Utility.getDefaultFileList(), 1);
-	}
+	// database connection
+	connection = new DatabaseConnection();
 
-	private void generateDatabase() {
+	blockProducer = new BlockProducer(Utility.getDefaultFileList(), 1);
+    }
 
-		for (Block block : blockProducer)
-			writeBlock(block);
-	}
+    private void generateDatabase() {
 
-	private void writeBlock(Block block) {
-		int totalIn = 0;
-		int totalOut = 0;
+	int height = 0;
+	long prevId = -1;
+	for (Block block : blockProducer)
+	    prevId = writeBlock(block, height++, prevId);
+    }
 
-		DataBlock dataBlock = new DataBlock(block, params);
-		dataBlock.writeBlock();
+    private long writeBlock(Block block, int height, long prevId) {
+	int totalIn = 0;
+	int totalOut = 0;
 
-		for (Transaction transaction : block.getTransactions()) DataTransaction dataTransaction = new DataTransaction( transaction, dataBlock.getId());
+	DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
+	dataBlock.writeBlock();
 
-		// right at the end of the loop...
-		dataBlock.updateAmounts(totalIn, totalOut);
-	}
+	return dataBlock.getId();
+
+	// right at the end of the loop...
+	// dataBlock.updateAmounts(totalIn, totalOut);
+    }
 
 }
