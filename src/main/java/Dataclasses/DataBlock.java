@@ -83,7 +83,7 @@ public class DataBlock {
 	    statement.setLong(8, block.getVersion()); // version
 	    statement.setLong(9, block.getNonce()); // Nonce
 
-	    statement.execute();
+	    statement.executeUpdate();
 
 	    blockId = statement.getGeneratedKeys().getLong(1);
 	} catch (SQLException e) {

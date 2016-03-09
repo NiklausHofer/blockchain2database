@@ -3,7 +3,7 @@ package ch.bfh.blk2.bitcoin.blockchain2database;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 
 import Dataclasses.DataBlock;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
@@ -25,7 +25,8 @@ public class FooClass {
     public FooClass() {
 
 	// Init BitcoinJ
-	params = new MainNetParams();
+	// params = new MainNetParams();
+	params = new TestNet3Params();
 	context = Context.getOrCreate(params);
 
 	// database connection
