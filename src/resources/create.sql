@@ -94,7 +94,7 @@ CREATE TABLE Block_transaction(
   FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)
 )ENGINE = MEMORY;
 
-CREATE TABLE Block_transaction(
+CREATE TABLE address_output(
   addr_id BIGINT,
   output_id BIGINT,
 )ENGINE = MEMORY;

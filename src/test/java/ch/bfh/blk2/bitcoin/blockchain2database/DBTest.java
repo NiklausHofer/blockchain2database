@@ -28,8 +28,8 @@ public class DBTest {
 		ResultSet result;
 
 		try{
-			result = dbconnection.getPreparedStatement(sql).executeQuery(sql);
-    
+			result = dbconnection.getPreparedStatement(sql).executeQuery();
+
 			while(result.next()){
 				int bar  = result.getInt("bar");
 				String baz = result.getString("baz");
@@ -43,6 +43,52 @@ public class DBTest {
 			e.printStackTrace();
 		}
 
+	}
+
+	@Test
+	public void initTest(){
+
+
+		DatabaseConnection dbconnection = new DatabaseConnection();
+
+		String sql="";
+		DBInitialisator init = new DBInitialisator();
+		init.initializeDB();
+
+		ResultSet result;
+
+		sql="show tables";
+
+		try{
+			result = dbconnection.getPreparedStatement(sql).executeQuery();
+
+			while(result.next()){
+				String table = result.getString("Tables_in_test");
+				System.out.println(table);
+			}
+
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		cleanUP();
+
+	}
+
+
+	private void cleanUP(){
+		
+		String sql="";
+
+		DatabaseConnection dbconnection = new DatabaseConnection();
+
+		try {
+			sql="DROP TABLE IF EXISTS block,";
+			dbconnection.getPreparedStatement(sql).executeUpdate();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 }
