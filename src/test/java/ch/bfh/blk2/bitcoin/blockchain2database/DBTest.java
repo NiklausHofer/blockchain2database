@@ -27,9 +27,9 @@ public class DBTest {
 
 		ResultSet result;
 
-		try {
-			result = dbconnection.getStatement().executeQuery(sql);
-
+		try{
+			result = dbconnection.getPreparedStatement(sql).executeQuery(sql);
+    
 			while(result.next()){
 				int bar  = result.getInt("bar");
 				String baz = result.getString("baz");
