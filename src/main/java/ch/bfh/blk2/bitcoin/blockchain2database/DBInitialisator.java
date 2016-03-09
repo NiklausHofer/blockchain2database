@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class DBInitialisator {
@@ -8,9 +9,9 @@ public class DBInitialisator {
 	BLOCK= "CREATE TABLE IF NOT EXISTS block("
 			+"blk_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 			+"difficulty BIGINT,"
-			+"hash VARCHAR(35),"
+			+"hash VARCHAR(64),"
 			+"prev_blk_id BIGINT,"
-			+"mkrl_root VARCHAR(35),"
+			+"mkrl_root VARCHAR(64),"
 			+"time TIMESTAMP DEFAULT 0,"
 			+"transaction_count BIGINT,"
 			+"height BIGINT,"
@@ -30,7 +31,7 @@ public class DBInitialisator {
 					+"input_amount BIGINT,"
 					+"coinbase BOOL,"
 					+"blk_id BIGINT,"
-					+"tx_hash VARCHAR(35),"
+					+"tx_hash VARCHAR(64),"
 					+"FOREIGN KEY(blk_id) REFERENCES block(blk_id)"
 					+")ENGINE = MEMORY;",
 					OUTPUT="CREATE TABLE IF NOT EXISTS output("
@@ -58,7 +59,7 @@ public class DBInitialisator {
 									+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 									+")ENGINE = MEMORY;",
 
-									SCRIPT="CREATE TABLE IF NOT EXISTS scrip("
+									SCRIPT="CREATE TABLE IF NOT EXISTS script("
 											+"script_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 											+"script_length BIGINT,"
 											+"script_code BLOB,"
@@ -95,15 +96,39 @@ public class DBInitialisator {
 		DatabaseConnection dbconn = new DatabaseConnection();
 		
 		try {
+			PreparedStatement ps;
 			
-			dbconn.getPreparedStatement(BLOCK).execute();
-			dbconn.getPreparedStatement(TRANSACTION).execute();
-			dbconn.getPreparedStatement(OUTPUT).execute();
-			dbconn.getPreparedStatement(INPUT).execute();
-			dbconn.getPreparedStatement(SCRIPT).execute();
-			dbconn.getPreparedStatement(ADDRESS).execute();
-			dbconn.getPreparedStatement(BLOCK_TRANSACTION).execute();
-			dbconn.getPreparedStatement(ADDRESS_OUTPUT).execute();
+			ps= dbconn.getPreparedStatement(BLOCK);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(TRANSACTION);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(OUTPUT);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(INPUT);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(SCRIPT);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(ADDRESS);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(BLOCK_TRANSACTION);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(ADDRESS_OUTPUT);
+			ps.execute();
+			ps.close();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
