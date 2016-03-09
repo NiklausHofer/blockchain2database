@@ -13,7 +13,9 @@ import java.util.TreeMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Block;
+import org.bitcoinj.core.Context;
 import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.utils.BlockFileLoader;
 
 import ch.bfh.blk2.bitcoin.comparator.Sha256HashComparator;
@@ -35,6 +37,8 @@ import ch.bfh.blk2.bitcoin.util.Utility;
  *
  */
 public class BlockProducer implements Iterable<Block> {
+
+	public static MainNetParams PARAMS = new MainNetParams();
 
 	private static final int DEFAULT_MIN_BLOCK_DEPTH = 6;
 	private static final Logger logger = LogManager.getLogger("TransactionProducer");
@@ -157,6 +161,7 @@ public class BlockProducer implements Iterable<Block> {
 	}
 
 	public static void main(String[] args) {
+		Context c = Context.getOrCreate(new MainNetParams());
 		BlockProducer op = new BlockProducer(Utility.getDefaultFileList(), 0);
 
 		long blocks = 0;
