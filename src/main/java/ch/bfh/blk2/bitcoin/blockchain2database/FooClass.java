@@ -41,6 +41,8 @@ public class FooClass {
 	long prevId = -1;
 	for (Block block : blockProducer)
 	    prevId = writeBlock(block, height++, prevId);
+
+	connection.commit();
     }
 
     private long writeBlock(Block block, int height, long prevId) {

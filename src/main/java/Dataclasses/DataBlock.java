@@ -1,7 +1,10 @@
 package Dataclasses;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.NetworkParameters;
 
@@ -10,6 +13,8 @@ import com.mysql.jdbc.PreparedStatement;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class DataBlock {
+
+    private static final Logger logger = LogManager.getLogger("DataBlock");
 
     private Block block;
     private int height;
@@ -20,7 +25,7 @@ public class DataBlock {
 
     private String insertBlockQuery = "INSERT INTO block"
 	    + " (difficulty, hash, prev_blk_id, mkrl_root, time, transaction_count, height, version, nonce)"
-	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+	    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
     private String updateBlockQuery = "UPDATE block" + " SET output_amount = ?, input_amount = ?"
 	    + " WHERE blk_id = ?;";
@@ -85,10 +90,22 @@ public class DataBlock {
 
 	    statement.executeUpdate();
 
-	    blockId = statement.getGeneratedKeys().getLong(1);
+	    ResultSet rs = statement.getGeneratedKeys();
+
+	    if (rs.next())
+		blockId = rs.getLong(1);
+	    else {
+		blockId = -1;
+		logger.warn("Bad generatedKeySet from Block " + block.getHashAsString());
+	    }
+
+	    rs.close();
 	} catch (SQLException e) {
-	    System.err.println(e);
+	    e.printStackTrace();
 	}
+
+	logger.info("Writing Block " + block.getHashAsString());
+
     }
 
     public void updateAmounts(int totalIn, int totalOut) {
