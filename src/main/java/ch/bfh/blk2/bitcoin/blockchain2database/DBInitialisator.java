@@ -43,7 +43,7 @@ public class DBInitialisator {
 							+"spent_by_input BIGINT,"
 							+"spent_in_tx BIGINT,"
 							+"spent_at TIMESTAMP DEFAULT 0,"
-							+"address_id BIGINT,"
+							+"addr_id BIGINT,"
 							+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 							+")ENGINE = MEMORY;",
 
@@ -69,7 +69,7 @@ public class DBInitialisator {
 
 											ADDRESS="CREATE TABLE IF NOT EXISTS address("
 													+"addr_id  BIGINT AUTO_INCREMENT PRIMARY KEY,"
-													+"public_key BIGINT,"
+													+"public_key VARBINARY(32),"
 													+"addr_hash VARCHAR(35)"
 													+")ENGINE = MEMORY;"
 							  ;

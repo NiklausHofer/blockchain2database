@@ -6,11 +6,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.script.ScriptException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.params.MainNetParams;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -37,8 +41,8 @@ public class DataTransaction {
 			+ " (version, lock_time, blk_time, input_count, output_count, output_amount, input_amount, coinbase, blk_id, tx_hash) "
 			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-	private String outputInsertQuery = "INSERT INTO output" + " (amount, tx_id, tx_index, spent)"
-			+ " VALUES( ?, ?, ?, ? );";
+	private String outputInsertQuery = "INSERT INTO output" + " (amount, tx_id, tx_index, spent,addr_id)"
+			+ " VALUES( ?, ?, ?, ? , ? );";
 
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date) {
 		this.transaction = transaction;
@@ -103,15 +107,24 @@ public class DataTransaction {
 	private void writeOutput(TransactionOutput output) {
 
 		try {
+			
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputInsertQuery);
 
+			//Get Adress ID
+			Address address = AddressUpdater.getAddressFromOutput(output, new MainNetParams());
+			AddressUpdater addressUpdater = new AddressUpdater(address);
+			long addr_id = addressUpdater.update(connection);
+			
 			statement.setLong(1, output.getValue().getValue());
 			statement.setLong(2, tx_id);
 			statement.setLong(3, output.getIndex());
 			statement.setBoolean(4, false);
+			statement.setLong(5, addr_id);
 
 			statement.executeUpdate();
 		} catch (SQLException e) {
+			e.printStackTrace();
+		}catch (ScriptException e) {
 			e.printStackTrace();
 		}
 	}
