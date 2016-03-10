@@ -27,14 +27,18 @@ public class DataTransaction {
 	private DatabaseConnection connection;
 	private Date date;
 	private List<DataInput> dataInputs;
+	private long tx_id;
 
-	private String inputAmountQuery_1 = "SELECT tx_id FROM transaction WHERE tx_hash = ?;";
-	private String inputAmountQuery_2 = "SELECT amount, output_id FROM output WHERE tx_id = ? AND output_index = ?;";
+	//private String inputAmountQuery_1 = "SELECT tx_id FROM transaction WHERE tx_hash = ?;";
+	//private String inputAmountQuery_2 = "SELECT amount, output_id FROM output WHERE tx_id = ? AND output_index = ?;";
 	private String inputAmountQuery_3 = "SELECT transaction.tx_id, output.amount, output.output_id FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String transactionInsertQuery = "INSERT INTO transaction"
 			+ " (version, lock_time, blk_time, input_count, output_count, output_amount, input_amount, coinbase, blk_id, tx_hash) "
 			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+	private String outputInsertQuery = "INSERT INTO output" + " (amount, tx_id, tx_index, spent)"
+			+ " VALUES( ?, ?, ?, ? );";
 
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date) {
 		this.transaction = transaction;
@@ -51,6 +55,8 @@ public class DataTransaction {
 		calcOutAmount();
 		calcInAmount();
 
+		tx_id = -1;
+
 		try {
 			PreparedStatement transactionInsertStatement = (PreparedStatement) connection
 					.getPreparedStatement(transactionInsertQuery);
@@ -65,10 +71,49 @@ public class DataTransaction {
 			transactionInsertStatement.setBoolean(8, transaction.isCoinBase());
 			transactionInsertStatement.setLong(9, blockId);
 			transactionInsertStatement.setString(10, transaction.getHashAsString());
+
+			transactionInsertStatement.executeUpdate();
+
+			ResultSet rs = transactionInsertStatement.getGeneratedKeys();
+
+			if (rs.next())
+				tx_id = rs.getLong(1);
+			else
+				logger.warn("Bad generatedKeySet from Transaction " + transaction.getHashAsString());
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
+		for (DataInput dataInput : dataInputs) {
+			dataInput.setTx_id(tx_id);
+			dataInput.writeInput(connection);
+		}
+
+		for (TransactionOutput output : transaction.getOutputs())
+			writeOutput(output);
+
+		for (DataInput dataInput : dataInputs) {
+			dataInput.setDate(date);
+			dataInput.updateOutputs(connection);
+		}
+
+	}
+
+	private void writeOutput(TransactionOutput output) {
+
+		try {
+			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputInsertQuery);
+
+			statement.setLong(1, output.getValue().getValue());
+			statement.setLong(2, tx_id);
+			statement.setLong(3, output.getIndex());
+			statement.setBoolean(4, false);
+
+			statement.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void calcOutAmount() {
@@ -87,7 +132,7 @@ public class DataTransaction {
 				return;
 			}
 
-			DataInput dataInput = new DataInput(input.getOutpoint().getIndex());
+			DataInput dataInput = new DataInput(input);
 			dataInputs.add(dataInput);
 
 			try {
