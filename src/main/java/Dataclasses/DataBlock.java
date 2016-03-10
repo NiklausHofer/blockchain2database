@@ -42,29 +42,6 @@ public class DataBlock {
 
     }
 
-    // /*
-    // * Get the required data from the database
-    // */
-    // private void getData() {
-    // PreparedStatement statement = (PreparedStatement)
-    // connection.getPreparedStatement(getPrevBlockIdQuery);
-    //
-    // try {
-    // // Don't do this for the genesis block
-    // if (block.getPrevBlockHash().equals(params.getGenesisBlock().getHash()))
-    // return;
-    // else
-    // statement.setString(1, block.getPrevBlockHash().toString());
-    //
-    // statement.execute();
-    // ResultSet result = statement.getResultSet();
-    //
-    // prevBlockId = result.getLong(1);
-    // } catch (SQLException e) {
-    // e.printStackTrace();
-    // }
-    // }
-
     /**
      * Inserts the block into the database. Leaves the "amount" Fields empty.
      */

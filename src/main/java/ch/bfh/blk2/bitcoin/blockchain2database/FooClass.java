@@ -3,9 +3,11 @@ package ch.bfh.blk2.bitcoin.blockchain2database;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.TestNet3Params;
 
 import Dataclasses.DataBlock;
+import Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
@@ -51,6 +53,12 @@ public class FooClass {
 
 	DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 	dataBlock.writeBlock();
+
+	for (Transaction transaction : block.getTransactions()) {
+	    DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
+		    block.getTime());
+	    dataTransaction.writeTransaction();
+	}
 
 	return dataBlock.getId();
 
