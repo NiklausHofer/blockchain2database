@@ -24,7 +24,7 @@ public class DataBlock {
 	private DatabaseConnection connection;
 
 	private String insertBlockQuery = "INSERT INTO block"
-			+ " (difficulty, hash, prev_blk_id, mkrl_root, time, transaction_count, height, version, nonce)"
+			+ " (difficulty, hash, prev_blk_id, mrkl_root, time, tx_count, height, version, nonce)"
 			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 	private String updateBlockQuery = "UPDATE block" + " SET output_amount = ?, input_amount = ?"

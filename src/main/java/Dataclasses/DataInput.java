@@ -27,7 +27,7 @@ public class DataInput {
 	private OutputUpdate outputUpdate;
 
 	String dataInputQuery = "INSERT INTO input "
-			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequenze_number, amount)"
+			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequence_number, amount)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?);";
 
 	String outputUpdateQuery = "UPDATE output" + " SET spent = ?, spent_by_input = ?, spent_in_tx = ?, spent_at = ?"
