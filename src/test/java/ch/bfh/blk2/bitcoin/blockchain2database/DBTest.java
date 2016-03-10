@@ -42,7 +42,6 @@ public class DBTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public class DBTest {
 			e.printStackTrace();
 		}
 		
-		cleanUP();
+		//cleanUP();
 
 	}
 

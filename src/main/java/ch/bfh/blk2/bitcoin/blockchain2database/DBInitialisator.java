@@ -11,9 +11,9 @@ public class DBInitialisator {
 			+"difficulty BIGINT,"
 			+"hash VARCHAR(64),"
 			+"prev_blk_id BIGINT,"
-			+"mkrl_root VARCHAR(64),"
+			+"mrkl_root VARCHAR(64),"
 			+"time TIMESTAMP DEFAULT 0,"
-			+"transaction_count BIGINT,"
+			+"tx_count BIGINT,"
 			+"height BIGINT,"
 			+"version BIGINT,"
 			+"nonce BIGINT,"
@@ -49,13 +49,13 @@ public class DBInitialisator {
 
 							INPUT="CREATE TABLE IF NOT EXISTS input("
 									+"input_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
-									+"prev_output BIGINT,"
+									+"prev_output_id BIGINT,"
 									+"tx_id BIGINT,"
 									+"prev_tx_id BIGINT,"
 									+"prev_output_index BIGINT,"
-									+"sequenze_number BIGINT,"
+									+"sequence_number BIGINT,"
 									+"amount BIGINT,"
-									+"FOREIGN KEY(prev_output) REFERENCES output(output_id),"
+									+"FOREIGN KEY(prev_output_id) REFERENCES output(output_id),"
 									+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 									+")ENGINE = MEMORY;",
 
@@ -71,15 +71,7 @@ public class DBInitialisator {
 													+"addr_id  BIGINT AUTO_INCREMENT PRIMARY KEY,"
 													+"public_key BIGINT,"
 													+"addr_hash VARCHAR(35)"
-													+")ENGINE = MEMORY;",
-
-													BLOCK_TRANSACTION="CREATE TABLE IF NOT EXISTS block_transaction("
-															+"blk_id BIGINT,"
-															+"tx_id BIGINT,"
-															+"PRIMARY KEY(blk_id,tx_id),"
-															+"FOREIGN KEY(blk_id) REFERENCES block(blk_id),"
-															+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
-															+")ENGINE = MEMORY;"
+													+")ENGINE = MEMORY;"
 							  ;
 	
 	
@@ -111,10 +103,6 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps= dbconn.getPreparedStatement(ADDRESS);
-			ps.execute();
-			ps.close();
-			
-			ps= dbconn.getPreparedStatement(BLOCK_TRANSACTION);
 			ps.execute();
 			ps.close();
 			
