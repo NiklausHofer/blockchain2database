@@ -27,10 +27,11 @@ public class DataBlock {
 			+ " (difficulty, hash, prev_blk_id, mrkl_root, time, tx_count, height, version, nonce)"
 			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-	private String updateBlockQuery = "UPDATE block" + " SET output_amount = ?, input_amount = ?"
+	private String updateBlockQuery = "UPDATE block"
+			+ " SET output_amount = ?, input_amount = ?"
 			+ " WHERE blk_id = ?;";
 
-	private String getPrevBlockIdQuery = "SELECT block_id FROM block WHERE block_hash = ?;";
+	//private String getPrevBlockIdQuery = "SELECT block_id FROM block WHERE block_hash = ?;";
 
 	public DataBlock(Block block, NetworkParameters params, DatabaseConnection connection, int height,
 			long prevBlockId) {
@@ -39,7 +40,6 @@ public class DataBlock {
 		this.connection = connection;
 		this.height = height;
 		this.prevBlockId = prevBlockId;
-
 	}
 
 	/**
@@ -85,9 +85,18 @@ public class DataBlock {
 
 	}
 
-	public void updateAmounts(int totalIn, int totalOut) {
-		String query = "UPDATE blocks SET ... = ... WHERE block_id = " + blockId + ";";
-		// TODO run
+	public void updateAmounts(long totalIn, long totalOut) {
+		try {
+			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(updateBlockQuery);
+			statement.setLong(1, totalOut);
+			statement.setLong(2, totalIn);
+			statement.setLong(3, blockId);
+
+			statement.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public long getId() {

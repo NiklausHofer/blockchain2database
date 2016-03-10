@@ -188,4 +188,12 @@ public class DataTransaction {
 		}
 	}
 
+	public long getInAmount() {
+		return inAmount;
+	}
+
+	public long getOutAmount() {
+		return outAmount;
+	}
+
 }

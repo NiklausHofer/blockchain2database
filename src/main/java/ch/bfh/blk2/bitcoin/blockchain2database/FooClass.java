@@ -49,8 +49,8 @@ public class FooClass {
 	}
 
 	private long writeBlock(Block block, int height, long prevId) {
-		int totalIn = 0;
-		int totalOut = 0;
+		long totalIn = 0;
+		long totalOut = 0;
 
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 		dataBlock.writeBlock();
@@ -59,7 +59,12 @@ public class FooClass {
 			DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
 					block.getTime());
 			dataTransaction.writeTransaction();
+
+			totalIn += dataTransaction.getInAmount();
+			totalOut += dataTransaction.getOutAmount();
 		}
+
+		dataBlock.updateAmounts(totalIn, totalOut);
 
 		return dataBlock.getId();
 

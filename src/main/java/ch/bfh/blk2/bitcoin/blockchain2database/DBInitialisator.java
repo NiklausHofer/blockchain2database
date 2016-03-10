@@ -112,6 +112,11 @@ public class DBInitialisator {
 			dbconn.closeConnection();
 		}
 	}
+	
+	public static void main(String[] args) {
+		DBInitialisator dbi = new DBInitialisator();
+		dbi.initializeDB();
+	}
 
 
 }
