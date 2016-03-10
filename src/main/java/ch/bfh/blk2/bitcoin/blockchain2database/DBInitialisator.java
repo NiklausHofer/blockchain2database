@@ -43,13 +43,13 @@ public class DBInitialisator {
 							+"spent_by_input BIGINT,"
 							+"spent_in_tx BIGINT,"
 							+"spent_at TIMESTAMP DEFAULT 0,"
+							+"address_id BIGINT,"
 							+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 							+")ENGINE = MEMORY;",
 
 							INPUT="CREATE TABLE IF NOT EXISTS input("
 									+"input_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 									+"prev_output BIGINT,"
-									+"tx_index BIGINT,"
 									+"tx_id BIGINT,"
 									+"prev_tx_id BIGINT,"
 									+"prev_output_index BIGINT,"
@@ -69,11 +69,9 @@ public class DBInitialisator {
 
 											ADDRESS="CREATE TABLE IF NOT EXISTS address("
 													+"addr_id  BIGINT AUTO_INCREMENT PRIMARY KEY,"
-													+"output_id BIGINT,"
-													+"addr_hash VARCHAR(35),"
-													+"FOREIGN KEY(output_id) REFERENCES output(output_id)"
+													+"public_key BIGINT,"
+													+"addr_hash VARCHAR(35)"
 													+")ENGINE = MEMORY;",
-
 
 													BLOCK_TRANSACTION="CREATE TABLE IF NOT EXISTS block_transaction("
 															+"blk_id BIGINT,"
@@ -81,13 +79,7 @@ public class DBInitialisator {
 															+"PRIMARY KEY(blk_id,tx_id),"
 															+"FOREIGN KEY(blk_id) REFERENCES block(blk_id),"
 															+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
-															+")ENGINE = MEMORY;",
-
-															ADDRESS_OUTPUT="CREATE TABLE IF NOT EXISTS address_output("
-																	+"addr_id BIGINT,"
-																	+"output_id BIGINT"
-																	+")ENGINE = MEMORY;"
-
+															+")ENGINE = MEMORY;"
 							  ;
 	
 	
@@ -123,10 +115,6 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps= dbconn.getPreparedStatement(BLOCK_TRANSACTION);
-			ps.execute();
-			ps.close();
-			
-			ps= dbconn.getPreparedStatement(ADDRESS_OUTPUT);
 			ps.execute();
 			ps.close();
 			

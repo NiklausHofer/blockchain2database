@@ -84,7 +84,7 @@ public class DBTest {
 		DatabaseConnection dbconnection = new DatabaseConnection();
 
 		try {
-			sql="DROP TABLE IF EXISTS block,transaction,output,input,script,address,block_transaction,address_output";
+			sql="DROP TABLE IF EXISTS block,transaction,output,input,script,address,block_transaction";
 			dbconnection.getPreparedStatement(sql).executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
