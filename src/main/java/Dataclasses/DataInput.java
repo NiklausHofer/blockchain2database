@@ -27,7 +27,7 @@ public class DataInput {
 	private OutputUpdate outputUpdate;
 
 	String dataInputQuery = "INSERT INTO input "
-			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequence_number, amount)"
+			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequenze_number, amount)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?);";
 
 	String outputUpdateQuery = "UPDATE output" + " SET spent = ?, spent_by_input = ?, spent_in_tx = ?, spent_at = ?"
@@ -69,6 +69,8 @@ public class DataInput {
 	}
 
 	public void updateOutputs(DatabaseConnection connection) {
+		if (isCoinBase)
+			return;
 		try {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputUpdateQuery);
 
@@ -76,6 +78,7 @@ public class DataInput {
 			statement.setLong(2, input_id);
 			statement.setLong(3, tx_id);
 			statement.setTimestamp(4, new Timestamp(date.getTime()));
+			statement.setLong(5, prev_out_id);
 
 			statement.executeUpdate();
 

@@ -62,7 +62,7 @@ public class DataTransaction {
 					.getPreparedStatement(transactionInsertQuery);
 
 			transactionInsertStatement.setLong(1, transaction.getVersion());
-			transactionInsertStatement.setTimestamp(2, new java.sql.Timestamp(transaction.getLockTime() * 1000));
+			transactionInsertStatement.setTimestamp(2, new java.sql.Timestamp(transaction.getLockTime() * 1000 + 1000));
 			transactionInsertStatement.setTimestamp(3, new java.sql.Timestamp(date.getTime()));
 			transactionInsertStatement.setLong(4, transaction.getInputs().size());
 			transactionInsertStatement.setLong(5, transaction.getOutputs().size());
