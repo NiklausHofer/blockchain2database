@@ -64,23 +64,5 @@ public class AddressUpdater {
 		
 		return id;
 	}
-	
-	/**
-	 * 
-	 * gets the Address from an Output
-	 * 
-	 * @param output
-	 * @param params 
-	 * @return an valid bitcoinAddress from pay to key or pay to script
-	 * @throws ScriptException if output has an invalid Address
-	 */
-	public static Address getAddressFromOutput( TransactionOutput output,
-			MainNetParams params ) throws ScriptException {
-		try {
-			return output.getScriptPubKey( ).getToAddress( params, true );
-		} catch (IllegalArgumentException e) {
-			throw new ScriptException( "Unable to get the address" );
-		}
-	}
 
 }

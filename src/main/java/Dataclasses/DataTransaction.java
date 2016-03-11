@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.script.ScriptException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Address;
+import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
@@ -19,6 +18,7 @@ import org.bitcoinj.params.MainNetParams;
 import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class DataTransaction {
 
@@ -106,14 +106,28 @@ public class DataTransaction {
 
 	private void writeOutput(TransactionOutput output) {
 
-		try {
+		long addr_id=0;
+		
+		try{
+			
+			//Get Adress ID
+			Address address = Utility.getAddressFromOutput(output, new MainNetParams());
+			AddressUpdater addressUpdater = new AddressUpdater(address);
+			addr_id = addressUpdater.update(connection);
+			
+		}
+		catch(ScriptException e){
+			e.printStackTrace();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			System.err.println("Invalid Address: error" + e.getClass());
+			addr_id=-1;
+		}
+		
+		try{
 			
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputInsertQuery);
-
-			//Get Adress ID
-			Address address = AddressUpdater.getAddressFromOutput(output, new MainNetParams());
-			AddressUpdater addressUpdater = new AddressUpdater(address);
-			long addr_id = addressUpdater.update(connection);
 			
 			statement.setLong(1, output.getValue().getValue());
 			statement.setLong(2, tx_id);
@@ -123,8 +137,6 @@ public class DataTransaction {
 
 			statement.executeUpdate();
 		} catch (SQLException e) {
-			e.printStackTrace();
-		}catch (ScriptException e) {
 			e.printStackTrace();
 		}
 	}
