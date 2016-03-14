@@ -6,8 +6,8 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.TestNet3Params;
 
-import Dataclasses.DataBlock;
-import Dataclasses.DataTransaction;
+import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataBlock;
+import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.util.Utility;
 

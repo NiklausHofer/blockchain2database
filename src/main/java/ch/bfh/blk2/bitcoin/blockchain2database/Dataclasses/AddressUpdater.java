@@ -1,4 +1,4 @@
-package Dataclasses;
+package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
