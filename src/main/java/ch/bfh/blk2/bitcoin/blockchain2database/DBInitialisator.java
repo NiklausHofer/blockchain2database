@@ -42,7 +42,7 @@ public class DBInitialisator {
 							+"spent BOOL,"
 							+"spent_by_input BIGINT,"
 							+"spent_in_tx BIGINT,"
-							+"spent_at TIMESTAMP DEFAULT 0,"
+							+"spent_at TIMESTAMP NULL,"
 							+"addr_id BIGINT,"
 							+"FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 							+")ENGINE = MEMORY;",
@@ -73,6 +73,10 @@ public class DBInitialisator {
 													+"addr_hash VARCHAR(35)"
 													+")ENGINE = MEMORY;"
 							  ;
+	private final String INDEX_1 = "CREATE INDEX transaction_hash USING BTREE ON transaction (tx_hash);";
+	
+	private final String INDEX_2 = " CREATE INDEX output_tx_index USING BTREE ON output (tx_index);";
+	private final String INDEX_3 = " CREATE INDEX addr_hash USING BTREE ON address (addr_hash);";
 	
 	
 	public void initializeDB(){
@@ -103,6 +107,18 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps= dbconn.getPreparedStatement(ADDRESS);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(INDEX_1);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(INDEX_2);
+			ps.execute();
+			ps.close();
+			
+			ps= dbconn.getPreparedStatement(INDEX_3);
 			ps.execute();
 			ps.close();
 			
