@@ -106,7 +106,7 @@ public class DataTransaction {
 
 	private void writeOutput(TransactionOutput output) {
 
-		long addr_id=0;
+		long addr_id=-1;
 		
 		try{
 			
@@ -122,7 +122,6 @@ public class DataTransaction {
 		catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Invalid Address: error" + e.getClass());
-			addr_id=-1;
 		}
 		
 		try{
