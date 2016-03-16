@@ -41,7 +41,7 @@ public class FooClass {
 
 	private final static String GETBLKHASHFROMHEIGHTQUERY = "SELECT hash FROM block WHERE height = ?;";
 
-	private final static String GETBLOCKIDQUERY = "SELECT id FROM block WHERE hash = ?;";
+	private final static String GETBLOCKIDQUERY = "SELECT blk_id FROM block WHERE hash = ?;";
 
 	public static void main(String[] args) {
 
@@ -57,7 +57,7 @@ public class FooClass {
 			properties.load(new FileInputStream("target/classes/blockchain.properties"));
 		} catch (Exception e) {
 			logger.fatal("Unable to read the properties file");
-			logger.fatal(e);
+			logger.fatal("failed at", e);
 			System.exit(1);
 		}
 
@@ -176,6 +176,9 @@ public class FooClass {
 	private void updateDatabase(int currentHeight, List<Sha256Hash> validChain) {
 		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 
+		logger.debug(
+				"Will try to delete block at height " + currentHeight + " which we found to be Block " + lastBlkHash);
+
 		BlockDeleter blockDeleter = new BlockDeleter();
 		blockDeleter.deleteBlock(lastBlkHash.toString(), connection);
 
@@ -223,7 +226,7 @@ public class FooClass {
 			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get blk_id from blkHash");
-			logger.fatal(e);
+			logger.fatal("failed at", e);
 			System.exit(1);
 		}
 
@@ -248,7 +251,7 @@ public class FooClass {
 							+ height
 							+ " Hash: "
 							+ rs.getString(1));
-					logger.fatal(e);
+					logger.fatal("failed at", e);
 					System.exit(1);
 				}
 			else {
@@ -260,7 +263,7 @@ public class FooClass {
 			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get Blkhash from Blkheight");
-			logger.fatal(e);
+			logger.fatal("failed at", e);
 			System.exit(1);
 		}
 		return hash;
@@ -284,7 +287,7 @@ public class FooClass {
 			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get maximum block height");
-			logger.fatal(e);
+			logger.fatal("failed at", e);
 			System.exit(1);
 		}
 
