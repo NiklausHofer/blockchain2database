@@ -15,13 +15,12 @@ public class DatabaseConnection {
 
     private String driver, url, user, password;
 
-    private Properties properties = new Properties();
-
     private Connection connection;
 
     public DatabaseConnection() {
 
 	try {
+		Properties properties = new Properties();
 	    properties.load(new FileInputStream(PROPERTIES_FILE));
 
 	    driver = properties.getProperty(DRIVER);

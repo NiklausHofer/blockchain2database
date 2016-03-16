@@ -1,11 +1,15 @@
 package ch.bfh.blk2.bitcoin.util;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ScriptException;
@@ -22,6 +26,8 @@ public class Utility {
 
     // public static MainNetParams PARAMS = new MainNetParams();
     public static TestNet3Params PARAMS = new TestNet3Params();
+    private static final String PROPERTIES_FILE = "src/resources/blockchain.properties",
+    		DIRECTORY="directory";
 
     /**
      * search the bitcoinclients default folder for all blockchain files
@@ -29,8 +35,20 @@ public class Utility {
      * @return List a list of all blockchain files in your clients directory
      */
     public static List<File> getDefaultFileList() {
-	String homedir = System.getProperty("user.home");
-	String blockChainPath = homedir + "/.bitcoin/testnet3/blocks";
+    	
+    	 
+    	Properties properties = new Properties();
+    	
+	    try {
+			properties.load(new FileInputStream(PROPERTIES_FILE));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+    String blkDir = properties.getProperty(DIRECTORY);		
+	String blockChainPath = blkDir;
 
 	File dir = new File(blockChainPath);
 	File[] files = dir.listFiles(new FilenameFilter() {
@@ -66,5 +84,5 @@ public class Utility {
 	    throw new ScriptException("Unable to get the address");
 	}
     }
-
+    
 }
