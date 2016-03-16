@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
+import java.io.FileInputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -52,10 +53,21 @@ public class FooClass {
 
 		// Init BitcoinJ
 		Properties properties = new Properties();
-		if (Boolean.parseBoolean(properties.getProperty("testnet")))
+		try {
+			properties.load(new FileInputStream("target/classes/blockchain.properties"));
+		} catch (Exception e) {
+			logger.fatal("Unable to read the properties file");
+			logger.fatal(e);
+			System.exit(1);
+		}
+
+		if (Boolean.parseBoolean(properties.getProperty("testnet"))) {
 			params = new TestNet3Params();
-		else
+			logger.info("Operating on Testnet3");
+		} else {
 			params = new MainNetParams();
+			logger.info("Operating on MainNet");
+		}
 		Utility.setParams(params);
 		context = Context.getOrCreate(params);
 
@@ -290,7 +302,7 @@ public class FooClass {
 				double duration = (System.currentTimeMillis() - startTime) / 1000.0;
 				logger.info("Inserted "
 						+ numOfTransactions
-						+ " in "
+						+ " transactions in "
 						+ duration
 						+ " seconds. That's about "
 						+ (duration / numOfTransactions)

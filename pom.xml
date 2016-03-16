@@ -90,6 +90,8 @@
                   <directory>src/resources </directory>
                   <includes>
                     <include>log4j2.xml</include>
+                    <include>blockchain.properties</include>
+                    <include>db.properties</include>
                   </includes>
                   <filtering>true</filtering>
                 </resource>
