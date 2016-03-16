@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +24,6 @@ public class BlockDeleter {
 			REMOVE_INPUT = "DELETE FROM input WHERE tx_id = ?",
 			REMOVE_BLOCK = "DELETE FROM block WHERE blk_id = ?",
 			REMOVE_TRANSACTION = "DELETE FROM transaction WHERE tx_id = ?",
-
 
 			MARK_AS_UNSPENT="UPDATE output"
 					+ "SET spent=0,"
@@ -78,15 +76,15 @@ public class BlockDeleter {
 
 				//remove outputs and inputs
 				removeFromDB(REMOVE_OUTPUT, txId, connection);
-
-				//remove inputs
 				removeFromDB(REMOVE_INPUT, txId , connection);
 
 				//set outputs to unspent
 				PreparedStatement unspentstatement = connection.getPreparedStatement(MARK_AS_UNSPENT);
+				unspentstatement.setLong(1, txId);
 				unspentstatement.executeUpdate();
 				unspentstatement.close();
 
+				//remove transaction
 				removeFromDB(REMOVE_TRANSACTION, txId, connection);
 			}
 
