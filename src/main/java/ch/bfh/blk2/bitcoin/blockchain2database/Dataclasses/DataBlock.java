@@ -82,7 +82,7 @@ public class DataBlock {
 			e.printStackTrace();
 		}
 
-		logger.info("Writing Block " + block.getHashAsString());
+		logger.debug("Writing Block " + block.getHashAsString());
 
 	}
 

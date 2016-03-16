@@ -272,9 +272,27 @@ public class FooClass {
 
 		blockProducer = new BlockProducer(Utility.getDefaultFileList(), 1);
 
+		long startTime = System.currentTimeMillis();
+		long numOfTransactions = 0;
+
 		for (Block block : blockProducer) {
 			prevId = writeBlock(block, height++, prevId);
 			connection.commit();
+			numOfTransactions += block.getTransactions().size();
+			if (height % 100 == 0) {
+				double duration = (System.currentTimeMillis() - startTime) / 1000.0;
+				logger.info("Inserted "
+						+ numOfTransactions
+						+ " in "
+						+ duration
+						+ " seconds. That's about "
+						+ (duration / numOfTransactions)
+						+ " seconds per transaction.\n"
+						+ "\tInserting 100K transactions takes approx "
+						+ (duration / numOfTransactions * 100000.0)
+						+ " seconds");
+				startTime = System.currentTimeMillis();
+			}
 		}
 
 	}
@@ -282,6 +300,7 @@ public class FooClass {
 	private long writeBlock(Block block, int height, long prevId) {
 		long totalIn = 0;
 		long totalOut = 0;
+		long startTime = System.currentTimeMillis();
 
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 		dataBlock.writeBlock();
@@ -296,6 +315,16 @@ public class FooClass {
 		}
 
 		dataBlock.updateAmounts(totalIn, totalOut);
+
+		logger.info("Inserted Block "
+				+ height
+				+ " with Hash "
+				+ block.getHashAsString()
+				+ ". Inserting "
+				+ block.getTransactions().size()
+				+ " transactions. Took "
+				+ ((System.currentTimeMillis() - startTime) / 1000.0)
+				+ " Seconds.");
 
 		return dataBlock.getId();
 

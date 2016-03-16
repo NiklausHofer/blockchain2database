@@ -41,7 +41,7 @@ public class BlockProducer implements Iterable<Block> {
 	public static MainNetParams PARAMS = new MainNetParams();
 
 	private static final int DEFAULT_MIN_BLOCK_DEPTH = 6;
-	private static final Logger logger = LogManager.getLogger("TransactionProducer");
+	private static final Logger logger = LogManager.getLogger("BlockProducer");
 
 	private List<Sha256Hash> orderedBlockHashes;
 	private List<File> blockChainFiles;
