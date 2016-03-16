@@ -30,7 +30,8 @@ public class DataInput {
 			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequence_number, amount)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?);";
 
-	String outputUpdateQuery = "UPDATE output" + " SET spent = ?, spent_by_input = ?, spent_in_tx = ?, spent_at = ?"
+	String outputUpdateQuery = "UPDATE output"
+			+ " SET spent = ?, spent_by_input = ?, spent_in_tx = ?, spent_at = ?"
 			+ " WHERE output_id = ?;";
 
 	public DataInput(TransactionInput input) {
@@ -63,6 +64,9 @@ public class DataInput {
 			if (rs.next())
 				input_id = rs.getLong(1);
 
+			rs.close();
+			statement.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -82,6 +86,7 @@ public class DataInput {
 
 			statement.executeUpdate();
 
+			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

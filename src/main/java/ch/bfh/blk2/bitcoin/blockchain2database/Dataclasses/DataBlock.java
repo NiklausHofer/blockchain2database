@@ -77,6 +77,7 @@ public class DataBlock {
 			}
 
 			rs.close();
+			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -94,6 +95,7 @@ public class DataBlock {
 
 			statement.executeUpdate();
 
+			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

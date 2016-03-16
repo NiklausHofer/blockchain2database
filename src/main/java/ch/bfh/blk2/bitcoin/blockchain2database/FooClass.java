@@ -81,6 +81,9 @@ public class FooClass {
 				System.exit(1);
 			}
 
+			rs.close();
+			statement.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -189,6 +192,9 @@ public class FooClass {
 				logger.fatal("Unable to interprete result from DB Query");
 				System.exit(1);
 			}
+
+			rs.close();
+			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get blk_id from blkHash");
 			logger.fatal(e);
@@ -223,6 +229,9 @@ public class FooClass {
 				logger.fatal("Unable to interprete result from Database");
 				System.exit(1);
 			}
+
+			rs.close();
+			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get Blkhash from Blkheight");
 			logger.fatal(e);
@@ -244,6 +253,9 @@ public class FooClass {
 				logger.fatal("Unable to interprete result from Database");
 				System.exit(1);
 			}
+
+			rs.close();
+			statement.close();
 		} catch (SQLException e) {
 			logger.fatal("Error while trying to get maximum block height");
 			logger.fatal(e);

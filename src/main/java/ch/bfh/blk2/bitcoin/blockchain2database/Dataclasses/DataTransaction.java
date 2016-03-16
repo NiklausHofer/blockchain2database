@@ -41,7 +41,8 @@ public class DataTransaction {
 			+ " (version, lock_time, blk_time, input_count, output_count, output_amount, input_amount, coinbase, blk_id, tx_hash) "
 			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
-	private String outputInsertQuery = "INSERT INTO output" + " (amount, tx_id, tx_index, spent,addr_id)"
+	private String outputInsertQuery = "INSERT INTO output"
+			+ " (amount, tx_id, tx_index, spent,addr_id)"
 			+ " VALUES( ?, ?, ?, ? , ? );";
 
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date) {
@@ -85,6 +86,9 @@ public class DataTransaction {
 			else
 				logger.warn("Bad generatedKeySet from Transaction " + transaction.getHashAsString());
 
+			rs.close();
+			transactionInsertStatement.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -106,28 +110,26 @@ public class DataTransaction {
 
 	private void writeOutput(TransactionOutput output) {
 
-		long addr_id=-1;
-		
-		try{
-			
+		long addr_id = -1;
+
+		try {
+
 			//Get Adress ID
 			Address address = Utility.getAddressFromOutput(output, new MainNetParams());
 			AddressUpdater addressUpdater = new AddressUpdater(address);
 			addr_id = addressUpdater.update(connection);
-			
-		}
-		catch(ScriptException e){
+
+		} catch (ScriptException e) {
 			e.printStackTrace();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			System.err.println("Invalid Address: error" + e.getClass());
 		}
-		
-		try{
-			
+
+		try {
+
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputInsertQuery);
-			
+
 			statement.setLong(1, output.getValue().getValue());
 			statement.setLong(2, tx_id);
 			statement.setLong(3, output.getIndex());
@@ -135,6 +137,8 @@ public class DataTransaction {
 			statement.setLong(5, addr_id);
 
 			statement.executeUpdate();
+
+			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -173,39 +177,15 @@ public class DataTransaction {
 
 					inAmount += rs.getLong(2);
 				} else
-					logger.error("The transaction/output reffered to by one of " + transaction.getHashAsString()
-							+ " Inputs can not be found\n" + "The specific output we were looking for  is: "
-							+ input.getOutpoint().getHash().toString() + " index " + input.getOutpoint().getIndex());
-				//		PreparedStatement statement_1 = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery_1);
-				//
-				//		statement_1.setString(1, transaction.getHashAsString());
-				//
-				//		ResultSet rs_1 = statement_1.executeQuery();
-				//
-				//		if (rs_1.next())
-				//		    dataInput.setPrev_tx_id(rs_1.getLong(1));
-				//		else {
-				//		    logger.warn("The transaction refered to by " + transaction.getHashAsString() + " Input "
-				//			    + input.getSequenceNumber()
-				//			    + " Was not Found.\nThere is a good chance, that your dataset is corrupt!");
-				//		    return;
-				//		}
-				//
-				//		PreparedStatement statement_2 = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery_2);
-				//
-				//		statement_2.setLong(1, dataInput.getPrev_tx_id());
-				//		statement_2.setLong(2, input.getOutpoint().getIndex());
-				//
-				//		ResultSet rs_2 = statement_2.executeQuery();
-				//
-				//		if (rs_2.next()) {
-				//		    dataInput.setAmount(rs_2.getLong(1));
-				//		    dataInput.setPrev_out_id(rs_2.getLong(2));
-				//		} else {
-				//		    logger.warn("Could not find the output refered to by" + transaction.getHashAsString() + " Input "
-				//			    + input.getSequenceNumber() + ".\nThere's a good chance, that your dataset is corrupt!");
-				//		    return;
-				//		}
+					logger.error("The transaction/output reffered to by one of "
+							+ transaction.getHashAsString()
+							+ " Inputs can not be found\n"
+							+ "The specific output we were looking for  is: "
+							+ input.getOutpoint().getHash().toString()
+							+ " index "
+							+ input.getOutpoint().getIndex());
+				rs.close();
+				statement.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
