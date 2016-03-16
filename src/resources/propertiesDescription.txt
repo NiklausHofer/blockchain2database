@@ -1,0 +1,15 @@
+
+a list of all needed properties files and their properties
+
+*** db.properties
+
+dbdriver
+dburl
+user
+password
+
+
+*** blockchain.properties
+
+directory
+
