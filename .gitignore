@@ -1,6 +1,6 @@
 ### Properties Files ###
 
-src/resources/db.properties
+src/resources/*.properties
 
 # Created by https://www.gitignore.io
 
