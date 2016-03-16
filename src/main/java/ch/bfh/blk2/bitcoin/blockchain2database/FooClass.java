@@ -144,9 +144,10 @@ public class FooClass {
 			}
 		}
 
-		for (Sha256Hash hash : orphanBlocks) {
-			// TODO delete
-		}
+		BlockDeleter blockDeleter = new BlockDeleter();
+
+		for (Sha256Hash hash : orphanBlocks)
+			blockDeleter.deleteBlock(hash.toString(), connection);
 
 		simpleUpdateDatabase(dbMaxHeight, validChain);
 
