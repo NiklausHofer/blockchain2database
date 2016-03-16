@@ -86,6 +86,21 @@ public class BlockProducer implements Iterable<Block> {
 		logger.debug("Got a chain of " + this.orderedBlockHashes.size() + "blocks");
 	}
 
+	public BlockProducer(List<File> blockChainFiles, List<Sha256Hash> validChain, int minBlockDepth) {
+		this.blockChainFiles = blockChainFiles;
+		orderedBlockHashes = validChain;
+
+		if (orderedBlockHashes.size() > minBlockDepth)
+			for (int i = 0; i < minBlockDepth; i++)
+				orderedBlockHashes.remove(orderedBlockHashes.size() - 1);
+
+		if (this.orderedBlockHashes.size() < 1) {
+			logger.fatal("BlockSorter is malfunctioning or an invalid list of files was provided");
+			System.exit(1);
+		}
+		logger.debug("Got a chain of " + this.orderedBlockHashes.size() + "blocks");
+	}
+
 	/**
 	 * WARNING! Each Iterator can use up to two Gigabytes of memory. So be
 	 * careful when using this.
