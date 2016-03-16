@@ -85,6 +85,8 @@ public class DataTransaction {
 			else {
 				logger.fatal(
 						"Bad generatedKeySet or malformed response from Transaction " + transaction.getHashAsString());
+				connection.commit();
+				connection.closeConnection();
 				System.exit(2);
 			}
 
@@ -94,6 +96,8 @@ public class DataTransaction {
 		} catch (SQLException e) {
 			logger.fatal("Failed to write transaction " + transaction.getHashAsString());
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 
@@ -149,6 +153,8 @@ public class DataTransaction {
 					+ " on transaction "
 					+ transaction.getHashAsString());
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 	}
@@ -194,6 +200,8 @@ public class DataTransaction {
 									+ input.getOutpoint().getHash().toString()
 									+ " index "
 									+ input.getOutpoint().getIndex());
+					connection.commit();
+					connection.closeConnection();
 					System.exit(2);
 				}
 				rs.close();
@@ -206,6 +214,8 @@ public class DataTransaction {
 						+ " of Tranasaction "
 						+ input.getOutpoint().getHash().toString());
 				logger.fatal(e);
+				connection.commit();
+				connection.closeConnection();
 				System.exit(1);
 			}
 		}

@@ -74,6 +74,8 @@ public class DataBlock {
 			else {
 				blockId = -1;
 				logger.fatal("Bad generatedKeySet from Block " + block.getHashAsString());
+				connection.commit();
+				connection.closeConnection();
 				System.exit(1);
 			}
 
@@ -82,6 +84,8 @@ public class DataBlock {
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Block " + block.getHashAsString());
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 		logger.debug("Writing Block " + block.getHashAsString());
@@ -100,6 +104,8 @@ public class DataBlock {
 		} catch (SQLException e) {
 			logger.fatal("Failed to update the amounts on Block " + block.getHashAsString());
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 	}

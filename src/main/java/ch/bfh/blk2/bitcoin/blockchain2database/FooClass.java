@@ -95,7 +95,8 @@ public class FooClass {
 					continueInsert();
 				}
 			} else {
-				logger.error("Unable to query databae");
+				logger.fatal("Unable to query databae");
+				connection.closeConnection();
 				System.exit(1);
 			}
 
@@ -104,6 +105,7 @@ public class FooClass {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
+			connection.closeConnection();
 			System.exit(1);
 		}
 

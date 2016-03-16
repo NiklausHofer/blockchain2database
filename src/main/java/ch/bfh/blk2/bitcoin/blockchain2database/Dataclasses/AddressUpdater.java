@@ -60,6 +60,8 @@ public class AddressUpdater {
 		} catch (SQLException e) {
 			logger.fatal("Failed to update/insert Address " + addressHash);
 			logger.fatal(e);
+			dbconnection.commit();
+			dbconnection.closeConnection();
 			System.exit(1);
 		}
 

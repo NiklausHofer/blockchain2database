@@ -67,6 +67,8 @@ public class DataInput {
 				input_id = rs.getLong(1);
 			else {
 				logger.fatal("Malformed response from Database when reading ID for a new Input");
+				connection.commit();
+				connection.closeConnection();
 				System.exit(1);
 			}
 
@@ -76,6 +78,8 @@ public class DataInput {
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id);
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 	}
@@ -98,6 +102,8 @@ public class DataInput {
 		} catch (SQLException e) {
 			logger.fatal("Failed to update Output #" + prev_out_id);
 			logger.fatal(e);
+			connection.commit();
+			connection.closeConnection();
 			System.exit(1);
 		}
 	}
