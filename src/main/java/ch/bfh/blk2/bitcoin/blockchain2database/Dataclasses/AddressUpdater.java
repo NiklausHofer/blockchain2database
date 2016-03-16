@@ -4,11 +4,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Address;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class AddressUpdater {
+
+	private static final Logger logger = LogManager.getLogger("AddressUpdater");
 
 	private static final String ADDR_ID = "addr_id", GET_ADDR_ID = "SELECT addr_id FROM address WHERE addr_hash = ?",
 			INSERT_ADDR = "INSERT INTO address (public_key,addr_hash) VALUES(?,?)";
@@ -54,7 +58,9 @@ public class AddressUpdater {
 			statement0.close();
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to update/insert Address " + addressHash);
+			logger.fatal(e);
+			System.exit(1);
 		}
 
 		return id;

@@ -73,17 +73,18 @@ public class DataBlock {
 				blockId = rs.getLong(1);
 			else {
 				blockId = -1;
-				logger.warn("Bad generatedKeySet from Block " + block.getHashAsString());
+				logger.fatal("Bad generatedKeySet from Block " + block.getHashAsString());
+				System.exit(1);
 			}
 
 			rs.close();
 			statement.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to write Block " + block.getHashAsString());
+			logger.fatal(e);
+			System.exit(1);
 		}
-
 		logger.debug("Writing Block " + block.getHashAsString());
-
 	}
 
 	public void updateAmounts(long totalIn, long totalOut) {
@@ -97,7 +98,9 @@ public class DataBlock {
 
 			statement.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to update the amounts on Block " + block.getHashAsString());
+			logger.fatal(e);
+			System.exit(1);
 		}
 	}
 

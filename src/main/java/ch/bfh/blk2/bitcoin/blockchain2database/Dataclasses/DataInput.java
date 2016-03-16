@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.TransactionInput;
 
 import com.mysql.jdbc.PreparedStatement;
@@ -12,6 +14,8 @@ import com.mysql.jdbc.PreparedStatement;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class DataInput {
+
+	private static final Logger logger = LogManager.getLogger("DataInput");
 
 	private long tx_id;
 
@@ -61,12 +65,18 @@ public class DataInput {
 
 			if (rs.next())
 				input_id = rs.getLong(1);
+			else {
+				logger.fatal("Malformed response from Database when reading ID for a new Input");
+				System.exit(1);
+			}
 
 			rs.close();
 			statement.close();
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id);
+			logger.fatal(e);
+			System.exit(1);
 		}
 	}
 
@@ -86,7 +96,9 @@ public class DataInput {
 
 			statement.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to update Output #" + prev_out_id);
+			logger.fatal(e);
+			System.exit(1);
 		}
 	}
 

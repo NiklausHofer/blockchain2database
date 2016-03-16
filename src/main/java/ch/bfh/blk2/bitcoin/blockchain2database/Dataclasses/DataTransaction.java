@@ -82,14 +82,19 @@ public class DataTransaction {
 
 			if (rs.next())
 				tx_id = rs.getLong(1);
-			else
-				logger.warn("Bad generatedKeySet from Transaction " + transaction.getHashAsString());
+			else {
+				logger.fatal(
+						"Bad generatedKeySet or malformed response from Transaction " + transaction.getHashAsString());
+				System.exit(2);
+			}
 
 			rs.close();
 			transactionInsertStatement.close();
 
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to write transaction " + transaction.getHashAsString());
+			logger.fatal(e);
+			System.exit(1);
 		}
 
 		for (DataInput dataInput : dataInputs) {
@@ -139,7 +144,12 @@ public class DataTransaction {
 
 			statement.close();
 		} catch (SQLException e) {
-			e.printStackTrace();
+			logger.fatal("Failed to write Output #"
+					+ output.getIndex()
+					+ " on transaction "
+					+ transaction.getHashAsString());
+			logger.fatal(e);
+			System.exit(1);
 		}
 	}
 
@@ -175,18 +185,28 @@ public class DataTransaction {
 					dataInput.setPrev_out_id(rs.getLong(3));
 
 					inAmount += rs.getLong(2);
-				} else
-					logger.error("The transaction/output reffered to by one of "
-							+ transaction.getHashAsString()
-							+ " Inputs can not be found\n"
-							+ "The specific output we were looking for  is: "
-							+ input.getOutpoint().getHash().toString()
-							+ " index "
-							+ input.getOutpoint().getIndex());
+				} else {
+					logger.fatal(
+							"Got a malformed response from the database while looking for an output reffered to by one of "
+									+ transaction.getHashAsString()
+									+ " Inputs can not be found\n"
+									+ "The specific output we were looking for  is: "
+									+ input.getOutpoint().getHash().toString()
+									+ " index "
+									+ input.getOutpoint().getIndex());
+					System.exit(2);
+				}
 				rs.close();
 				statement.close();
 			} catch (SQLException e) {
-				e.printStackTrace();
+				logger.fatal("Unable to find output for one of transaction "
+						+ transaction.getHashAsString()
+						+ "'s Inputs. We were looking for output #"
+						+ input.getOutpoint().getIndex()
+						+ " of Tranasaction "
+						+ input.getOutpoint().getHash().toString());
+				logger.fatal(e);
+				System.exit(1);
 			}
 		}
 	}
