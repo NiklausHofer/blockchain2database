@@ -48,8 +48,7 @@ public class Utility {
 			e.printStackTrace();
 		}
 
-		String blkDir = properties.getProperty(DIRECTORY);
-		String blockChainPath = blkDir;
+		String blockChainPath = properties.getProperty(DIRECTORY);
 
 		File dir = new File(blockChainPath);
 		File[] files = dir.listFiles(new FilenameFilter() {
