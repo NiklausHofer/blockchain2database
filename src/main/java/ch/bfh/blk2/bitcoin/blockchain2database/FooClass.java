@@ -144,7 +144,7 @@ public class FooClass {
 				System.exit(0);
 			}
 			logger.info("No orphan Blocks found. Will attempt to update the database now");
-			updateDatabase();
+			updateDatabase(dbMaxHeight, validChain);
 
 			return;
 		}
@@ -173,8 +173,13 @@ public class FooClass {
 
 	}
 
-	private void updateDatabase() {
-		// TODO
+	private void updateDatabase(int currentHeight, List<Sha256Hash> validChain) {
+		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
+
+		BlockDeleter blockDeleter = new BlockDeleter();
+		blockDeleter.deleteBlock(lastBlkHash.toString(), connection);
+
+		simpleUpdateDatabase(currentHeight - 1, validChain);
 	}
 
 	private void simpleUpdateDatabase(int currentHeight, List<Sha256Hash> validChain) {
