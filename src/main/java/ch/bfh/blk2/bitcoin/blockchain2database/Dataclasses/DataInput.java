@@ -24,8 +24,6 @@ public class DataInput {
 	private long input_id = -1;
 	private Date date;
 
-	private OutputUpdate outputUpdate;
-
 	String dataInputQuery = "INSERT INTO input "
 			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequence_number, amount)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?);";

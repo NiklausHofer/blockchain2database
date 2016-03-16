@@ -13,7 +13,6 @@ import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.MainNetParams;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -115,7 +114,7 @@ public class DataTransaction {
 		try {
 
 			//Get Adress ID
-			Address address = Utility.getAddressFromOutput(output, new MainNetParams());
+			Address address = Utility.getAddressFromOutput(output);
 			AddressUpdater addressUpdater = new AddressUpdater(address);
 			addr_id = addressUpdater.update(connection);
 

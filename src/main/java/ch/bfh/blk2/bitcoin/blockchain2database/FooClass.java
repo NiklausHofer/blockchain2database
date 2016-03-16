@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 
 import org.apache.logging.log4j.LogManager;
@@ -14,6 +15,7 @@ import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
+import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 
 import com.mysql.jdbc.PreparedStatement;
@@ -49,8 +51,12 @@ public class FooClass {
 	public FooClass() {
 
 		// Init BitcoinJ
-		// params = new MainNetParams();
-		params = new TestNet3Params();
+		Properties properties = new Properties();
+		if (Boolean.parseBoolean(properties.getProperty("testnet")))
+			params = new TestNet3Params();
+		else
+			params = new MainNetParams();
+		Utility.setParams(params);
 		context = Context.getOrCreate(params);
 
 		// database connection
