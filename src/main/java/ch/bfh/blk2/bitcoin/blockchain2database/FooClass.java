@@ -189,6 +189,8 @@ public class FooClass {
 		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 		long prevId = getBlockId(lastBlkHash);
 
+		logger.debug("Found current highest block to be " + lastBlkHash + " with blk_id = " + prevId);
+
 		blockProducer = new BlockProducer(Utility.getDefaultFileList(), validChain, 1);
 
 		Iterator<Block> blockIterator = blockProducer.iterator();
@@ -196,7 +198,7 @@ public class FooClass {
 		while (blockIterator.hasNext() && !blockIterator.next().getPrevBlockHash().equals(lastBlkHash)) {
 		}
 
-		logger.info("After deleting orphan Blocks, we are now ready again to continue inserting Blocks.\n"
+		logger.info("After deleting unwanted Blocks, we are now ready again to continue inserting Blocks.\n"
 				+ "We will continue from Block "
 				+ lastBlkHash.toString());
 
