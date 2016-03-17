@@ -20,17 +20,17 @@ public class BlockDeleter {
 
 			REMOVE_OUTPUT_SCRIPT = "DELETE FROM script WHERE output_id = ?",
 			REMOVE_INPUT_SCRIPT = "DELETE FROM script WHERE input_id = ?",
-			REMOVE_OUTPUT = "DELETE FORM output WHERE tx_id = ?",
+			REMOVE_OUTPUT = "DELETE FROM output WHERE tx_id = ?",
 			REMOVE_INPUT = "DELETE FROM input WHERE tx_id = ?",
 			REMOVE_BLOCK = "DELETE FROM block WHERE blk_id = ?",
 			REMOVE_TRANSACTION = "DELETE FROM transaction WHERE tx_id = ?",
 
 			MARK_AS_UNSPENT="UPDATE output"
-					+ "SET spent=0,"
-					+ "spent_by_input = NULL,"
-					+ "spent_in_tx = NULL,"
-					+ "spent_at = NULL,"
-					+ "WHERE spent_in_tx = ?";
+					+ " SET spent = 0,"
+					+ " spent_by_input = NULL,"
+					+ " spent_in_tx = NULL,"
+					+ " spent_at = NULL"
+					+ " WHERE spent_in_tx = ?";
 
 	private List<PreparedStatement> statements= new ArrayList<>();
 
@@ -68,14 +68,14 @@ public class BlockDeleter {
 				//get output and input ids and remove scripts
 				ResultSet outputs = getFromDB(GET_OUTPUT_ID, txId, connection);
 				while(outputs.next()){
-					long outputId = result.getLong("output_id");
+					long outputId = outputs.getLong("output_id");
 					removeFromDB(REMOVE_OUTPUT_SCRIPT, outputId, connection);
 				}
 				outputs.close();
 
 				ResultSet inputs = getFromDB(GET_INPUT_ID, txId, connection);
 				while(inputs.next()){
-					long inputId = result.getLong("input_id");
+					long inputId = inputs.getLong("input_id");
 					removeFromDB(REMOVE_INPUT_SCRIPT, inputId, connection);
 				}
 				inputs.close();
