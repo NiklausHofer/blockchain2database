@@ -195,19 +195,42 @@ public class FooClass {
 
 		Iterator<Block> blockIterator = blockProducer.iterator();
 
-		while (blockIterator.hasNext() && !blockIterator.next().getPrevBlockHash().equals(lastBlkHash)) {
+		Block blk = null;
+
+		while (blockIterator.hasNext()) {
+			blk = blockIterator.next();
+			if (blk.getPrevBlockHash().equals(lastBlkHash))
+				break;
 		}
 
 		logger.info("After deleting unwanted Blocks, we are now ready again to continue inserting Blocks.\n"
 				+ "We will continue from Block "
 				+ lastBlkHash.toString());
 
-		while (blockIterator.hasNext()) {
-			currentHeight++;
-			Block blk = blockIterator.next();
-			prevId = writeBlock(blk, currentHeight, prevId);
+		currentHeight++;
+		int numOfTransactions = 0;
+		long startTime = System.currentTimeMillis();
+
+		do {
+			prevId = writeBlock(blk, currentHeight++, prevId);
+			numOfTransactions += blk.getTransactions().size();
 			connection.commit();
-		}
+			blk = blockIterator.next();
+			if (currentHeight % 10000 == 0) {
+				double duration = (System.currentTimeMillis() - startTime) / 1000.0;
+				logger.info("Inserted "
+						+ numOfTransactions
+						+ " transactions in "
+						+ duration
+						+ " seconds. That's about "
+						+ (duration / numOfTransactions)
+						+ " seconds per transaction.\n"
+						+ "\tInserting 1M transactions takes approx "
+						+ (duration / numOfTransactions * 1000000.0)
+						+ " seconds");
+				startTime = System.currentTimeMillis();
+			}
+		} while (blockIterator.hasNext());
 	}
 
 	private long getBlockId(Sha256Hash blkHash) {
@@ -310,7 +333,7 @@ public class FooClass {
 			prevId = writeBlock(block, height++, prevId);
 			connection.commit();
 			numOfTransactions += block.getTransactions().size();
-			if (height % 100 == 0) {
+			if (height % 10000 == 0) {
 				double duration = (System.currentTimeMillis() - startTime) / 1000.0;
 				logger.info("Inserted "
 						+ numOfTransactions
@@ -319,8 +342,8 @@ public class FooClass {
 						+ " seconds. That's about "
 						+ (duration / numOfTransactions)
 						+ " seconds per transaction.\n"
-						+ "\tInserting 100K transactions takes approx "
-						+ (duration / numOfTransactions * 100000.0)
+						+ "\tInserting 1M transactions takes approx "
+						+ (duration / numOfTransactions * 1000000.0)
 						+ " seconds");
 				startTime = System.currentTimeMillis();
 			}
