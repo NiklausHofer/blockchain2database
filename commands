@@ -1,0 +1,20 @@
+# Maven build without running the tests:
+$ mvn -Dmaven.test.skip=true clean package
+
+# Maven run a class' main function
+mvn exec:java -Dexec.mainClass="ch.bfh.blk2.bitcoin.blockchain2database.FooClass"
+
+# Both of them togethre
+mvn -Dmaven.test.skip=true clean package exec:java -Dexec.mainClass="ch.bfh.blk2.bitcoin.blockchain2database.FooClass"
+
+# Recreate our database
+mysql -h localhost -u root -p < db.sql
+
+# Copy latest version to test machine
+scp -r src/ pom.xml db.sql testnet3@btc:blockchain2database/
+
+# Dump the database
+mysqldump -h localhost -u root -p --databases testnet3 > targetfile.dmp
+
+# Apply a dump to a DB
+mysql -h localhost -u testnet3 -p < dumpfile.dmp
