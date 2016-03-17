@@ -65,7 +65,7 @@ public class DBInitialisator {
 			+ "script_length BIGINT,"
 			+ "script_code BLOB,"
 			+ "input_id BIGINT,"
-			+ "outpu_id BIGINT"
+			+ "output_id BIGINT"
 			+ ")ENGINE = INNODB;",
 
 	ADDRESS = "CREATE TABLE IF NOT EXISTS address("

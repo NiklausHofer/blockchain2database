@@ -112,8 +112,8 @@ public class BlockDeleter {
 		try {
 			for(PreparedStatement statement: statements){
 				statement.close();
-				statements.remove(statement);
 			}
+			statements = new ArrayList<>();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}	
