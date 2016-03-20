@@ -229,6 +229,7 @@ public class FooClass {
 						+ (duration / numOfTransactions * 1000000.0)
 						+ " seconds");
 				startTime = System.currentTimeMillis();
+				numOfTransactions = 0;
 			}
 		} while (blockIterator.hasNext());
 	}
@@ -346,6 +347,7 @@ public class FooClass {
 						+ (duration / numOfTransactions * 1000000.0)
 						+ " seconds");
 				startTime = System.currentTimeMillis();
+				numOfTransactions = 0;
 			}
 		}
 
