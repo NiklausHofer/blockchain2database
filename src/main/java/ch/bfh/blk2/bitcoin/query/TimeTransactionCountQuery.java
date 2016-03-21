@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
-public class TimeTransactionCountQuerie implements Query<Long>{
+public class TimeTransactionCountQuery implements Query<Long>{
 
 	private static final Logger logger = LogManager.getLogger("TimeTransactionCountQuerie");
 	
@@ -26,7 +26,7 @@ public class TimeTransactionCountQuerie implements Query<Long>{
 	 * Get the number of Transactions between two dates
 	 * 
 	 */
-	public TimeTransactionCountQuerie(String start,String end) {		
+	public TimeTransactionCountQuery(String start,String end) {		
 		this.start=start;
 		this.end=end;
 	}
@@ -42,7 +42,7 @@ public class TimeTransactionCountQuerie implements Query<Long>{
 		ResultSet resultSet = statement.executeQuery();
 		
 		if(resultSet.next())
-			this.result = resultSet.getInt("count");
+			this.result = resultSet.getLong("count");
 					
 		} catch (SQLException e) {	
 			e.printStackTrace();
