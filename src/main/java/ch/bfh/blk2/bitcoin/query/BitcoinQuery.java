@@ -28,6 +28,19 @@ public class BitcoinQuery {
 		Query<Long> query1 = new TimeAdressSaldoQuery(address, date);
 		query1.exequte(connection);
 		logger.info(query1.resultToString());
+		
+		
+		long amount = 20; 
+		
+		Query<Long> query2 = new CountAddressReceivedMoreQuery(amount);
+		query2.exequte(connection);
+		logger.info(query2.resultToString());
+		
+		amount = 11; 
+		
+		Query<Long> query3= new CountAddressHigherSaldoQuery(amount);
+		query3.exequte(connection);
+		logger.info(query3.resultToString());
 	}
 
 }
