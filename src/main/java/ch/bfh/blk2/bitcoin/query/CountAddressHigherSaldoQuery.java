@@ -36,6 +36,8 @@ public class CountAddressHigherSaldoQuery implements Query<Long>{
 	@Override
 	public void exequte(DatabaseConnection connection) {
 		
+		logger.info("Counting Addresses that have a Saldo higher than"+this.amount);
+		
 		try{
 		PreparedStatement statement = connection.getPreparedStatement(SQL);
 		statement.setLong(1, this.amount);

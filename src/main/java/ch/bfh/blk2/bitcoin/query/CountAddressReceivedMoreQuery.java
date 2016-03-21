@@ -35,6 +35,8 @@ public class CountAddressReceivedMoreQuery implements Query<Long>{
 	@Override
 	public void exequte(DatabaseConnection connection) {
 		
+		logger.info("Counting Addresses that received more than"+this.amount);
+		
 		try{
 		PreparedStatement statement = connection.getPreparedStatement(SQL);
 		statement.setLong(1, this.amount);

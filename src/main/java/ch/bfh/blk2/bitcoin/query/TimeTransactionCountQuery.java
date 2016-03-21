@@ -34,6 +34,8 @@ public class TimeTransactionCountQuery implements Query<Long>{
 	@Override
 	public void exequte(DatabaseConnection connection) {
 		
+		logger.info("Counting number of Transactions between "+this.start+" and "+this.end);
+		
 		try{
 		PreparedStatement statement = connection.getPreparedStatement(SQL);
 		statement.setString(1, this.start);

@@ -42,6 +42,9 @@ public class TimeAdressSaldoQuery implements Query<Long> {
 	
 	@Override
 	public void exequte(DatabaseConnection connection) {
+		
+		logger.info("Get saldo of address ["+this.address+"] on "+this.date);
+		
 		try{
 		PreparedStatement statement = connection.getPreparedStatement(SQL);
 		statement.setString(1, this.date);
