@@ -32,7 +32,7 @@ public class TransactionNodeQuery implements Query<Integer>{
 			
 			COUNT_ADDR =
 				"SELECT COUNT(addr_id) as count"
-				+ " FROM OUTPUT"
+				+ " FROM output"
 				+ " WHERE addr_id = ?",
 				
 			TX_ID = "tx_id"

@@ -95,7 +95,7 @@ public class DBTest {
 			e.printStackTrace();
 		}
 		
-		cleanUP();
+		//cleanUP();
 
 	}
 
