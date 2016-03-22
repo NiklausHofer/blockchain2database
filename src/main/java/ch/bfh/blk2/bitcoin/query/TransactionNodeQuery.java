@@ -57,6 +57,7 @@ public class TransactionNodeQuery implements Query<Integer>{
 		int count=0;
 		boolean found= false;
 
+		logger.debug("max search depth : "+ MAX);
 
 		try{
 			long idA=-1,idB=-1;
@@ -67,13 +68,25 @@ public class TransactionNodeQuery implements Query<Integer>{
 			ResultSet result = statement.executeQuery();
 			if(result.next()){
 				idA =result.getLong("addr_id");
+			}else{
+				logger.fatal("address not found in database ["+addrA+"]");
+				connection.commit();
+				connection.closeConnection();
+				System.exit(1);
 			}
 
 			statement.setString(1, addrB);
 			result = statement.executeQuery();
 			if(result.next()){
 				idB =result.getLong("addr_id");
+			}else{
+				logger.fatal("address not found in database ["+addrB+"]");
+				connection.commit();
+				connection.closeConnection();
+				System.exit(1);
 			}
+			
+			
 			result.close();
 			statement.close();
 
@@ -86,8 +99,12 @@ public class TransactionNodeQuery implements Query<Integer>{
 				nextTx.add(result.getLong("spent_in_tx"));
 			};
 
+			logger.debug("found transactions : "+nextTx.size()); 
+			
 			while(count < MAX && !found && !nextTx.isEmpty()){
 				
+				logger.debug("found transactions : "+nextTx.size());
+				 logger.debug("steps : "+count);
 					count ++;
 					//check if addr b is in one of the next transactions
 					int addrCount = 0;
@@ -104,9 +121,11 @@ public class TransactionNodeQuery implements Query<Integer>{
 					}
 				
 					if(addrCount > 0){
+						logger.debug("found a path");
 						found = true;
 					}
 					else{
+                        logger.debug("path not jet found");
 						//get next transactions
 						String getNextTxIn = CreateWhereInStatement(GET_NEXT_TX, TX_ID, nextTx.size());
 						statement = connection.getPreparedStatement(getNextTxIn);
@@ -125,6 +144,9 @@ public class TransactionNodeQuery implements Query<Integer>{
 			
 			if(found)
 				this.result =count; 
+			
+            logger.debug("result : "+this.result);
+
 
 		} catch (SQLException e) {
 			e.printStackTrace();
