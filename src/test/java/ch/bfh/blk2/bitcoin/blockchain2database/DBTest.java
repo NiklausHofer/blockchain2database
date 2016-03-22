@@ -3,6 +3,8 @@ package ch.bfh.blk2.bitcoin.blockchain2database;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -182,6 +184,77 @@ public class DBTest {
 			
 			
 			sql="DROP TABLE IF EXISTS insert_binary";
+			dbconnection.getPreparedStatement(sql).executeUpdate();
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	@Test
+	public void multySelect(){
+		try{
+			
+			System.out.println("\n//// TEST 5");
+			
+			DatabaseConnection dbconnection = new DatabaseConnection();
+			String sql= "CREATE TABLE IF NOT EXISTS abc("
+					+ " a INT AUTO_INCREMENT PRIMARY KEY,"
+					+ " b VARCHAR(25),"
+					+ " c INT )";
+			dbconnection.getPreparedStatement(sql).executeUpdate();
+			
+			sql = "INSERT INTO abc (b,c) VALUES"
+					+ "('a',1),('b',1),('c',1),('d',1),('e',1),('f',1),"
+					+ "('g',2),('h',2),('i',2),('j',2),('k',2),('l',2),"
+					+ "('m',3),('n',3),('o',3),('p',3),('q',3),('r',3),"
+					+ "('s',1),('t',1),('u',1),('v',1),('w',1),('x',1),"
+					+ "('y',1),('z',1)";
+			
+			dbconnection.getPreparedStatement(sql).executeUpdate();
+
+			//*****************************
+			
+			sql = "SELECT a,b,c FROM abc"; 
+			
+			List<Integer> list = new ArrayList<>();
+			list.add(3);
+			list.add(2);
+			
+			StringBuilder sb=new StringBuilder();
+			
+			if(!list.isEmpty()){
+				sb.append(sql);
+				sb.append(" WHERE c IN (?");
+			
+				for(int i=1;i<list.size();i++)
+					sb.append(",?");
+			
+				sb.append(")");
+				
+			
+			System.out.println(sb.toString());
+				
+				
+			PreparedStatement statement = dbconnection.getPreparedStatement(sb.toString());
+			
+			for(int i= 0 ;i<list.size();i++)
+				statement.setObject(i+1,list.get(i));
+			
+			ResultSet result = statement.executeQuery();
+			
+			while(result.next()){
+				
+				System.out.print(result.getInt("a")+" : ");
+				System.out.print(result.getString("b")+" : ");
+				System.out.println(result.getInt("c"));
+			}			
+			
+			}
+			
+			sql="DROP TABLE IF EXISTS abc";
 			dbconnection.getPreparedStatement(sql).executeUpdate();
 			
 		} catch (SQLException e) {

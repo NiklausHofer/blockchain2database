@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.query;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ import com.mysql.fabric.xmlrpc.base.Array;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
-public class TransactionNodeQuery implements Query<Long>{
+public class TransactionNodeQuery implements Query<Integer>{
 
 	private static final String
 			GET_ADDR_ID="SELECT addr_id FROM address WHERE addr_hash = ?",
@@ -27,25 +28,24 @@ public class TransactionNodeQuery implements Query<Long>{
 			GET_NEXT_TX=
 				"SELECT spent_in_tx"
 				+ " FROM output"
-				+ " AND spent = 1"
-				+ " WHERE tx_id IN ?",
+				+ " WHERE spent = 1",
 			
 			COUNT_ADDR =
 				"SELECT COUNT(addr_id) as count"
 				+ " FROM OUTPUT"
-				+ " WHERE addr_id = ?"
-				+ " AND tx_id IN ?"
+				+ " WHERE addr_id = ?",
+				
+			TX_ID = "tx_id"
 			;
 	
 	private static final int MAX = 6;
 			
-			
-	
-	
 	private static final Logger logger = LogManager.getLogger("TransactionNodeQuery");
 	
 	private String addrA,addrB;
 
+	private int result = -1;
+	
 	public TransactionNodeQuery(String addrA,String addrB){
 		this.addrA=addrA;
 		this.addrB=addrB;
@@ -53,14 +53,10 @@ public class TransactionNodeQuery implements Query<Long>{
 	
 	@Override
 	public void exequte(DatabaseConnection connection) {
-
-		long length=0;
-		long count=0;
+		
+		int count=0;
 		boolean found= false;
 
-		//create a List of output_id for address A and B
-		List<Long> spentOutputsA = new ArrayList<>(),
-				outputsB = new ArrayList<>();
 
 		try{
 			long idA=-1,idB=-1;
@@ -90,48 +86,86 @@ public class TransactionNodeQuery implements Query<Long>{
 				nextTx.add(result.getLong("spent_in_tx"));
 			};
 
-			do{
-				count ++;
-				//check if addr b is in one of the next transactions
-				int addrCount = 0;
-				statement = connection.getPreparedStatement(COUNT_ADDR);
-				statement.setArray(1,nextTx.toArray());
-				result = statement.executeQuery();
-				if(result.next()){
-					addrCount = result.getInt("count");
-				}
-				if(addrCount > 0){
-					found = true;
-				}
-				else{
-					//get next transactions
-					statement = connection.getPreparedStatement(GET_NEXT_TX);
-					//statement.set(1, nextTx);
+			while(count < MAX && !found && !nextTx.isEmpty()){
+				
+					count ++;
+					//check if addr b is in one of the next transactions
+					int addrCount = 0;
+					String countAddrIn = CreateWhereInStatement(COUNT_ADDR, TX_ID, nextTx.size());
+					statement = connection.getPreparedStatement(countAddrIn);
+					statement.setLong(1,idB);
+
+					for(int i=0;i<nextTx.size();i++)
+						statement.setLong(i+2,nextTx.get(i));
+
 					result = statement.executeQuery();
-					nextTx = new ArrayList<>();
-					while(result.next()){
-						nextTx.add(result.getLong("spent_in_tx"));
+					if(result.next()){
+						addrCount = result.getInt("count");
+					}
+				
+					if(addrCount > 0){
+						found = true;
+					}
+					else{
+						//get next transactions
+						String getNextTxIn = CreateWhereInStatement(GET_NEXT_TX, TX_ID, nextTx.size());
+						statement = connection.getPreparedStatement(getNextTxIn);
+						
+						for(int i=0;i<nextTx.size();i++)
+							statement.setLong(i+1,nextTx.get(i));
+						
+						//statement.set(1, nextTx);
+						result = statement.executeQuery();
+						nextTx = new ArrayList<>();
+						while(result.next()){
+							nextTx.add(result.getLong("spent_in_tx"));
+						}
 					}
 				}
-			}while(count < MAX && !found && !nextTx.isEmpty());
 			
+			if(found)
+				this.result =count; 
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 
 	}
 
+	private String CreateWhereInStatement(String sql,String tableName,int size){
+		
+		if(size > 0 ){
+			StringBuilder sb = new StringBuilder();
+			sb.append(sql);
+			sb.append(" AND ");
+			sb.append(tableName);
+			sb.append(" IN (?");
+			
+			for(int i=1;i<size;i++)
+				sb.append(",?");
+				
+			sb.append(")");
+			
+			return sb.toString();
+			
+		}else
+		return null;
+	}
 	
 	@Override
-	public Long getResult() {
-		// TODO Auto-generated method stub
-		return null;
+	public Integer getResult() {
+		return this.result;
 	}
 
 	@Override
 	public String resultToString() {
-		// TODO Auto-generated method stub
-		return null;
+		if(this.result < 1){
+			return "No Path of Transactions found between ["
+					+addrA+"] and ["+addrB+"]";
+		}else{
+			return "Shortest Path of Transactions  between ["
+					+addrA+"] and ["+addrB+"] : "+ this.result;
+		}
 	}
 	
 	
