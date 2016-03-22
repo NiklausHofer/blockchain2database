@@ -54,6 +54,8 @@ public class TransactionNodeQuery implements Query<Integer>{
 	@Override
 	public void exequte(DatabaseConnection connection) {
 		
+		logger.info("Searching shortest path between adresses ["+addrA+"] and ["+addrB+"]" );
+		
 		int count=0;
 		boolean found= false;
 
