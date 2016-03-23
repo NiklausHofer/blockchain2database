@@ -1,1 +1,4 @@
- - We should not be using DATETIME for transaction.locktime. Apparently users can set whatever value there, but the MariaDB DATETIME field is very limited in range.
+[FIXED] - We should not be using DATETIME for transaction.locktime. Apparently users can set whatever value there, but the MariaDB DATETIME field is very limited in range.
+
+ - Add Block Size to the block table
+ - Remove dot after the hash value in the INFO output
