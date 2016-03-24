@@ -126,27 +126,64 @@ public class SimpleAddressNodeQuerry implements Query<Double>{
 	
 	// assemble the graph
 	private void getGraph(long addrA,long addrB,DatabaseConnection connection){
-		
+
 		long currAddrId = addrA;
-		int depth=0;
 		List<AddressNode> nextNodes = new ArrayList<>();
-		
+
 		//add start node
 		nextNodes.add(new AddressNode(currAddrId));
-		
-		while(depth<MAX && !nextNodes.isEmpty()){
-			
-			AddressNode currNode = nextNodes.get(0);
-			long currId = currNode.getAddrId();
-			
-			
-			
-			//get all transactions where output of the current Node are spent 
-			PreparedStatement statement=connection.getPreparedStatement(GET_ADDR_SPENT_OUTPUT_TX);
-			
-			
+
+		try{
+
+			while(!nextNodes.isEmpty()){
+
+				AddressNode currNode = nextNodes.get(0);
+				nextNodes.remove(0);
+
+				long currId = currNode.getAddrId();
+				int currDepth = currNode.getDepth();
+
+				//get all transactions where output of the current Node are spent 
+				PreparedStatement statement=connection.getPreparedStatement(GET_ADDR_SPENT_OUTPUT_TX);
+				statement.setLong(1,currAddrId);
+				ResultSet result = statement.executeQuery();
+
+				while (result.next() && currDepth<MAX) {
+					long currTx = result.getLong("spent_in_tx");
+
+					//get all receiving addresses
+					PreparedStatement addrStatement = connection.getPreparedStatement(GET_TX_ADDR_ID);
+					addrStatement.setLong(1,currTx);
+					ResultSet addresses  = addrStatement.executeQuery();
+
+					while(addresses.next()){
+						long addr = addresses.getLong("addr_id");
+						if(addr >= 0){
+
+							AddressNode addrNode;
+
+							if(addressNodes.containsKey(addr)){
+								addrNode = addressNodes.get(addr);
+								if(addrNode.getDepth()>currDepth+1)
+									addrNode.setDepth(currDepth++);
+								
+							}else{
+								addrNode = new AddressNode(addr,currDepth); 
+								addressNodes.put(addr,addrNode);
+							}
+
+							TransactionEdge txe = new TransactionEdge(currTx, currNode, addrNode);
+
+							nextNodes.add(addrNode);
+						}
+
+					}
+				}
+
+			}
+		}catch(SQLException e){
+			e.printStackTrace();
 		}
-		
 	}
 	
 	// Address Graph
@@ -156,11 +193,13 @@ public class SimpleAddressNodeQuerry implements Query<Double>{
 	private class AddressNode{
 		
 		long addrId;
+		int depth;
 		Set<TransactionEdge> outgoingTransaction = new HashSet<>();
 		Set<TransactionEdge> incommingTransaction = new HashSet<>();
 		
-		public AddressNode(long addrId){
+		public AddressNode(long addrId,int depth){
 			this.addrId=addrId;
+			this.depth=depth;
 		}
 	
 		public void addIncommingTransaction(TransactionEdge txEdge){
@@ -173,6 +212,14 @@ public class SimpleAddressNodeQuerry implements Query<Double>{
 		
 		public Long getAddrId(){
 			return this.addrId;
+		}
+		
+		public int getDepth(){
+			return this.depth;
+		}
+		
+		public void setDepth(int Depth){
+			this.depth = depth;
 		}
 	}
 	
