@@ -131,7 +131,7 @@ public class SimpleAddressNodeQuerry implements Query<Double>{
 		List<AddressNode> nextNodes = new ArrayList<>();
 
 		//add start node
-		nextNodes.add(new AddressNode(currAddrId));
+		nextNodes.add(new AddressNode(currAddrId,0));
 
 		try{
 
