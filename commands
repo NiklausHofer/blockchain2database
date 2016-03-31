@@ -18,3 +18,10 @@ mysqldump -h localhost -u root -p --databases testnet3 > targetfile.dmp
 
 # Apply a dump to a DB
 mysql -h localhost -u testnet3 -p < dumpfile.dmp
+
+# See which kinds of error were thrown by the program
+grep -vP "^\s" errorlog | sort |uniq
+
+# Size of Database w/ and w/o indexes
+> SELECT ROUND((SUM(data_length+index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = 'btc';
+> SELECT ROUND((SUM(data_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = 'btc';
