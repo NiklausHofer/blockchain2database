@@ -1,17 +1,24 @@
 package ch.bfh.blk2.bitcoin.producer;
 
 import java.io.File;
-import java.io.FilenameFilter;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.TreeMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Block;
+import org.bitcoinj.core.Context;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.Sha256Hash;
+import org.bitcoinj.params.MainNetParams;
+import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.utils.BlockFileLoader;
 
 import ch.bfh.blk2.bitcoin.comparator.Sha256HashComparator;
@@ -27,61 +34,98 @@ import ch.bfh.blk2.bitcoin.util.Utility;
  *
  */
 public class BlockSorter {
+	private static final Logger logger = LogManager.getLogger("BlockSorter");
 
 	private BlockIdentifier deepestBlock;
 	private Map<Sha256Hash, BlockIdentifier> blockMap;
 	private BlockFileLoader bfl;
 	private List<BlockIdentifier> unsortedBlocks;
 
+	/* Default values for when we start at the bottom of the chain */
+	private Sha256Hash rootHash = Sha256Hash.ZERO_HASH;
+	private int virtBlockHeight = -1;
+
 	/**
 	 * @param blockChainFiles
 	 *            the files containing the unparsed blockchain
 	 */
-	public BlockSorter( List<File> blockChainFiles ) {
-		Collections.sort( blockChainFiles );
+	public BlockSorter(List<File> blockChainFiles) {
+		Collections.sort(blockChainFiles);
 
-		blockMap = new TreeMap<>( new Sha256HashComparator( ) );
-		unsortedBlocks = new LinkedList<>( );
+		blockMap = new TreeMap<>(new Sha256HashComparator());
+		unsortedBlocks = new LinkedList<>();
 
-		bfl = new BlockFileLoader( Utility.PARAMS, blockChainFiles );
+		bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
 
-		sort( );
+		sort();
 	}
 
-	private void insertBlock( BlockIdentifier bi ) {
-		BlockIdentifier parent = blockMap.get( bi.getParentHash( ) );
-		bi.setParent( parent );
-		bi.setDepth( parent.getDepth( ) + 1 );
-		blockMap.put( bi.getBlockHash( ), bi );
-		if (bi.getDepth( ) > deepestBlock.getDepth( ))
+	private void insertBlock(BlockIdentifier bi) {
+		logger.trace("Inserting yet another block: " + bi.getBlockHash().toString());
+		BlockIdentifier parent = blockMap.get(bi.getParentHash());
+		bi.setParent(parent);
+		bi.setDepth(parent.getDepth() + 1);
+		blockMap.put(bi.getBlockHash(), bi);
+		if (bi.getDepth() > deepestBlock.getDepth())
 			deepestBlock = bi;
 
 		for (BlockIdentifier bli : unsortedBlocks)
-			if (blockMap.containsKey( bli.getParentHash( ) )) {
-				unsortedBlocks.remove( bli );
-				insertBlock( bli );
+			if (blockMap.containsKey(bli.getParentHash())) {
+				unsortedBlocks.remove(bli);
+				insertBlock(bli);
 				break;
 			}
 	}
 
-	private void sort( ) {
+	private void sort() {
 		/*
 		 * Insert a virtual block that is parent of gensis, allowing us to
 		 * handle Genesis Block in the same way as normal blocks.
 		 */
-		BlockIdentifier virtualBlock = new BlockIdentifier(
-				Sha256Hash.ZERO_HASH );
-		virtualBlock.setDepth( -1 );
+		BlockIdentifier virtualBlock = new BlockIdentifier(rootHash);
+		virtualBlock.setDepth(virtBlockHeight);
 		deepestBlock = virtualBlock;
-		blockMap.put( virtualBlock.getBlockHash( ), virtualBlock );
+		blockMap.put(virtualBlock.getBlockHash(), virtualBlock);
+
+		logger.debug("start sorting");
+
+		logger.debug(bfl);
 
 		for (Block blk : bfl) {
-			BlockIdentifier bi = new BlockIdentifier( blk );
-			if (blockMap.containsKey( bi.getParentHash( ) ))
-				insertBlock( bi );
+			logger.trace("block: " + blk.getHashAsString());
+			BlockIdentifier bi = new BlockIdentifier(blk);
+			if (blockMap.containsKey(bi.getParentHash()))
+				insertBlock(bi);
 			else
-				unsortedBlocks.add( bi );
+				unsortedBlocks.add(bi);
 		}
+
+		logger.debug("Gonna write now");
+		saveChain();
+	}
+
+	private void saveChain() {
+		File file = new File("./chain");
+		if (file.exists()) {
+			logger.info("Found an already existing version of the chain file. Will replace it");
+			file.delete();
+		}
+
+		try {
+			file.createNewFile();
+			PrintWriter pw = new PrintWriter(file);
+
+			List<Sha256Hash> chain = getLongestBranch();
+			for (Sha256Hash hash : chain)
+				pw.println(hash.toString());
+
+			pw.flush();
+			pw.close();
+
+		} catch (IOException e) {
+			logger.error("Can't create the chain file. Will continue nonetheless.");
+		}
+
 	}
 
 	/**
@@ -89,39 +133,48 @@ public class BlockSorter {
 	 * @return a list of hashes representing blocks in the order that is
 	 *         considered the current state of the blockchain
 	 */
-	public List<Sha256Hash> getLongestBranch( ) {
-		List<Sha256Hash> branch = new LinkedList<>( );
+	public List<Sha256Hash> getLongestBranch() {
+		List<Sha256Hash> branch = new LinkedList<>();
 
 		BlockIdentifier current = deepestBlock;
 
-		while (current.getDepth( ) >= 0) {
-			branch.add( 0, current.getBlockHash( ) );
-			current = current.getParent( );
+		while (current.getDepth() >= 0) {
+			branch.add(0, current.getBlockHash());
+			current = current.getParent();
 		}
 
 		return branch;
 	}
 
 	// main method for testing
-	public static void main( String[] args ) {
-		String homedir = System.getProperty( "user.home" );
-		String blockChainPath = homedir + "/.bitcoin/blocks";
+	public static void main(String[] args) {
+		Properties properties = new Properties();
+		try {
+			properties.load(new FileInputStream("target/classes/blockchain.properties"));
+		} catch (Exception e) {
+			logger.fatal("Unable to read the properties file");
+			logger.fatal("failed at", e);
+			System.exit(1);
+		}
 
-		File dir = new File( blockChainPath );
-		File[] files = dir.listFiles( new FilenameFilter( ) {
-			@Override
-			public boolean accept( File dir, String name ) {
-				return name.matches( "blk\\d{5}.dat" );
-			}
-		} );
+		NetworkParameters params = null;
 
-		List<File> blockChainFiles = new ArrayList<>( Arrays.asList( files ) );
+		if (Boolean.parseBoolean(properties.getProperty("testnet"))) {
+			params = new TestNet3Params();
+			logger.info("Operating on Testnet3");
+		} else {
+			params = new MainNetParams();
+			logger.info("Operating on MainNet");
+		}
+		Utility.setParams(params);
+		Context context = Context.getOrCreate(params);
 
-		BlockSorter sorter = new BlockSorter( blockChainFiles );
+		List<File> blockChainFiles = Utility.getDefaultFileList();
 
-		System.out.println( "================================" );
-		System.out.println( "Highest block: "
-				+ (sorter.getLongestBranch( ).size( ) + 1) );
-		System.out.println( "================================" );
+		BlockSorter sorter = new BlockSorter(blockChainFiles);
+
+		System.out.println("================================");
+		System.out.println("Highest block: " + (sorter.getLongestBranch().size() - 1));
+		System.out.println("================================");
 	}
 }
