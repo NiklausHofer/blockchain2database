@@ -24,12 +24,8 @@ public class DataBlock {
 	private DatabaseConnection connection;
 
 	private String insertBlockQuery = "INSERT INTO block"
-			+ " (difficulty, hash, prev_blk_id, mrkl_root, time, tx_count, height, version, nonce)"
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);";
-
-	private String updateBlockQuery = "UPDATE block"
-			+ " SET output_amount = ?, input_amount = ?"
-			+ " WHERE blk_id = ?;";
+			+ " (difficulty, hash, prev_blk_id, mrkl_root, time, height, version, nonce)"
+			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
 
 	//private String getPrevBlockIdQuery = "SELECT block_id FROM block WHERE block_hash = ?;";
 
@@ -60,10 +56,9 @@ public class DataBlock {
 				statement.setNull(3, java.sql.Types.NULL);
 			statement.setString(4, block.getMerkleRoot().toString()); // mrkl_root
 			statement.setTimestamp(5, new java.sql.Timestamp(block.getTime().getTime())); // time
-			statement.setLong(6, block.getTransactions().size()); // transaction_count
-			statement.setLong(7, height); // height
-			statement.setLong(8, block.getVersion()); // version
-			statement.setLong(9, block.getNonce()); // Nonce
+			statement.setLong(6, height); // height
+			statement.setLong(7, block.getVersion()); // version
+			statement.setLong(8, block.getNonce()); // Nonce
 
 			statement.executeUpdate();
 
@@ -89,25 +84,6 @@ public class DataBlock {
 			System.exit(1);
 		}
 		logger.debug("Writing Block " + block.getHashAsString());
-	}
-
-	public void updateAmounts(long totalIn, long totalOut) {
-		try {
-			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(updateBlockQuery);
-			statement.setLong(1, totalOut);
-			statement.setLong(2, totalIn);
-			statement.setLong(3, blockId);
-
-			statement.executeUpdate();
-
-			statement.close();
-		} catch (SQLException e) {
-			logger.fatal("Failed to update the amounts on Block " + block.getHashAsString());
-			logger.fatal(e);
-			connection.commit();
-			connection.closeConnection();
-			System.exit(1);
-		}
 	}
 
 	public long getId() {

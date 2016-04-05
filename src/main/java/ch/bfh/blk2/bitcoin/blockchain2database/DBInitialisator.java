@@ -51,7 +51,6 @@ public class DBInitialisator {
 			+ ")ENGINE = MEMORY;",
 
 	INPUT = "CREATE TABLE IF NOT EXISTS input("
-			+ "prev_output_id BIGINT,"
 			+ "tx_id BIGINT,"
 			+ "tx_index BIGINT,"
 			+ "prev_tx_id BIGINT,"
