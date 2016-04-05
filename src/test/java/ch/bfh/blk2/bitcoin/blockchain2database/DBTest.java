@@ -95,7 +95,7 @@ public class DBTest {
 			e.printStackTrace();
 		}
 		
-		//cleanUP();
+		cleanUP();
 
 	}
 
@@ -271,7 +271,8 @@ public class DBTest {
 		DatabaseConnection dbconnection = new DatabaseConnection();
 
 		try {
-			sql="DROP TABLE IF EXISTS block,transaction,output,input,script,address,block_transaction";
+			sql="DROP TABLE IF EXISTS block,transaction,output,input,"
+					+ "large_out_script,large_in_script,small_out_script,small_in_script";
 			dbconnection.getPreparedStatement(sql).executeUpdate();
 		} catch (SQLException e1) {
 			e1.printStackTrace();

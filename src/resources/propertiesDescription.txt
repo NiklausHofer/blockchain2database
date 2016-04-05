@@ -7,9 +7,10 @@ dbdriver
 dburl
 user
 password
+small_script_size
 
 
 *** blockchain.properties
 
 directory
-
+testnet

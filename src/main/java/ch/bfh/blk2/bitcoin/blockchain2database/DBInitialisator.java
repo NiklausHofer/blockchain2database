@@ -1,23 +1,31 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Properties;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class DBInitialisator {
 
-	private static final String BLOCK = "CREATE TABLE IF NOT EXISTS block("
+	private static final String
+	
+	PROPERTIES_FILE = "src/resources/db.properties",
+	
+	SCRIPT_SIZE = "small_script_size",
+			
+	BLOCK = "CREATE TABLE IF NOT EXISTS block("
 			+ "blk_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 			+ "difficulty BIGINT,"
 			+ "hash VARCHAR(64),"
 			+ "prev_blk_id BIGINT,"
 			+ "mrkl_root VARCHAR(64),"
 			+ "time TIMESTAMP DEFAULT 0,"
-			+ "tx_count BIGINT,"
 			+ "height BIGINT,"
 			+ "version BIGINT,"
-			+ "nonce BIGINT,"
-			+ "output_amount BIGINT,"
-			+ "input_amount BIGINT"
+			+ "nonce BIGINT"
 			+ ")ENGINE = MEMORY;",
 
 	TRANSACTION = "CREATE TABLE IF NOT EXISTS transaction("
@@ -25,66 +33,86 @@ public class DBInitialisator {
 			+ "version BIGINT,"
 			+ "lock_time DATETIME DEFAULT 0,"
 			+ "blk_time TIMESTAMP DEFAULT 0,"
-			+ "input_count BIGINT,"
-			+ "output_count BIGINT,"
-			+ "output_amount BIGINT,"
-			+ "input_amount BIGINT,"
-			+ "coinbase BOOL,"
 			+ "blk_id BIGINT,"
 			+ "tx_hash VARCHAR(64),"
 			+ "FOREIGN KEY(blk_id) REFERENCES block(blk_id)"
 			+ ")ENGINE = MEMORY;",
 
 	OUTPUT = "CREATE TABLE IF NOT EXISTS output("
-			+ "output_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 			+ "amount BIGINT,"
 			+ "tx_id BIGINT,"
 			+ "tx_index BIGINT,"
-			+ "spent BOOL,"
-			+ "spent_by_input BIGINT,"
-			+ "spent_in_tx BIGINT,"
+			+ "spent_by_index BIGINT,"
+			+ "spent_by_tx BIGINT,"
 			+ "spent_at TIMESTAMP NULL,"
-			+ "addr_id BIGINT,"
+			+ "address VARCHAR(64),"
+			+ "PRIMARY KEY(tx_id,tx_index),"
 			+ "FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 			+ ")ENGINE = MEMORY;",
 
 	INPUT = "CREATE TABLE IF NOT EXISTS input("
-			+ "input_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 			+ "prev_output_id BIGINT,"
 			+ "tx_id BIGINT,"
+			+ "tx_index BIGINT,"
 			+ "prev_tx_id BIGINT,"
 			+ "prev_output_index BIGINT,"
 			+ "sequence_number BIGINT,"
 			+ "amount BIGINT,"
+			+ "PRIMARY KEY(tx_id,tx_index),"
 			+ "FOREIGN KEY(prev_output_id) REFERENCES output(output_id),"
 			+ "FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
 			+ ")ENGINE = MEMORY;",
 
-	SCRIPT = "CREATE TABLE IF NOT EXISTS script("
-			+ "script_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
-			+ "script_length BIGINT,"
-			+ "script_code BLOB,"
-			+ "input_id BIGINT,"
-			+ "output_id BIGINT"
+	SMALL_OUT_SCRIPT_SCRIPT = "CREATE TABLE IF NOT EXISTS small_out_script("
+			+ "tx_id BIGINT,"
+			+ "tx_index BIGINT,"
+			+ "script_size BIGINT,"
+			+ "script VARBINARY(?),"
+			+ "PRIMARY KEY(tx_id,tx_index)"
+			+ ")ENGINE = MEMORY;",
+
+	LARGE_OUT_SCRIPT_SCRIPT = "CREATE TABLE IF NOT EXISTS large_out_script("
+			+ "tx_id BIGINT,"
+			+ "tx_index BIGINT,"
+			+ "script_size BIGINT,"
+			+ "script VARBINARY(4096),"
+			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = INNODB;",
 
-	ADDRESS = "CREATE TABLE IF NOT EXISTS address("
-			+ "addr_id  BIGINT AUTO_INCREMENT PRIMARY KEY,"
-			+ "public_key VARBINARY(32),"
-			+ "addr_hash VARCHAR(35)"
-			+ ")ENGINE = MEMORY;";
+	SMALL_IN_SCRIPT_SCRIPT = "CREATE TABLE IF NOT EXISTS small_in_script("
+			+ "tx_id BIGINT,"
+			+ "tx_index BIGINT,"
+			+ "script_size BIGINT,"
+			+ "script VARBINARY(?),"
+			+ "PRIMARY KEY(tx_id,tx_index)"
+			+ ")ENGINE = MEMORY;",
+
+	LARGE_IN_SCRIPT_SCRIPT = "CREATE TABLE IF NOT EXISTS large_in_script("
+			+ "tx_id BIGINT,"
+			+ "tx_index BIGINT,"
+			+ "script_size BIGINT,"
+			+ "script VARBINARY(4096),"
+			+ "PRIMARY KEY(tx_id,tx_index)"
+			+ ")ENGINE = INNODB;";
+		
 
 	private final String INDEX_1 = "CREATE INDEX transaction_hash USING BTREE ON transaction (tx_hash);";
 
 	private final String INDEX_2 = " CREATE INDEX output_tx_index USING BTREE ON output (tx_index);";
-
-	private final String INDEX_3 = " CREATE INDEX addr_hash USING BTREE ON address (addr_hash);";
-
+	
+	private static final Logger logger = LogManager.getLogger("DBInitialisator");
+	
 	public void initializeDB() {
 
 		DatabaseConnection dbconn = new DatabaseConnection();
 
+		int smallScriptSize=0;
+		
 		try {
+			Properties properties = new Properties();
+			properties.load(new FileInputStream(PROPERTIES_FILE));
+			smallScriptSize = Integer.parseInt(properties.getProperty(SCRIPT_SIZE));
+			
 			PreparedStatement ps;
 
 			ps = dbconn.getPreparedStatement(BLOCK);
@@ -102,12 +130,22 @@ public class DBInitialisator {
 			ps = dbconn.getPreparedStatement(INPUT);
 			ps.execute();
 			ps.close();
-
-			ps = dbconn.getPreparedStatement(SCRIPT);
+			
+			ps = dbconn.getPreparedStatement(SMALL_OUT_SCRIPT_SCRIPT);
+			ps.setInt(1,smallScriptSize);
 			ps.execute();
 			ps.close();
-
-			ps = dbconn.getPreparedStatement(ADDRESS);
+			
+			ps = dbconn.getPreparedStatement(LARGE_OUT_SCRIPT_SCRIPT);
+			ps.execute();
+			ps.close();
+			
+			ps = dbconn.getPreparedStatement(SMALL_IN_SCRIPT_SCRIPT);
+			ps.setInt(1,smallScriptSize);
+			ps.execute();
+			ps.close();
+			
+			ps = dbconn.getPreparedStatement(LARGE_IN_SCRIPT_SCRIPT);
 			ps.execute();
 			ps.close();
 
@@ -119,13 +157,12 @@ public class DBInitialisator {
 			ps.execute();
 			ps.close();
 
-			ps = dbconn.getPreparedStatement(INDEX_3);
-			ps.execute();
-			ps.close();
-
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} finally {
+		} catch (IOException e) {
+			e.printStackTrace();
+			logger.error("unable to read properties");
+		}finally {
 			dbconn.closeConnection();
 		}
 	}
