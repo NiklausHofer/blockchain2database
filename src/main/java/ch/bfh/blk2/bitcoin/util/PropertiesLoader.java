@@ -21,19 +21,24 @@ public class PropertiesLoader {
 	
 	private static PropertiesLoader propertiesLoader;
 
-	private Map<String,String> properties = new HashMap<>();
+	private Map<String,String> properties;
 	
 	private PropertiesLoader(){
 		loadProperties();
 	}
 	
 	private void loadProperties(){
+		this.properties = new HashMap<>();
 		for(String fileName : PROPERTIES_FILES){
 			try {
-				Properties properties = new Properties();
-				properties.load(new FileInputStream(fileName));
-				for(Entry<Object,Object> entry : properties.entrySet()){
-					properties.put(entry.getKey(), entry.getValue());
+				Properties prop = new Properties();
+				prop.load(new FileInputStream(fileName));
+				for(Entry<Object,Object> entry : prop.entrySet()){
+					String key = (String) entry.getKey(),
+							value = (String) entry.getValue();
+	
+					this.properties.put(key,value);
+					logger.debug(key+" : "+value);
 				}
 			} catch (IOException e) {
 				logger.error("Unable to read Properties from: "+ fileName);
@@ -52,6 +57,7 @@ public class PropertiesLoader {
 	}	
 	
 	public String getProperty(String key){
+		logger.debug(properties.size());
 		if(properties.containsKey(key)){
 			return properties.get(key);
 		}else{
