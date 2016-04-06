@@ -33,7 +33,10 @@ public class DataTransaction {
 
 	//private String inputAmountQuery_1 = "SELECT tx_id FROM transaction WHERE tx_hash = ?;";
 	//private String inputAmountQuery_2 = "SELECT amount, output_id FROM output WHERE tx_id = ? AND output_index = ?;";
-	private String inputAmountQuery_3 = "SELECT transaction.tx_id, output.amount, output.output_id FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
+	private String inputAmountQuery_3 = 
+			"SELECT transaction.tx_id, output.amount"
+			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
+			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String transactionInsertQuery = "INSERT INTO transaction"
 			+ " (version, lock_time, blk_time, blk_id, tx_hash) "
@@ -158,8 +161,10 @@ public class DataTransaction {
 	}
 
 	private void calcInAmount() {
-		for (TransactionInput input : transaction.getInputs()) {
-
+		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
+			
+			TransactionInput input = transaction.getInputs().get(tx_index);
+			
 			if (input.isCoinBase()) {
 				// Coinbase Input
 				DataInput dataInput = new DataInput();
@@ -170,6 +175,7 @@ public class DataTransaction {
 
 			DataInput dataInput = new DataInput(input);
 			dataInputs.add(dataInput);
+			dataInput.setTxIndex(tx_index);
 
 			try {
 				PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery_3);
@@ -181,8 +187,7 @@ public class DataTransaction {
 				if (rs.next()) {
 					dataInput.setPrev_tx_id(rs.getLong(1));
 					dataInput.setAmount(rs.getLong(2));
-					dataInput.setPrev_out_id(rs.getLong(3));
-
+					
 					inAmount += rs.getLong(2);
 				} else {
 					logger.fatal(

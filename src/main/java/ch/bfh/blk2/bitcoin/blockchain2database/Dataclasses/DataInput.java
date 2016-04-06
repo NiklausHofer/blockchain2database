@@ -22,19 +22,20 @@ public class DataInput {
 	private boolean isCoinBase = false;
 
 	private long prev_tx_id;
-	private long prev_out_id;
 	private long amount;
+	private long tx_index;
 	private TransactionInput input;
 	private long input_id = -1;
 	private Date date;
 
 	String dataInputQuery = "INSERT INTO input "
-			+ " (prev_output_id, tx_id, prev_tx_id, prev_output_index, sequence_number, amount)"
+			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?);";
 
 	String outputUpdateQuery = "UPDATE output"
-			+ " SET spent = ?, spent_by_input = ?, spent_in_tx = ?, spent_at = ?"
-			+ " WHERE output_id = ?;";
+			+ " SET spent_by_tx = ?, spent_by_index = ?, spent_at = ?"
+			+ " WHERE tx_id = ?"
+			+ " AND tx_index = ?;";
 
 	public DataInput(TransactionInput input) {
 		this.input = input;
@@ -52,8 +53,8 @@ public class DataInput {
 		try {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(dataInputQuery);
 
-			statement.setLong(1, prev_out_id);
-			statement.setLong(2, tx_id);
+			statement.setLong(1, tx_id);
+			statement.setLong(2, tx_index);
 			statement.setLong(3, prev_tx_id);
 			statement.setLong(4, input.getOutpoint().getIndex());
 			statement.setLong(5, input.getSequenceNumber());
@@ -91,16 +92,17 @@ public class DataInput {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputUpdateQuery);
 
 			statement.setBoolean(1, true);
-			statement.setLong(2, input_id);
-			statement.setLong(3, tx_id);
+			statement.setLong(2, tx_id);
+			statement.setLong(3, tx_index);
 			statement.setTimestamp(4, new Timestamp(date.getTime()));
-			statement.setLong(5, prev_out_id);
+			statement.setLong(5, tx_id);
+			statement.setLong(6, input.getOutpoint().getIndex());
 
 			statement.executeUpdate();
 
 			statement.close();
 		} catch (SQLException e) {
-			logger.fatal("Failed to update Output #" + prev_out_id);
+			logger.fatal("Failed to update Output [tx: "+prev_tx_id+" , # "+input.getOutpoint().getIndex());
 			logger.fatal(e);
 			connection.commit();
 			connection.closeConnection();
@@ -120,16 +122,15 @@ public class DataInput {
 		this.amount = amount;
 	}
 
-	public void setPrev_out_id(long prev_out_id) {
-		this.prev_out_id = prev_out_id;
-	}
-
 	public void setTx_id(long tx_id) {
 		this.tx_id = tx_id;
 	}
 
-	public long getPrev_tx_id() {
-		return prev_out_id;
+	public void setTxIndex(long tx_index){
+		this.tx_index = tx_index;
 	}
-
+	
+	public long getTxIndex(){
+		return tx_index;
+	}
 }
