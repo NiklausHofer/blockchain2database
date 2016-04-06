@@ -25,6 +25,7 @@ import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataBlock;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.producer.BlockSorter;
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class FooClass {
@@ -52,16 +53,8 @@ public class FooClass {
 	public FooClass() {
 
 		// Init BitcoinJ
-		Properties properties = new Properties();
-		try {
-			properties.load(new FileInputStream("target/classes/blockchain.properties"));
-		} catch (Exception e) {
-			logger.fatal("Unable to read the properties file");
-			logger.fatal("failed at", e);
-			System.exit(1);
-		}
 
-		if (Boolean.parseBoolean(properties.getProperty("testnet"))) {
+		if (Boolean.parseBoolean(PropertiesLoader.getInstance().getProperty("testnet"))) {
 			params = new TestNet3Params();
 			logger.info("Operating on Testnet3");
 		} else {
