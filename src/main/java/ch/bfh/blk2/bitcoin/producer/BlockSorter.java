@@ -6,10 +6,12 @@ import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.TreeMap;
 
@@ -40,8 +42,8 @@ public class BlockSorter {
 
 	private BlockIdentifier deepestBlock;
 	private Map<Sha256Hash, BlockIdentifier> blockMap;
-	private BlockFileLoader bfl;
 	private List<BlockIdentifier> unsortedBlocks;
+	private List<File> files;
 
 	/* Default values for when we start at the bottom of the chain */
 	private Sha256Hash rootHash = Sha256Hash.ZERO_HASH;
@@ -62,7 +64,9 @@ public class BlockSorter {
 
 		logger.info("Will continue from Block #" + virtBlockHeight + " : " + rootHash);
 
-		bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
+		files = blockChainFiles;
+
+		//bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
 
 		sort();
 	}
@@ -113,15 +117,20 @@ public class BlockSorter {
 
 		logger.debug("start sorting");
 
-		logger.debug(bfl);
+		//logger.debug(bfl);
+		for (File file : files) {
 
-		for (Block blk : bfl) {
-			logger.trace("block: " + blk.getHashAsString());
-			BlockIdentifier bi = new BlockIdentifier(blk);
-			if (blockMap.containsKey(bi.getParentHash()))
-				insertBlock(bi);
-			else
-				unsortedBlocks.add(bi);
+			List<File> currentFile = new ArrayList<>(1);
+			currentFile.add(file);
+			BlockFileLoader bfl = new BlockFileLoader(Utility.PARAMS, currentFile);
+			for (Block blk : bfl) {
+				logger.trace("block: " + blk.getHashAsString());
+				BlockIdentifier bi = new BlockIdentifier(blk, file.getName());
+				if (blockMap.containsKey(bi.getParentHash()))
+					insertBlock(bi);
+				else
+					unsortedBlocks.add(bi);
+			}
 		}
 	}
 
@@ -146,7 +155,20 @@ public class BlockSorter {
 		} catch (IOException e) {
 			logger.error("Can't create the chain file. Will continue nonetheless.");
 		}
+	}
 
+	public void extractFileInformation() {
+
+		Map<String, Integer> fileMap = new TreeMap<>();
+
+		for (BlockIdentifier bi : blockMap.values()) {
+			String filename = bi.getFilename();
+			if (!fileMap.containsKey(filename) || fileMap.get(filename) < bi.getDepth())
+				fileMap.put(filename, bi.getDepth());
+		}
+
+		for (Entry<String, Integer> e : fileMap.entrySet())
+			System.out.println(e.getKey() + "\t" + e.getValue());
 	}
 
 	/**
@@ -159,7 +181,7 @@ public class BlockSorter {
 
 		BlockIdentifier current = deepestBlock;
 
-		while (current.getDepth() >= virtBlockHeight) {
+		while (current.getDepth() > virtBlockHeight) {
 			branch.add(0, current.getBlockHash());
 			current = current.getParent();
 		}
@@ -225,6 +247,9 @@ public class BlockSorter {
 
 		BlockSorter sorter = new BlockSorter(blockChainFiles);
 		sorter.saveChain();
+		long startTime = System.currentTimeMillis();
+		sorter.extractFileInformation();
+		logger.info((System.currentTimeMillis() - startTime) / 1000.0);
 
 		System.out.println("================================");
 		System.out.println("Highest block: " + (sorter.getLongestBranch().size() - 1));
