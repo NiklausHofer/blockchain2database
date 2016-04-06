@@ -11,7 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +43,7 @@ public class BlockSorter {
 	private BlockIdentifier deepestBlock;
 	private Map<Sha256Hash, BlockIdentifier> blockMap;
 	private BlockFileLoader bfl;
-	private List<BlockIdentifier> unsortedBlocks;
+	private Set<BlockIdentifier> unsortedBlocks;
 
 	/* Default values for when we start at the bottom of the chain */
 	private Sha256Hash rootHash = Sha256Hash.ZERO_HASH;
@@ -51,45 +53,29 @@ public class BlockSorter {
 	 * @param blockChainFiles
 	 *            the files containing the unparsed blockchain
 	 */
-	public BlockSorter(List<File> blockChainFiles) {
+	public BlockSorter(List<File> blockChainFiles, Sha256Hash rootHash, int startHeight) {
 		Collections.sort(blockChainFiles);
 
 		blockMap = new TreeMap<>(new Sha256HashComparator());
-		unsortedBlocks = new LinkedList<>();
+		//unsortedBlocks = new LinkedList<>();
+		unsortedBlocks = new TreeSet<>();
+
+		virtBlockHeight = startHeight;
+		this.rootHash = rootHash;
+
+		logger.info("Will continue from Block #" + virtBlockHeight + " : " + rootHash);
 
 		bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
 
-		// Check if a chain file is present already...
-		File file = new File("./chain");
-		if (file.exists() && !file.isDirectory() && file.canRead()) {
-			logger.info("Found a chain File. Will attempt to continue from there");
-
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(file));
-				List<String> hashes = new LinkedList<>();
-				String line = null;
-				int lineNr = 0;
-				while ((line = reader.readLine()) != null) {
-					lineNr++;
-					hashes.add(line);
-					if (hashes.size() > 100)
-						hashes.remove(0);
-				}
-				logger.info("Highest block in chian file:\n\theight: "
-						+ (lineNr - 1)
-						+ "\tblock: "
-						+ hashes.get(hashes.size() - 1));
-				logger.info("Block #" + (lineNr - 101) + " : " + hashes.get(0));
-
-				return;
-			} catch (IOException e) {
-				logger.info("Unable to process the chain file. Continuing without.");
-				logger.debug("reason: ", e);
-			}
-		}
-
 		sort();
+	}
 
+	public BlockSorter(List<File> blockChainFiles, String rootHash, int startHeight) {
+		this(blockChainFiles, Sha256Hash.wrap(rootHash), startHeight);
+	}
+
+	public BlockSorter(List<File> blockChainFiles) {
+		this(blockChainFiles, Sha256Hash.ZERO_HASH, -1);
 	}
 
 	private void insertBlock(BlockIdentifier bi) {
@@ -133,11 +119,10 @@ public class BlockSorter {
 		}
 
 		logger.debug("Gonna write now");
-		saveChain();
 	}
 
-	private void saveChain() {
-		File file = new File("./chain");
+	public void saveChain() {
+		File file = new File("./chain2");
 		if (file.exists()) {
 			logger.info("Found an already existing version of the chain file. Will replace it");
 			file.delete();
@@ -203,7 +188,39 @@ public class BlockSorter {
 
 		List<File> blockChainFiles = Utility.getDefaultFileList();
 
+		// Check if a chain file is present already...
+		File file = new File("./chain");
+		if (file.exists() && !file.isDirectory() && file.canRead()) {
+			logger.info("Found a chain File. Will attempt to continue from there");
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				List<String> hashes = new LinkedList<>();
+				String line = null;
+				int lineNr = 0;
+				while ((line = reader.readLine()) != null) {
+					lineNr++;
+					hashes.add(line);
+					if (hashes.size() > 100)
+						hashes.remove(0);
+				}
+				logger.info("Highest block in chian file:\n\theight: "
+						+ (lineNr - 1)
+						+ "\tblock: "
+						+ hashes.get(hashes.size() - 1));
+				logger.info("Block #" + (lineNr - 100) + " : " + hashes.get(0));
+
+				BlockSorter sorter = new BlockSorter(blockChainFiles, hashes.get(0), lineNr - 100);
+				sorter.saveChain();
+				return;
+			} catch (IOException e) {
+				logger.info("Unable to process the chain file. Continuing without.");
+				logger.debug("reason: ", e);
+			}
+		}
+
 		BlockSorter sorter = new BlockSorter(blockChainFiles);
+		sorter.saveChain();
 
 		System.out.println("================================");
 		System.out.println("Highest block: " + (sorter.getLongestBranch().size() - 1));
