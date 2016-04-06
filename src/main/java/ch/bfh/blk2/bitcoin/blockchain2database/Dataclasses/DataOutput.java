@@ -21,12 +21,11 @@ public class DataOutput {
 			+ " (amount, tx_id, tx_index,address)"
 			+ " VALUES(?, ?, ?, ?);",
 			
-			INSERT_SCRIPT = "INSERT IGNORE INTO ? (tx_id,tx_index,script_size,script)"
+			INSERT_SMALL_SCRIPT = "INSERT IGNORE INTO small_out_script (tx_id,tx_index,script_size,script)"
 			+ " VALUES(?, ?, ?, ?);",
 			
-			SMALL_SCRIPT_TABLE="small_out_script",
-			
-			LARGE_SCRIPT_TABLE="large_out_script";
+			INSERT_LARGE_SCRIPT = "INSERT IGNORE INTO large_out_script (tx_id,tx_index,script_size,script)"
+			+ " VALUES(?, ?, ?, ?);";
 	
 	private static int maxScriptSize = Integer.parseInt(
 			PropertiesLoader.getInstance().getProperty("max_inmemory_output_script"));
@@ -94,24 +93,24 @@ public class DataOutput {
 			return;
 		else{ 
 			try{
-			PreparedStatement insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(INSERT_SCRIPT);
+			PreparedStatement insertScriptStatement;
 			
 			if(script.length > maxScriptSize)
-				insertScriptStatement.setString(1, SMALL_SCRIPT_TABLE);
+				insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(INSERT_LARGE_SCRIPT);
 			else
-				insertScriptStatement.setString(1, LARGE_SCRIPT_TABLE);
+				insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(INSERT_SMALL_SCRIPT);
 			
-			insertScriptStatement.setLong(2, txId);
-			insertScriptStatement.setLong(3, output.getIndex());
-			insertScriptStatement.setLong(4,script.length);
-			insertScriptStatement.setBytes(5, script);
+			insertScriptStatement.setLong(1, txId);
+			insertScriptStatement.setLong(2, output.getIndex());
+			insertScriptStatement.setLong(3,script.length);
+			insertScriptStatement.setBytes(4, script);
 
 			insertScriptStatement.executeUpdate();
 			insertScriptStatement.close();
 			
 			}catch(SQLException e){
-				logger.error("failed to insert output script");
-				logger.error("output [tx : "+txId+", #"+output.getIndex()+"]");
+				logger.fatal("failed to insert output script");
+				logger.fatal("output [tx : "+txId+", #"+output.getIndex()+"]",e);
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);

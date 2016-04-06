@@ -40,6 +40,7 @@ public class PropertiesLoader {
 					this.properties.put(key,value);
 					logger.debug(key+" : "+value);
 				}
+				logger.debug("loaded "+properties.size()+" properties");
 			} catch (IOException e) {
 				logger.error("Unable to read Properties from: "+ fileName);
 				System.exit(1);
@@ -57,7 +58,7 @@ public class PropertiesLoader {
 	}	
 	
 	public String getProperty(String key){
-		logger.debug(properties.size());
+		
 		if(properties.containsKey(key)){
 			return properties.get(key);
 		}else{

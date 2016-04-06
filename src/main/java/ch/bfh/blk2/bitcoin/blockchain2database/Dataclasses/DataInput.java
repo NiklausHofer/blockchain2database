@@ -49,11 +49,11 @@ public class DataInput {
 			+ " WHERE tx_id = ?"
 			+ " AND tx_index = ?;";
 	
-	private String insertScript = "INSERT IGNORE INTO ? (tx_id,tx_index,script_size,script)"
+	private String insertSmallScript = "INSERT IGNORE INTO small_in_script (tx_id,tx_index,script_size,script)"
 			+ " VALUES(?, ?, ?, ?);";
 	
-	private static final String SMALL_SCRIPT_TABLE="small_in_script",
-				LARGE_SCRIPT_TABLE="large_in_script";	
+	private String insertLargeScript = "INSERT IGNORE INTO large_in_script (tx_id,tx_index,script_size,script)"
+			+ " VALUES(?, ?, ?, ?);";	
 
 	public DataInput(TransactionInput input,long tx_id,long tx_index,Date date) {
 		this.input = input;
@@ -79,19 +79,6 @@ public class DataInput {
 			statement.setLong(6, amount);
 
 			statement.executeUpdate();
-
-			ResultSet rs = statement.getGeneratedKeys();
-
-			if (rs.next())
-				input_id = rs.getLong(1);
-			else {
-				logger.fatal("Malformed response from Database when reading ID for a new Input");
-				connection.commit();
-				connection.closeConnection();
-				System.exit(1);
-			}
-
-			rs.close();
 			statement.close();
 			
 			updateOutputs(connection);
@@ -184,53 +171,29 @@ public class DataInput {
 			return;
 		else{ 
 			try{
-			PreparedStatement insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(insertScript);
+			PreparedStatement insertScriptStatement;
 			
 			if(script.length > maxScriptSize)
-				insertScriptStatement.setString(1, SMALL_SCRIPT_TABLE);
+				insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(insertLargeScript);
 			else
-				insertScriptStatement.setString(1, LARGE_SCRIPT_TABLE);
+				insertScriptStatement =(PreparedStatement) connection.getPreparedStatement(insertSmallScript);
 			
-			insertScriptStatement.setLong(2, tx_id);
-			insertScriptStatement.setLong(3, tx_index);
-			insertScriptStatement.setLong(4,script.length);
-			insertScriptStatement.setBytes(5, script);
+			insertScriptStatement.setLong(1, tx_id);
+			insertScriptStatement.setLong(2, tx_index);
+			insertScriptStatement.setLong(3,script.length);
+			insertScriptStatement.setBytes(4, script);
 
 			insertScriptStatement.executeUpdate();
 			insertScriptStatement.close();
 			
 			}catch(SQLException e){
-				logger.error("failed to insert input script");
-				logger.error("input [tx : "+tx_id+", #"+tx_index+"]");
+				logger.fatal("failed to insert input script");
+				logger.fatal("input [tx : "+tx_id+", #"+tx_index+"]",e);
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);
 			}
 		}
 		
-	}
-
-	public void setDate(Date date) {
-		this.date = date;
-	}
-
-	public void setPrev_tx_id(long prev_tx_id) {
-		this.prev_tx_id = prev_tx_id;
-	}
-
-	public void setAmount(long amount) {
-		this.amount = amount;
-	}
-
-	public void setTx_id(long tx_id) {
-		this.tx_id = tx_id;
-	}
-
-	public void setTxIndex(long tx_index){
-		this.tx_index = tx_index;
-	}
-	
-	public long getTxIndex(){
-		return tx_index;
 	}
 }
