@@ -1,7 +1,9 @@
 package ch.bfh.blk2.bitcoin.producer;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -57,7 +59,37 @@ public class BlockSorter {
 
 		bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
 
+		// Check if a chain file is present already...
+		File file = new File("./chain");
+		if (file.exists() && !file.isDirectory() && file.canRead()) {
+			logger.info("Found a chain File. Will attempt to continue from there");
+
+			try {
+				BufferedReader reader = new BufferedReader(new FileReader(file));
+				List<String> hashes = new LinkedList<>();
+				String line = null;
+				int lineNr = 0;
+				while ((line = reader.readLine()) != null) {
+					lineNr++;
+					hashes.add(line);
+					if (hashes.size() > 100)
+						hashes.remove(0);
+				}
+				logger.info("Highest block in chian file:\n\theight: "
+						+ (lineNr - 1)
+						+ "\tblock: "
+						+ hashes.get(hashes.size() - 1));
+				logger.info("Block #" + (lineNr - 101) + " : " + hashes.get(0));
+
+				return;
+			} catch (IOException e) {
+				logger.info("Unable to process the chain file. Continuing without.");
+				logger.debug("reason: ", e);
+			}
+		}
+
 		sort();
+
 	}
 
 	private void insertBlock(BlockIdentifier bi) {
