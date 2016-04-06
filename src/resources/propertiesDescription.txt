@@ -7,7 +7,8 @@ dbdriver
 dburl
 user
 password
-small_script_size
+max_inmemory_output_script
+max_inmemory_input_script
 
 
 *** blockchain.properties

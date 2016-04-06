@@ -10,11 +10,14 @@ import org.apache.logging.log4j.Logger;
 
 public class DBInitialisator {
 
+	private final static int LARGE_SCRIPT = 4096;
+	
 	private static final String
 	
 	PROPERTIES_FILE = "src/resources/db.properties",
 	
-	SCRIPT_SIZE = "small_script_size",
+	MAX_INMEMORY_OUTPUT_SCRIPT ="max_inmemory_output_script",
+	MAX_INMEMORY_INPUT_SCRIPT = "max_inmemory_input_script",
 			
 	BLOCK = "CREATE TABLE IF NOT EXISTS block("
 			+ "blk_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
@@ -57,9 +60,7 @@ public class DBInitialisator {
 			+ "prev_output_index BIGINT,"
 			+ "sequence_number BIGINT,"
 			+ "amount BIGINT,"
-			+ "PRIMARY KEY(tx_id,tx_index),"
-			+ "FOREIGN KEY(prev_output_id) REFERENCES output(output_id),"
-			+ "FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)"
+			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = MEMORY;",
 
 	SMALL_OUT_SCRIPT_SCRIPT = "CREATE TABLE IF NOT EXISTS small_out_script("
@@ -74,7 +75,7 @@ public class DBInitialisator {
 			+ "tx_id BIGINT,"
 			+ "tx_index BIGINT,"
 			+ "script_size BIGINT,"
-			+ "script VARBINARY(4096),"
+			+ "script VARBINARY(?),"
 			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = INNODB;",
 
@@ -90,7 +91,7 @@ public class DBInitialisator {
 			+ "tx_id BIGINT,"
 			+ "tx_index BIGINT,"
 			+ "script_size BIGINT,"
-			+ "script VARBINARY(4096),"
+			+ "script VARBINARY(?),"
 			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = INNODB;";
 		
@@ -105,13 +106,14 @@ public class DBInitialisator {
 
 		DatabaseConnection dbconn = new DatabaseConnection();
 
-		int smallScriptSize=0;
+		int smallInputScriptSize = 0,
+				smallOutputScriptSize = 0;
 		
 		try {
 			Properties properties = new Properties();
 			properties.load(new FileInputStream(PROPERTIES_FILE));
-			smallScriptSize = Integer.parseInt(properties.getProperty(SCRIPT_SIZE));
-			
+			smallInputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_INPUT_SCRIPT));
+			smallOutputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_OUTPUT_SCRIPT));
 			PreparedStatement ps;
 
 			ps = dbconn.getPreparedStatement(BLOCK);
@@ -131,20 +133,22 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(SMALL_OUT_SCRIPT_SCRIPT);
-			ps.setInt(1,smallScriptSize);
+			ps.setInt(1,smallOutputScriptSize);
 			ps.execute();
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(LARGE_OUT_SCRIPT_SCRIPT);
+			ps.setInt(1,LARGE_SCRIPT);
 			ps.execute();
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(SMALL_IN_SCRIPT_SCRIPT);
-			ps.setInt(1,smallScriptSize);
+			ps.setInt(1,smallInputScriptSize);
 			ps.execute();
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(LARGE_IN_SCRIPT_SCRIPT);
+			ps.setInt(1,LARGE_SCRIPT);
 			ps.execute();
 			ps.close();
 
