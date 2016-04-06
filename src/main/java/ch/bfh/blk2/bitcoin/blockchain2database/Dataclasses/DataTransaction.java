@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
@@ -37,12 +36,12 @@ public class DataTransaction {
 	private String inputAmountQuery_3 = "SELECT transaction.tx_id, output.amount, output.output_id FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String transactionInsertQuery = "INSERT INTO transaction"
-			+ " (version, lock_time, blk_time, input_count, output_count, output_amount, input_amount, coinbase, blk_id, tx_hash) "
-			+ " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+			+ " (version, lock_time, blk_time, blk_id, tx_hash) "
+			+ " VALUES (?, ?, ?, ?, ?);";
 
 	private String outputInsertQuery = "INSERT INTO output"
-			+ " (amount, tx_id, tx_index, spent,addr_id)"
-			+ " VALUES( ?, ?, ?, ? , ? );";
+			+ " (amount, tx_id, tx_index,address)"
+			+ " VALUES(?, ?, ?, ?);";
 
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date) {
 		this.transaction = transaction;
@@ -68,13 +67,8 @@ public class DataTransaction {
 			transactionInsertStatement.setLong(1, transaction.getVersion());
 			transactionInsertStatement.setTimestamp(2, new java.sql.Timestamp(transaction.getLockTime() * 1000 + 1000));
 			transactionInsertStatement.setTimestamp(3, new java.sql.Timestamp(date.getTime()));
-			transactionInsertStatement.setLong(4, transaction.getInputs().size());
-			transactionInsertStatement.setLong(5, transaction.getOutputs().size());
-			transactionInsertStatement.setLong(6, outAmount);
-			transactionInsertStatement.setLong(7, inAmount);
-			transactionInsertStatement.setBoolean(8, transaction.isCoinBase());
-			transactionInsertStatement.setLong(9, blockId);
-			transactionInsertStatement.setString(10, transaction.getHashAsString());
+			transactionInsertStatement.setLong(4, blockId);
+			transactionInsertStatement.setString(5, transaction.getHashAsString());
 
 			transactionInsertStatement.executeUpdate();
 
@@ -118,15 +112,11 @@ public class DataTransaction {
 
 	private void writeOutput(TransactionOutput output) {
 
-		long addr_id = -1;
-
+		String address = null;
+ 
 		try {
-
 			//Get Adress ID
-			Address address = Utility.getAddressFromOutput(output);
-			AddressUpdater addressUpdater = new AddressUpdater(address);
-			addr_id = addressUpdater.update(connection);
-
+			address = Utility.getAddressFromOutput(output).toString();
 		} catch (ScriptException e) {
 			e.printStackTrace();
 		} catch (Exception e) {
@@ -141,8 +131,11 @@ public class DataTransaction {
 			statement.setLong(1, output.getValue().getValue());
 			statement.setLong(2, tx_id);
 			statement.setLong(3, output.getIndex());
-			statement.setBoolean(4, false);
-			statement.setLong(5, addr_id);
+			
+			if(address == null)
+				statement.setNull(4, java.sql.Types.NULL);
+			else
+				statement.setString(4, address);
 
 			statement.executeUpdate();
 
