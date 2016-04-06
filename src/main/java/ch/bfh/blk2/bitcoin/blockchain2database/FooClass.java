@@ -354,8 +354,7 @@ public class FooClass {
 	}
 
 	private long writeBlock(Block block, int height, long prevId) {
-		long totalIn = 0;
-		long totalOut = 0;
+
 		long startTime = System.currentTimeMillis();
 
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
@@ -365,12 +364,7 @@ public class FooClass {
 			DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
 					block.getTime());
 			dataTransaction.writeTransaction();
-
-			totalIn += dataTransaction.getInAmount();
-			totalOut += dataTransaction.getOutAmount();
 		}
-
-		dataBlock.updateAmounts(totalIn, totalOut);
 
 		logger.info("Inserted Block "
 				+ height

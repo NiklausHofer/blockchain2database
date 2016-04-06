@@ -23,8 +23,6 @@ public class DataTransaction {
 	private static final Logger logger = LogManager.getLogger("DataTransaction");
 
 	private long blockId;
-	private long outAmount;
-	private long inAmount;
 	private Transaction transaction;
 	private DatabaseConnection connection;
 	private Date date;
@@ -53,12 +51,9 @@ public class DataTransaction {
 		this.date = date;
 
 		dataInputs = new ArrayList<>();
-		inAmount = 0;
-		outAmount = 0;
 	}
 
 	public void writeTransaction() {
-		calcOutAmount();
 		calcInAmount();
 
 		tx_id = -1;
@@ -155,11 +150,6 @@ public class DataTransaction {
 		}
 	}
 
-	private void calcOutAmount() {
-		for (TransactionOutput output : transaction.getOutputs())
-			outAmount += output.getValue().getValue();
-	}
-
 	private void calcInAmount() {
 		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
 			
@@ -188,7 +178,6 @@ public class DataTransaction {
 					dataInput.setPrev_tx_id(rs.getLong(1));
 					dataInput.setAmount(rs.getLong(2));
 					
-					inAmount += rs.getLong(2);
 				} else {
 					logger.fatal(
 							"Got a malformed response from the database while looking for an output reffered to by one of "
@@ -218,13 +207,4 @@ public class DataTransaction {
 			}
 		}
 	}
-
-	public long getInAmount() {
-		return inAmount;
-	}
-
-	public long getOutAmount() {
-		return outAmount;
-	}
-
 }
