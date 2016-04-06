@@ -26,15 +26,7 @@ public class DataTransaction {
 	private Transaction transaction;
 	private DatabaseConnection connection;
 	private Date date;
-	private List<DataInput> dataInputs;
 	private long tx_id;
-
-	//private String inputAmountQuery_1 = "SELECT tx_id FROM transaction WHERE tx_hash = ?;";
-	//private String inputAmountQuery_2 = "SELECT amount, output_id FROM output WHERE tx_id = ? AND output_index = ?;";
-	private String inputAmountQuery_3 = 
-			"SELECT transaction.tx_id, output.amount"
-			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
-			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String transactionInsertQuery = "INSERT INTO transaction"
 			+ " (version, lock_time, blk_time, blk_id, tx_hash) "
@@ -49,13 +41,10 @@ public class DataTransaction {
 		this.blockId = blockId;
 		this.connection = connection;
 		this.date = date;
-
-		dataInputs = new ArrayList<>();
 	}
 
 	public void writeTransaction() {
-		calcInAmount();
-
+		
 		tx_id = -1;
 
 		try {
@@ -93,19 +82,18 @@ public class DataTransaction {
 			System.exit(1);
 		}
 
-		for (DataInput dataInput : dataInputs) {
-			dataInput.setTx_id(tx_id);
-			dataInput.writeInput(connection);
-		}
-
 		for (TransactionOutput output : transaction.getOutputs())
 			writeOutput(output);
 
-		for (DataInput dataInput : dataInputs) {
-			dataInput.setDate(date);
-			dataInput.updateOutputs(connection);
+		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
+			
+			TransactionInput input = transaction.getInputs().get(tx_index);
+			
+			if (!input.isCoinBase()) {
+				DataInput dataInput = new DataInput(input,tx_id,tx_index,date);
+				dataInput.writeInput(connection);
+			}
 		}
-
 	}
 
 	private void writeOutput(TransactionOutput output) {
@@ -150,61 +138,4 @@ public class DataTransaction {
 		}
 	}
 
-	private void calcInAmount() {
-		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
-			
-			TransactionInput input = transaction.getInputs().get(tx_index);
-			
-			if (input.isCoinBase()) {
-				// Coinbase Input
-				DataInput dataInput = new DataInput();
-				dataInputs.add(dataInput);
-				// TODO
-				return;
-			}
-
-			DataInput dataInput = new DataInput(input);
-			dataInputs.add(dataInput);
-			dataInput.setTxIndex(tx_index);
-
-			try {
-				PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery_3);
-				statement.setString(1, input.getOutpoint().getHash().toString());
-				statement.setLong(2, input.getOutpoint().getIndex());
-
-				ResultSet rs = statement.executeQuery();
-
-				if (rs.next()) {
-					dataInput.setPrev_tx_id(rs.getLong(1));
-					dataInput.setAmount(rs.getLong(2));
-					
-				} else {
-					logger.fatal(
-							"Got a malformed response from the database while looking for an output reffered to by one of "
-									+ transaction.getHashAsString()
-									+ " Inputs can not be found\n"
-									+ "The specific output we were looking for  is: "
-									+ input.getOutpoint().getHash().toString()
-									+ " index "
-									+ input.getOutpoint().getIndex());
-					connection.commit();
-					connection.closeConnection();
-					System.exit(2);
-				}
-				rs.close();
-				statement.close();
-			} catch (SQLException e) {
-				logger.fatal("Unable to find output for one of transaction "
-						+ transaction.getHashAsString()
-						+ "'s Inputs. We were looking for output #"
-						+ input.getOutpoint().getIndex()
-						+ " of Tranasaction "
-						+ input.getOutpoint().getHash().toString());
-				logger.fatal(e);
-				connection.commit();
-				connection.closeConnection();
-				System.exit(1);
-			}
-		}
-	}
 }
