@@ -10,6 +10,7 @@ import org.bitcoinj.core.TransactionOutput;
 import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class DataOutput {
@@ -27,8 +28,9 @@ public class DataOutput {
 			
 			LARGE_SCRIPT_TABLE="large_out_script";
 	
-	private static int maxScriptSize = 5; // TODO get from Properties
-
+	private static int maxScriptSize = Integer.parseInt(
+			PropertiesLoader.getInstance().getProperty("max_inmemory_output_script"));
+	
 	private TransactionOutput output;
 	private long txId;
 	

@@ -5,18 +5,18 @@ import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Properties;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 
 public class DBInitialisator {
 
 	private final static int LARGE_INPUT_SCRIPT = 9216;
 	private final static int LARGE_OUTPUT_SCRIPT = 4096;
 	
-	private static final String
-	
-	PROPERTIES_FILE = "src/resources/db.properties",
-	
+	private static final String	
 	MAX_INMEMORY_OUTPUT_SCRIPT ="max_inmemory_output_script",
 	MAX_INMEMORY_INPUT_SCRIPT = "max_inmemory_input_script",
 			
@@ -111,10 +111,11 @@ public class DBInitialisator {
 				smallOutputScriptSize = 0;
 		
 		try {
-			Properties properties = new Properties();
-			properties.load(new FileInputStream(PROPERTIES_FILE));
+
+			PropertiesLoader properties = PropertiesLoader.getInstance();	
 			smallInputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_INPUT_SCRIPT));
 			smallOutputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_OUTPUT_SCRIPT));
+			
 			PreparedStatement ps;
 
 			ps = dbconn.getPreparedStatement(BLOCK);
@@ -163,10 +164,6 @@ public class DBInitialisator {
 
 		} catch (SQLException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-			logger.error("unable to read properties");
-		}finally {
 			dbconn.closeConnection();
 		}
 	}

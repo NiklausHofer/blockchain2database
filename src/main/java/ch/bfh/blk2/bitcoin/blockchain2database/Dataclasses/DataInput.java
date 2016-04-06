@@ -14,10 +14,11 @@ import org.bitcoinj.core.TransactionInput;
 import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 
 public class DataInput {
 
-	private static int maxScriptSize = 5; //TODO create a properties Utility
+	private static int maxScriptSize = Integer.parseInt(PropertiesLoader.getInstance().getProperty("max_inmemory_input_script"));
 	
 	private static final Logger logger = LogManager.getLogger("DataInput");
 
