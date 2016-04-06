@@ -10,7 +10,8 @@ import org.apache.logging.log4j.Logger;
 
 public class DBInitialisator {
 
-	private final static int LARGE_SCRIPT = 4096;
+	private final static int LARGE_INPUT_SCRIPT = 9216;
+	private final static int LARGE_OUTPUT_SCRIPT = 4096;
 	
 	private static final String
 	
@@ -138,7 +139,7 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(LARGE_OUT_SCRIPT_SCRIPT);
-			ps.setInt(1,LARGE_SCRIPT);
+			ps.setInt(1,LARGE_OUTPUT_SCRIPT);
 			ps.execute();
 			ps.close();
 			
@@ -148,7 +149,7 @@ public class DBInitialisator {
 			ps.close();
 			
 			ps = dbconn.getPreparedStatement(LARGE_IN_SCRIPT_SCRIPT);
-			ps.setInt(1,LARGE_SCRIPT);
+			ps.setInt(1,LARGE_INPUT_SCRIPT);
 			ps.execute();
 			ps.close();
 
