@@ -11,9 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,7 +41,7 @@ public class BlockSorter {
 	private BlockIdentifier deepestBlock;
 	private Map<Sha256Hash, BlockIdentifier> blockMap;
 	private BlockFileLoader bfl;
-	private Set<BlockIdentifier> unsortedBlocks;
+	private List<BlockIdentifier> unsortedBlocks;
 
 	/* Default values for when we start at the bottom of the chain */
 	private Sha256Hash rootHash = Sha256Hash.ZERO_HASH;
@@ -57,8 +55,7 @@ public class BlockSorter {
 		Collections.sort(blockChainFiles);
 
 		blockMap = new TreeMap<>(new Sha256HashComparator());
-		//unsortedBlocks = new LinkedList<>();
-		unsortedBlocks = new TreeSet<>();
+		unsortedBlocks = new LinkedList<>();
 
 		virtBlockHeight = startHeight;
 		this.rootHash = rootHash;
@@ -87,6 +84,15 @@ public class BlockSorter {
 		if (bi.getDepth() > deepestBlock.getDepth())
 			deepestBlock = bi;
 
+		// Makes the program faster whenever chains are found after an insert
+		for (BlockIdentifier bli : unsortedBlocks)
+			if (bli.getParentHash().equals(bi.getBlockHash())) {
+				unsortedBlocks.remove(bli);
+				insertBlock(bli);
+				return;
+			}
+
+		// Needed to navigate orphan chains
 		for (BlockIdentifier bli : unsortedBlocks)
 			if (blockMap.containsKey(bli.getParentHash())) {
 				unsortedBlocks.remove(bli);
@@ -117,8 +123,6 @@ public class BlockSorter {
 			else
 				unsortedBlocks.add(bi);
 		}
-
-		logger.debug("Gonna write now");
 	}
 
 	public void saveChain() {
@@ -155,7 +159,7 @@ public class BlockSorter {
 
 		BlockIdentifier current = deepestBlock;
 
-		while (current.getDepth() >= 0) {
+		while (current.getDepth() >= virtBlockHeight) {
 			branch.add(0, current.getBlockHash());
 			current = current.getParent();
 		}
