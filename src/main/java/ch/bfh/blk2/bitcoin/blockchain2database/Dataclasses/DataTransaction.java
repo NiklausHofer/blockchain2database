@@ -32,10 +32,6 @@ public class DataTransaction {
 			+ " (version, lock_time, blk_time, blk_id, tx_hash) "
 			+ " VALUES (?, ?, ?, ?, ?);";
 
-	private String outputInsertQuery = "INSERT INTO output"
-			+ " (amount, tx_id, tx_index,address)"
-			+ " VALUES(?, ?, ?, ?);";
-
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date) {
 		this.transaction = transaction;
 		this.blockId = blockId;
@@ -82,9 +78,11 @@ public class DataTransaction {
 			System.exit(1);
 		}
 
-		for (TransactionOutput output : transaction.getOutputs())
-			writeOutput(output);
-
+		for (TransactionOutput output : transaction.getOutputs()){
+			DataOutput dataOutput = new DataOutput(output,tx_id);
+			dataOutput.writeOutput(connection);
+		}
+			
 		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
 			
 			TransactionInput input = transaction.getInputs().get(tx_index);
@@ -95,47 +93,4 @@ public class DataTransaction {
 			}
 		}
 	}
-
-	private void writeOutput(TransactionOutput output) {
-
-		String address = null;
- 
-		try {
-			//Get Adress ID
-			address = Utility.getAddressFromOutput(output).toString();
-		} catch (ScriptException e) {
-			e.printStackTrace();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.err.println("Invalid Address: error" + e.getClass());
-		}
-
-		try {
-
-			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputInsertQuery);
-
-			statement.setLong(1, output.getValue().getValue());
-			statement.setLong(2, tx_id);
-			statement.setLong(3, output.getIndex());
-			
-			if(address == null)
-				statement.setNull(4, java.sql.Types.NULL);
-			else
-				statement.setString(4, address);
-
-			statement.executeUpdate();
-
-			statement.close();
-		} catch (SQLException e) {
-			logger.fatal("Failed to write Output #"
-					+ output.getIndex()
-					+ " on transaction "
-					+ transaction.getHashAsString());
-			logger.fatal(e);
-			connection.commit();
-			connection.closeConnection();
-			System.exit(1);
-		}
-	}
-
 }

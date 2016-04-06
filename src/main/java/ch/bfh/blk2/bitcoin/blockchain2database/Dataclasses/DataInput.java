@@ -196,6 +196,7 @@ public class DataInput {
 			insertScriptStatement.setBytes(5, script);
 
 			insertScriptStatement.executeUpdate();
+			insertScriptStatement.close();
 			
 			}catch(SQLException e){
 				logger.error("failed to insert input script");
