@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.bitcoinj.core.Address;
@@ -16,6 +17,8 @@ import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.TestNet3Params;
+
+import ch.bfh.blk2.bitcoin.producer.FileMapSerializer;
 
 /**
  *
@@ -63,6 +66,36 @@ public class Utility {
 		Collections.sort(blockChainFiles);
 
 		return blockChainFiles;
+	}
+
+	/**
+	 * Returns a list of .dat files containing the blockchain. If a fileMap is
+	 * found, only those files will be returned that contain blocks which are
+	 * higher or have an equal height to the passed height parameter.
+	 *
+	 * @param height
+	 *            threshhold for file selection
+	 * @return List A list of files containing blocks of height larger or equal
+	 *         to height. If no fileMap is found, all files will be returned.
+	 */
+	public static List<File> getDefaultFileList(int height) {
+		List<File> compleatList = getDefaultFileList();
+		Map<String, Integer> fileMap = FileMapSerializer.read();
+
+		// Abort if no fileMap was found
+		if (fileMap == null)
+			return compleatList;
+
+		List<File> prunedList = new ArrayList<>(compleatList);
+		// Newest file. Since the compleatlist is sorted, this works easy enough
+		File newestFile = compleatList.get(compleatList.size() - 1);
+
+		for (File f : compleatList)
+			// Don't remove the newest file. It is always needet
+			if (fileMap.get(f.getName()) < height && !f.equals(newestFile))
+				prunedList.remove(f);
+
+		return prunedList;
 	}
 
 	/**

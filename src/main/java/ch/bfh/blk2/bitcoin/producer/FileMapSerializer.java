@@ -42,7 +42,7 @@ public class FileMapSerializer {
 		}
 	}
 
-	static Map<String, Integer> read() {
+	public static Map<String, Integer> read() {
 		File file = new File("fileMap.serial");
 		if (!file.exists())
 			return null;
