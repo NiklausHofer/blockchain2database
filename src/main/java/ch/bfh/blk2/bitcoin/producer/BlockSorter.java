@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,13 +98,16 @@ public class BlockSorter {
 				return;
 			}
 
+		// Only do this one in 10 times. This is still fine as long as there are at
+		// most 10% orphan blocks (hint: there are not)
 		// Needed to navigate orphan chains
-		for (BlockIdentifier bli : unsortedBlocks)
-			if (blockMap.containsKey(bli.getParentHash())) {
-				unsortedBlocks.remove(bli);
-				insertBlock(bli);
-				break;
-			}
+		if (Math.random() < 0.1)
+			for (BlockIdentifier bli : unsortedBlocks)
+				if (blockMap.containsKey(bli.getParentHash())) {
+					unsortedBlocks.remove(bli);
+					insertBlock(bli);
+					break;
+				}
 	}
 
 	private void sort() {
@@ -157,7 +162,7 @@ public class BlockSorter {
 		}
 	}
 
-	public void extractFileInformation() {
+	public Map<String, Integer> extractFileInformation() {
 
 		Map<String, Integer> fileMap = new TreeMap<>();
 
@@ -167,8 +172,21 @@ public class BlockSorter {
 				fileMap.put(filename, bi.getDepth());
 		}
 
+		logger.debug("Highest block in each .dat file:");
 		for (Entry<String, Integer> e : fileMap.entrySet())
-			System.out.println(e.getKey() + "\t" + e.getValue());
+			logger.debug("\t" + e.getKey() + "\t" + e.getValue());
+
+		logger.debug("The following blocks are not part of _any_ chain:");
+		for (BlockIdentifier bi : unsortedBlocks)
+			logger.debug("\t"
+					+ bi.getBlockHash().toString()
+					+ " ==> "
+					+ bi.getParentHash().toString()
+					+ " ("
+					+ bi.getFilename()
+					+ ")");
+
+		return fileMap;
 	}
 
 	/**
@@ -219,36 +237,65 @@ public class BlockSorter {
 		if (file.exists() && !file.isDirectory() && file.canRead()) {
 			logger.info("Found a chain File. Will attempt to continue from there");
 
-			try {
-				BufferedReader reader = new BufferedReader(new FileReader(file));
-				List<String> hashes = new LinkedList<>();
-				String line = null;
-				int lineNr = 0;
-				while ((line = reader.readLine()) != null) {
-					lineNr++;
-					hashes.add(line);
-					if (hashes.size() > 100)
-						hashes.remove(0);
-				}
-				logger.info("Highest block in chian file:\n\theight: "
-						+ (lineNr - 1)
-						+ "\tblock: "
-						+ hashes.get(hashes.size() - 1));
-				logger.info("Block #" + (lineNr - 100) + " : " + hashes.get(0));
+			Map<String, Integer> fileMap = FileMapSerializer.read();
+			logger.info("Successfully retrieved the fileMap");
 
-				BlockSorter sorter = new BlockSorter(blockChainFiles, hashes.get(0), lineNr - 100);
-				sorter.saveChain();
-				return;
-			} catch (IOException e) {
-				logger.info("Unable to process the chain file. Continuing without.");
-				logger.debug("reason: ", e);
-			}
+			if (fileMap != null)
+				try {
+					// Read in the old chain
+					BufferedReader reader = new BufferedReader(new FileReader(file));
+					List<String> hashes = new LinkedList<>();
+					String line = null;
+					int lineNr = 0;
+					while ((line = reader.readLine()) != null) {
+						lineNr++;
+						hashes.add(line);
+						if (hashes.size() > 100)
+							hashes.remove(0);
+					}
+					logger.info("Highest block in chian file:\n\theight: "
+							+ (lineNr - 1)
+							+ "\tblock: "
+							+ hashes.get(hashes.size() - 1));
+					logger.info("Block #" + (lineNr - 100) + " : " + hashes.get(0));
+
+					// Prune the file list
+					Set<File> prunedBlockFileList = new TreeSet<>(blockChainFiles);
+					for (File f : blockChainFiles)
+						if (fileMap.get(f.getName()) < (lineNr - 100)) // TODO Don't remove the newest file...
+							prunedBlockFileList.remove(f);
+
+					// Make sure the newest file is always in the list, no matter what
+					File newestFile = blockChainFiles.get(0);
+					for (File f : blockChainFiles)
+						if (f.getName().compareTo(newestFile.getName()) > 0)
+							newestFile = f;
+
+					prunedBlockFileList.add(newestFile);
+
+					logger.debug("These files will be searched: ");
+					for (File f : prunedBlockFileList)
+						logger.debug("\t" + f.getName());
+
+					List<File> fList = new ArrayList<>(prunedBlockFileList);
+
+					BlockSorter sorter = new BlockSorter(fList, hashes.get(0), lineNr - 100);
+					sorter.saveChain();
+					logger.info("done!");
+					return;
+				} catch (IOException e) {
+					logger.info("Unable to process the chain file. Continuing without.");
+					logger.debug("reason: ", e);
+				}
+			else
+				logger.info("Unable to get the fileMap. Will start a complete readin of the chain");
 		}
 
 		BlockSorter sorter = new BlockSorter(blockChainFiles);
 		sorter.saveChain();
 		long startTime = System.currentTimeMillis();
-		sorter.extractFileInformation();
+		Map<String, Integer> fileMap = sorter.extractFileInformation();
+		FileMapSerializer.write(fileMap);
 		logger.info((System.currentTimeMillis() - startTime) / 1000.0);
 
 		System.out.println("================================");
