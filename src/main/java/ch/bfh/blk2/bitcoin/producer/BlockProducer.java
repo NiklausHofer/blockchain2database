@@ -17,6 +17,7 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.utils.BlockFileLoader;
 
 import ch.bfh.blk2.bitcoin.comparator.Sha256HashComparator;
+import ch.bfh.blk2.bitcoin.util.BlockFileList;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
 /**
@@ -40,7 +41,7 @@ public class BlockProducer implements Iterable<Block> {
 	private static final Logger logger = LogManager.getLogger("BlockProducer");
 
 	private List<Sha256Hash> orderedBlockHashes;
-	private List<File> blockChainFiles;
+	private BlockFileList fileList;
 	// private List<Block> blockBuffer;
 
 	/**
@@ -51,24 +52,22 @@ public class BlockProducer implements Iterable<Block> {
 	 * @param filters
 	 *            a list of block filters
 	 */
-	public BlockProducer(List<File> blockChainFiles) {
-		this(blockChainFiles, DEFAULT_MIN_BLOCK_DEPTH);
+	public BlockProducer(BlockFileList bflist) {
+		this(bflist, DEFAULT_MIN_BLOCK_DEPTH);
 	}
 
 	/**
 	 *
 	 * @param blockChainFiles
 	 *            a list of unparsed Blockchain Files
-	 * @param filters
-	 *            a list of block filters
 	 * @param minBlockDepth
 	 *            the number of blocks at the end of the blockchain to be
 	 *            ignored a number defining the minimal depth a block must have
 	 *            to be accepted
 	 */
-	public BlockProducer(List<File> blockChainFiles, int minBlockDepth) {
-		this.blockChainFiles = blockChainFiles;
-		BlockSorter bs = new BlockSorter(this.blockChainFiles);
+	public BlockProducer(BlockFileList bflist, int minBlockDepth) {
+		this.fileList = bflist;
+		BlockSorter bs = new BlockSorter(bflist);
 		this.orderedBlockHashes = bs.getLongestBranch();
 
 		if (orderedBlockHashes.size() > minBlockDepth)
@@ -82,8 +81,8 @@ public class BlockProducer implements Iterable<Block> {
 		logger.debug("Got a chain of " + this.orderedBlockHashes.size() + "blocks");
 	}
 
-	public BlockProducer(List<File> blockChainFiles, List<Sha256Hash> validChain, int minBlockDepth) {
-		this.blockChainFiles = blockChainFiles;
+	public BlockProducer(BlockFileList bflist, List<Sha256Hash> validChain, int minBlockDepth) {
+		this.fileList = bflist;
 		orderedBlockHashes = validChain;
 
 		if (orderedBlockHashes.size() > minBlockDepth)
@@ -115,7 +114,7 @@ public class BlockProducer implements Iterable<Block> {
 
 		private BlockIterator() {
 			hashIterator = BlockProducer.this.orderedBlockHashes.iterator();
-			fileIterator = BlockProducer.this.blockChainFiles.iterator();
+			fileIterator = BlockProducer.this.fileList.iterator();
 
 			blockBuffer = new TreeMap<>(new Sha256HashComparator());
 			validBlocks = new LinkedList<>();

@@ -25,6 +25,7 @@ import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataBlock;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.producer.BlockSorter;
+import ch.bfh.blk2.bitcoin.util.BlockFileList;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class FooClass {
@@ -113,7 +114,8 @@ public class FooClass {
 
 	private void continueInsert() {
 		// Get a list of all valid blocks
-		BlockSorter blockSorter = new BlockSorter(Utility.getDefaultFileList());
+		BlockFileList bflist = new BlockFileList();
+		BlockSorter blockSorter = new BlockSorter(bflist);
 		List<Sha256Hash> validChain = blockSorter.getLongestBranch();
 
 		// Get the height of the chain in our database
@@ -144,7 +146,7 @@ public class FooClass {
 				System.exit(0);
 			}
 			logger.info("No orphan Blocks found. Will attempt to update the database now");
-			updateDatabase(dbMaxHeight, validChain);
+			updateDatabase(dbMaxHeight, validChain, bflist);
 
 			return;
 		}
@@ -169,11 +171,11 @@ public class FooClass {
 		for (Sha256Hash hash : orphanBlocks)
 			blockDeleter.deleteBlock(hash.toString(), connection);
 
-		simpleUpdateDatabase(dbMaxHeight, validChain);
+		simpleUpdateDatabase(dbMaxHeight, validChain, bflist);
 
 	}
 
-	private void updateDatabase(int currentHeight, List<Sha256Hash> validChain) {
+	private void updateDatabase(int currentHeight, List<Sha256Hash> validChain, BlockFileList bflist) {
 		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 
 		logger.debug(
@@ -182,16 +184,16 @@ public class FooClass {
 		BlockDeleter blockDeleter = new BlockDeleter();
 		blockDeleter.deleteBlock(lastBlkHash.toString(), connection);
 
-		simpleUpdateDatabase(currentHeight - 1, validChain);
+		simpleUpdateDatabase(currentHeight - 1, validChain, bflist);
 	}
 
-	private void simpleUpdateDatabase(int currentHeight, List<Sha256Hash> validChain) {
+	private void simpleUpdateDatabase(int currentHeight, List<Sha256Hash> validChain, BlockFileList bflist) {
 		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 		long prevId = getBlockId(lastBlkHash);
 
 		logger.debug("Found current highest block to be " + lastBlkHash + " with blk_id = " + prevId);
 
-		blockProducer = new BlockProducer(Utility.getDefaultFileList(), validChain, 1);
+		blockProducer = new BlockProducer(bflist, validChain, 1);
 
 		Iterator<Block> blockIterator = blockProducer.iterator();
 
@@ -325,7 +327,7 @@ public class FooClass {
 		int height = 0;
 		long prevId = -1;
 
-		blockProducer = new BlockProducer(Utility.getDefaultFileList(), 1);
+		blockProducer = new BlockProducer(new BlockFileList(), 1);
 
 		long startTime = System.currentTimeMillis();
 		long numOfTransactions = 0;

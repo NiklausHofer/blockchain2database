@@ -55,9 +55,9 @@ public class BlockFileList implements Iterable<File> {
 			logger.warn(
 					"The list of blockfiles to readin is very large!\nIt may or may not be faster to delete the fileMap and create the entire blockchain from scratch");
 
-		fileList = prunedList;
-		startHeight = height;
-		rootHash = hash;
+		this.fileList = prunedList;
+		this.startHeight = height;
+		this.rootHash = hash;
 	}
 
 	public BlockFileList(int height, String hash) {
@@ -103,6 +103,10 @@ public class BlockFileList implements Iterable<File> {
 
 	public Sha256Hash getRootHash() {
 		return rootHash;
+	}
+
+	public List<File> getFileList() {
+		return fileList;
 	}
 
 }

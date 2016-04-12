@@ -1,21 +1,13 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Properties;
 
-import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Base58;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Message;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Sha256Hash;
@@ -28,17 +20,15 @@ import org.bitcoinj.script.ScriptChunk;
 import org.bitcoinj.utils.BlockFileLoader;
 import org.junit.Test;
 
-import ch.bfh.blk2.bitcoin.producer.BlockIdentifier;
+import ch.bfh.blk2.bitcoin.util.BlockFileList;
 import ch.bfh.blk2.bitcoin.util.Utility;
-import static org.bitcoinj.script.ScriptOpCodes.OP_HASH160;
-import static org.junit.Assert.*;
 
 public class AddressTest {
 
 	private static final String PROPERTIES_FILE = "src/resources/blockchain.properties", DIRECTORY = "directory";
 
 	@Test
-	public void someTest(){
+	public void someTest() {
 
 		Properties properties = new Properties();
 		NetworkParameters params;
@@ -57,44 +47,39 @@ public class AddressTest {
 			params = new MainNetParams();
 		Utility.setParams(params);
 
-
-		List<File> blockChainFiles = Utility.getDefaultFileList();
+		//List<File> blockChainFiles = Utility.getDefaultFileList();
+		BlockFileList blockChainFiles = new BlockFileList();
 		Context context = Context.getOrCreate(Utility.PARAMS);
 
-
-		BlockFileLoader bfl = new BlockFileLoader( Utility.PARAMS, blockChainFiles );
-		int count=0;
-		Transaction t=null;
-		TransactionOutput o=null;
+		BlockFileLoader bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles.getFileList());
+		int count = 0;
+		Transaction t = null;
+		TransactionOutput o = null;
 
 		try {
 
-
 			for (Block blk : bfl)
 				for (Transaction tx : blk.getTransactions())
-					for (TransactionOutput out: tx.getOutputs()){
+					for (TransactionOutput out : tx.getOutputs()) {
 
-						t=tx;
-						o=out;
+						t = tx;
+						o = out;
 
 						Script s = out.getScriptPubKey();
 
+						byte[] bytes = new byte[1];
 
-						byte[] bytes=new byte[1];
+						if (!s.isSentToAddress() && s.isPayToScriptHash() && !s.isSentToRawPubKey()) {
 
-						if (!s.isSentToAddress()
-								&& s.isPayToScriptHash()
-								&& ! s.isSentToRawPubKey()){
-							
 							count++;
-							for(ScriptChunk b:  s.getChunks())
-								if(b.data!=null){
-								
-									int i=1;
-									bytes=b.data;
-									i=b.data.length;
-									
-									byte[] addressBytes = new byte[1 + i+ 4];
+							for (ScriptChunk b : s.getChunks())
+								if (b.data != null) {
+
+									int i = 1;
+									bytes = b.data;
+									i = b.data.length;
+
+									byte[] addressBytes = new byte[1 + i + 4];
 									addressBytes[0] = (byte) Utility.PARAMS.getAddressHeader();//version
 									System.arraycopy(bytes, 0, addressBytes, 1, bytes.length);
 									byte[] checksum = Sha256Hash.hashTwice(addressBytes, 0, bytes.length + 1);
@@ -102,48 +87,43 @@ public class AddressTest {
 									String addr = Base58.encode(addressBytes);
 									System.out.println(addr);
 									System.out.println(b.opcode);
-								}
-								else
-									System.out.println("nan  "+s.getChunks().size());
-
-
+								} else
+									System.out.println("nan  " + s.getChunks().size());
 
 						}
 
-//
-//						Address a = null;
-//
-//						if (s.isSentToAddress())
-//							a= new Address(Utility.PARAMS, s.getPubKeyHash());
-//						else if (s.isPayToScriptHash())
-//							a= Address.fromP2SHScript(Utility.PARAMS, s);
-//						else if( s.isSentToRawPubKey())
-//							a=ECKey.fromPublicOnly(s.getPubKey()).toAddress(Utility.PARAMS);
-//						else
-//							count ++;
-//
-//						if(a!=null){
-//							System.out.println("2 : "+a.toString());
-//						}
-						
+						//
+						//						Address a = null;
+						//
+						//						if (s.isSentToAddress())
+						//							a= new Address(Utility.PARAMS, s.getPubKeyHash());
+						//						else if (s.isPayToScriptHash())
+						//							a= Address.fromP2SHScript(Utility.PARAMS, s);
+						//						else if( s.isSentToRawPubKey())
+						//							a=ECKey.fromPublicOnly(s.getPubKey()).toAddress(Utility.PARAMS);
+						//						else
+						//							count ++;
+						//
+						//						if(a!=null){
+						//							System.out.println("2 : "+a.toString());
+						//						}
+
 					}
 
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 
-		}catch(ScriptException e){
+		} catch (ScriptException e) {
 			e.printStackTrace();
 
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-
-		System.out.println("unknown keys :"+count);
-		System.out.println("crashed in transaction :"+t.getHashAsString());
-		System.out.println("num of outputs :"+t.getOutputs().size());
-		System.out.println("output index :" +o.getIndex());
-
+		System.out.println("unknown keys :" + count);
+		System.out.println("crashed in transaction :" + t.getHashAsString());
+		System.out.println("num of outputs :" + t.getOutputs().size());
+		System.out.println("output index :" + o.getIndex());
 
 	}
 
