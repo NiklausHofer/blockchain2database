@@ -348,10 +348,6 @@ public class FooClass {
 	}
 
 	private void generateDatabase() {
-
-		// start manipulating DB, set dirty flag
-		DBKeyStore keyStore= new DBKeyStore();
-		keyStore.setParameter(connection, DBKeyStore.DYRTY, "true");
 	
 		int height = 0;
 		long prevId = -1;
@@ -361,6 +357,10 @@ public class FooClass {
 		long startTime = System.currentTimeMillis();
 		long numOfTransactions = 0;
 
+		// start manipulating DB, set dirty flag
+		DBKeyStore keyStore= new DBKeyStore();
+		keyStore.setParameter(connection, DBKeyStore.DYRTY, "true");
+		
 		for (Block block : blockProducer) {
 			prevId = writeBlock(block, height++, prevId);
 			connection.commit();
