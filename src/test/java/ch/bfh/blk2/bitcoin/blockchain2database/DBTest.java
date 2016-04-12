@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import ch.bfh.blk2.bitcoin.util.DBKeyStore;
 import static org.junit.Assert.*;
 
 public class DBTest {
@@ -70,7 +71,12 @@ public class DBTest {
 	@Test
 	public void initTest(){
 
+		
+		
 		System.out.println("\n//// TEST 2");
+		
+		cleanUP();
+
 		
 		DatabaseConnection dbconnection = new DatabaseConnection();
 
@@ -78,6 +84,8 @@ public class DBTest {
 		DBInitialisator init = new DBInitialisator();
 		init.initializeDB();
 
+		System.err.println("----foo");
+		
 		ResultSet result;
 
 		sql="show tables";
@@ -95,6 +103,19 @@ public class DBTest {
 			e.printStackTrace();
 		}
 		
+		DBKeyStore keyStore = new DBKeyStore();
+		String value = "true";
+		
+		assertNotNull(keyStore.getParameter(dbconnection, DBKeyStore.DYRTY));
+		assertTrue(value.equals(keyStore.getParameter(dbconnection, DBKeyStore.DYRTY)));
+		
+		value = "foobar";
+		
+		keyStore.setParameter(dbconnection, DBKeyStore.DYRTY,value);
+		assertNotNull(keyStore.getParameter(dbconnection, DBKeyStore.DYRTY));
+		assertTrue(value.equals(keyStore.getParameter(dbconnection, DBKeyStore.DYRTY)));
+		
+		dbconnection.closeConnection();
 		cleanUP();
 
 	}
@@ -272,8 +293,10 @@ public class DBTest {
 
 		try {
 			sql="DROP TABLE IF EXISTS block,transaction,output,input,"
-					+ "large_out_script,large_in_script,small_out_script,small_in_script";
+					+ "large_out_script,large_in_script,small_out_script,small_in_script,"
+					+ "parameter";
 			dbconnection.getPreparedStatement(sql).executeUpdate();
+			dbconnection.closeConnection();
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}

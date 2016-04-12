@@ -94,7 +94,20 @@ public class DBInitialisator {
 			+ "script_size BIGINT,"
 			+ "script VARBINARY(?),"
 			+ "PRIMARY KEY(tx_id,tx_index)"
-			+ ")ENGINE = INNODB;";
+			+ ")ENGINE = INNODB;",
+			
+			
+	PARAMETER = "CREATE TABLE IF NOT EXISTS parameter("
+			+ " p_key VARCHAR(256),"
+			+ " p_value VARCHAR(256) NOT NULL,"
+			+ " PRIMARY KEY(p_key)"
+			+ " ) ENGINE = MEMEORY",
+			
+	INIT_PARAMETER = "INSERT INTO parameter (p_key,p_value)"
+			+ " VALUES ('DIRTY','true')"
+	;
+	
+	
 		
 
 	private final String INDEX_1 = "CREATE INDEX transaction_hash USING BTREE ON transaction (tx_hash);";
@@ -153,7 +166,15 @@ public class DBInitialisator {
 			ps.setInt(1,LARGE_INPUT_SCRIPT);
 			ps.execute();
 			ps.close();
+			
+			ps = dbconn.getPreparedStatement(PARAMETER);
+			ps.execute();
+			ps.close();
 
+			ps = dbconn.getPreparedStatement(INIT_PARAMETER);
+			ps.execute();
+			ps.close();
+			
 			ps = dbconn.getPreparedStatement(INDEX_1);
 			ps.execute();
 			ps.close();
