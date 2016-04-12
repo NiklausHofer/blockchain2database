@@ -25,6 +25,7 @@ import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataBlock;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataTransaction;
 import ch.bfh.blk2.bitcoin.producer.BlockProducer;
 import ch.bfh.blk2.bitcoin.producer.BlockSorter;
+import ch.bfh.blk2.bitcoin.util.DBKeyStore;
 import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
@@ -77,7 +78,7 @@ public class FooClass {
 			statement.executeQuery();
 			ResultSet rs = statement.getResultSet();
 
-			if (rs.next()) {
+			if (rs.next()) {				
 				if (rs.getInt(1) < 1) {
 					// Database still empty. Let's fill it up
 					logger.info("No blocks in Database yet. Will now start inserting");
@@ -117,7 +118,7 @@ public class FooClass {
 					"The chain in the database is longer than the one on disk. Something is very likely wrong. Aborting");
 			System.exit(1);
 		}
-
+		
 		// Check if there are Orphan blocks in the database
 		List<Sha256Hash> orphanBlocks = new ArrayList<>();
 		Sha256Hash blkHash;
@@ -167,14 +168,35 @@ public class FooClass {
 	}
 
 	private void updateDatabase(int currentHeight, List<Sha256Hash> validChain) {
-		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 
-		logger.debug(
-				"Will try to delete block at height " + currentHeight + " which we found to be Block " + lastBlkHash);
+		//check if DB is in a dirty condition
+		// last block might not be inserted completly
+		
+		DBKeyStore keyStore= new DBKeyStore();
+		boolean dirty = Boolean.parseBoolean(keyStore.getParameter(connection,DBKeyStore.DYRTY));
+		
+		if(dirty){
+			// delete last block which might be incomplete
+			
+			logger.debug("DIRTY flag is set in DB");
+			Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 
-		BlockDeleter blockDeleter = new BlockDeleter();
-		blockDeleter.deleteBlock(lastBlkHash.toString(), connection);
+			logger.debug(
+					"Will try to delete block at height " + currentHeight + " which we found to be Block " + lastBlkHash);
 
+			//set flag as soon as DB is manipulated
+			keyStore= new DBKeyStore();
+			keyStore.setParameter(connection, DBKeyStore.DYRTY, "true");
+
+			BlockDeleter blockDeleter = new BlockDeleter();
+			blockDeleter.deleteBlock(lastBlkHash.toString(), connection);
+		}
+		else{
+			logger.debug("DIRTY flag not set in DB");
+			logger.debug("last Block was inserted completly and will not be deleted");
+		}
+
+		// resume inserting
 		simpleUpdateDatabase(currentHeight - 1, validChain);
 	}
 
@@ -182,6 +204,10 @@ public class FooClass {
 		Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 		long prevId = getBlockId(lastBlkHash);
 
+		// set dirty falg while DB will be manipulated
+		DBKeyStore keyStore= new DBKeyStore();
+		keyStore.setParameter(connection, DBKeyStore.DYRTY, "true");
+		
 		logger.debug("Found current highest block to be " + lastBlkHash + " with blk_id = " + prevId);
 
 		blockProducer = new BlockProducer(Utility.getDefaultFileList(), validChain, 1);
@@ -225,6 +251,14 @@ public class FooClass {
 				numOfTransactions = 0;
 			}
 		} while (blockIterator.hasNext());
+		
+
+		// insertion complete DB in clean condition
+		keyStore= new DBKeyStore();
+		keyStore.setParameter(connection, DBKeyStore.DYRTY, "false");
+		
+		logger.info("Finished inserting Blocks");
+		logger.debug("Database in clean state");
 	}
 
 	private long getBlockId(Sha256Hash blkHash) {
@@ -315,6 +349,10 @@ public class FooClass {
 
 	private void generateDatabase() {
 
+		// start manipulating DB, set dirty flag
+		DBKeyStore keyStore= new DBKeyStore();
+		keyStore.setParameter(connection, DBKeyStore.DYRTY, "true");
+	
 		int height = 0;
 		long prevId = -1;
 
@@ -343,6 +381,13 @@ public class FooClass {
 				numOfTransactions = 0;
 			}
 		}
+		
+		// stop manipulation on DB, leaving in clean state
+		keyStore= new DBKeyStore();
+		keyStore.setParameter(connection, DBKeyStore.DYRTY, "false");
+		
+		logger.info("Finished inserting Blocks");
+		logger.debug("Database in clean state");
 
 	}
 
