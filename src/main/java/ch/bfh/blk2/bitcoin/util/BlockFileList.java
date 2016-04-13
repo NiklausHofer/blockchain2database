@@ -25,6 +25,7 @@ public class BlockFileList implements Iterable<File> {
 
 	private List<File> fileList;
 	private int startHeight = -1;
+	// Only needet for the sorter, not so for the producer
 	private Sha256Hash rootHash = Sha256Hash.ZERO_HASH;
 
 	public BlockFileList() {
