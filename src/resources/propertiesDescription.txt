@@ -7,9 +7,11 @@ dbdriver
 dburl
 user
 password
+max_inmemory_output_script
+max_inmemory_input_script
 
 
 *** blockchain.properties
 
 directory
-
+testnet

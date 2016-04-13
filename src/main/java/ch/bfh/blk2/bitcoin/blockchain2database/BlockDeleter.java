@@ -13,23 +13,24 @@ public class BlockDeleter {
 
 	private static final Logger logger = LogManager.getLogger("BlockDeleter");
 
-	String GET_BLOCK_ID = "SELECT blk_id FROM block WHERE hash = ?",
+	private static final String
+			GET_BLOCK_ID = "SELECT blk_id FROM block WHERE hash = ?",
 			GET_TRANSACTION_ID = "SELECT tx_id FROM transaction WHERE blk_id = ?",
-			GET_OUTPUT_ID = "SELECT output_id FROM output WHERE tx_id = ?",
-			GET_INPUT_ID = "SELECT input_id FROM input WHERE tx_id= ?",
 
-	REMOVE_OUTPUT_SCRIPT = "DELETE FROM script WHERE output_id = ?",
-			REMOVE_INPUT_SCRIPT = "DELETE FROM script WHERE input_id = ?",
-			REMOVE_OUTPUT = "DELETE FROM output WHERE tx_id = ?", REMOVE_INPUT = "DELETE FROM input WHERE tx_id = ?",
+			REMOVE_SMALL_OUTPUT_SCRIPT = "DELETE FROM small_out_script WHERE tx_id = ?",
+			REMOVE_SMALL_INPUT_SCRIPT = "DELETE FROM small_in_script WHERE tx_id = ?",
+			REMOVE_LARGE_OUTPUT_SCRIPT = "DELETE FROM large_out_script WHERE tx_id = ?",
+			REMOVE_LARGE_INPUT_SCRIPT = "DELETE FROM large_in_script WHERE tx_id = ?",
+			REMOVE_OUTPUT = "DELETE FROM output WHERE tx_id = ?",
+			REMOVE_INPUT = "DELETE FROM input WHERE tx_id = ?",
 			REMOVE_BLOCK = "DELETE FROM block WHERE blk_id = ?",
 			REMOVE_TRANSACTION = "DELETE FROM transaction WHERE tx_id = ?",
 
-	MARK_AS_UNSPENT = "UPDATE output"
-			+ " SET spent = 0,"
-			+ " spent_by_input = NULL,"
-			+ " spent_in_tx = NULL,"
+			MARK_AS_UNSPENT = "UPDATE output"
+			+ " SET spent_by_tx = NULL,"
+			+ " spent_by_index = NULL,"
 			+ " spent_at = NULL"
-			+ " WHERE spent_in_tx = ?";
+			+ " WHERE spent_by_tx = ?";
 
 	private List<PreparedStatement> statements = new ArrayList<>();
 
@@ -64,21 +65,12 @@ public class BlockDeleter {
 
 				long txId = transactions.getLong("tx_id");
 
-				//get output and input ids and remove scripts
-				ResultSet outputs = getFromDB(GET_OUTPUT_ID, txId, connection);
-				while (outputs.next()) {
-					long outputId = outputs.getLong("output_id");
-					removeFromDB(REMOVE_OUTPUT_SCRIPT, outputId, connection);
-				}
-				outputs.close();
-
-				ResultSet inputs = getFromDB(GET_INPUT_ID, txId, connection);
-				while (inputs.next()) {
-					long inputId = inputs.getLong("input_id");
-					removeFromDB(REMOVE_INPUT_SCRIPT, inputId, connection);
-				}
-				inputs.close();
-
+				//remove scripts
+				removeFromDB(REMOVE_SMALL_INPUT_SCRIPT, txId, connection);
+				removeFromDB(REMOVE_LARGE_INPUT_SCRIPT, txId, connection);
+				removeFromDB(REMOVE_SMALL_OUTPUT_SCRIPT, txId, connection);
+				removeFromDB(REMOVE_LARGE_OUTPUT_SCRIPT, txId, connection);
+				
 				//remove outputs and inputs
 				removeFromDB(REMOVE_OUTPUT, txId, connection);
 				removeFromDB(REMOVE_INPUT, txId, connection);
