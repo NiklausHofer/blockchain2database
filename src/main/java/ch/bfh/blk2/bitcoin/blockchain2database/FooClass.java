@@ -109,6 +109,7 @@ public class FooClass {
 		// Get the height of the chain in our database
 		int dbMaxHeight = getChainHeight();
 		Sha256Hash blkHash = getBlockHashAtHeight(dbMaxHeight);
+		logger.debug("Highest block in the database (" + dbMaxHeight + "): " + blkHash);
 
 		// Get the hash of 30 Blocks back...
 		Sha256Hash saveHash = getBlockHashAtHeight(dbMaxHeight - 30);
@@ -196,7 +197,7 @@ public class FooClass {
 		if (dirty) {
 			// delete last block which might be incomplete
 
-			logger.debug("DIRTY flag is set in DB");
+			logger.info("DIRTY flag is set in DB. Will delete highest block");
 			Sha256Hash lastBlkHash = getBlockHashAtHeight(currentHeight);
 
 			logger.debug("Will try to delete block at height "
@@ -232,7 +233,7 @@ public class FooClass {
 
 		long prevId = -1;
 		if (currentHeight >= 0)
-			prevId = getBlockId(validChain.get(0));
+			prevId = getBlockId(getBlockHashAtHeight(currentHeight));
 
 		currentHeight++;
 
@@ -289,7 +290,7 @@ public class FooClass {
 			if (rs.next())
 				id = rs.getLong(1);
 			else {
-				logger.fatal("Unable to interprete result from DB Query");
+				logger.fatal("getBlockId(" + blkHash + "): Unable to interprete result from DB Query");
 				System.exit(1);
 			}
 
@@ -326,7 +327,7 @@ public class FooClass {
 					System.exit(1);
 				}
 			else {
-				logger.fatal("Unable to interprete result from Database");
+				logger.fatal("getBlockHashAtHeight(" + height + "): Unable to interprete result from Database");
 				System.exit(1);
 			}
 
@@ -350,7 +351,7 @@ public class FooClass {
 			if (rs.next())
 				height = rs.getInt(1);
 			else {
-				logger.fatal("Unable to interprete result from Database");
+				logger.fatal("getChainHeight(): Unable to interprete result from Database");
 				System.exit(1);
 			}
 

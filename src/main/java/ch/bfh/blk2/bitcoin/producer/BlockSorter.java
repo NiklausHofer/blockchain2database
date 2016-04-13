@@ -69,6 +69,11 @@ public class BlockSorter {
 		//bfl = new BlockFileLoader(Utility.PARAMS, blockChainFiles);
 
 		sort();
+		Map<String, Integer> fileMap = FileMapSerializer.read();
+		if (fileMap == null)
+			FileMapSerializer.write(this.extractFileInformation());
+		else
+			FileMapSerializer.write(this.extractFileInformation(fileMap));
 	}
 
 	private void insertBlock(BlockIdentifier bi) {
@@ -130,8 +135,10 @@ public class BlockSorter {
 	}
 
 	public Map<String, Integer> extractFileInformation() {
+		return extractFileInformation(new TreeMap<String, Integer>());
+	}
 
-		Map<String, Integer> fileMap = new TreeMap<>();
+	public Map<String, Integer> extractFileInformation(Map<String, Integer> fileMap) {
 
 		for (BlockIdentifier bi : blockMap.values()) {
 			String filename = bi.getFilename();
@@ -143,9 +150,9 @@ public class BlockSorter {
 		for (Entry<String, Integer> e : fileMap.entrySet())
 			logger.debug("\t" + e.getKey() + "\t" + e.getValue());
 
-		logger.debug("The following blocks are not part of _any_ chain:");
+		logger.trace("The following blocks are not part of _any_ chain:");
 		for (BlockIdentifier bi : unsortedBlocks)
-			logger.debug("\t"
+			logger.trace("\t"
 					+ bi.getBlockHash().toString()
 					+ " ==> "
 					+ bi.getParentHash().toString()

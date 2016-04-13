@@ -1,10 +1,7 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,11 +12,10 @@ public class DBInitialisator {
 
 	private final static int LARGE_INPUT_SCRIPT = 9216;
 	private final static int LARGE_OUTPUT_SCRIPT = 4096;
-	
-	private static final String	
-	MAX_INMEMORY_OUTPUT_SCRIPT ="max_inmemory_output_script",
-	MAX_INMEMORY_INPUT_SCRIPT = "max_inmemory_input_script",
-			
+
+	private static final String MAX_INMEMORY_OUTPUT_SCRIPT = "max_inmemory_output_script",
+			MAX_INMEMORY_INPUT_SCRIPT = "max_inmemory_input_script",
+
 	BLOCK = "CREATE TABLE IF NOT EXISTS block("
 			+ "blk_id BIGINT AUTO_INCREMENT PRIMARY KEY,"
 			+ "difficulty BIGINT,"
@@ -95,40 +91,33 @@ public class DBInitialisator {
 			+ "script VARBINARY(?),"
 			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = INNODB;",
-			
-			
+
 	PARAMETER = "CREATE TABLE IF NOT EXISTS parameter("
 			+ " p_key VARCHAR(256),"
 			+ " p_value VARCHAR(256) NOT NULL,"
 			+ " PRIMARY KEY(p_key)"
 			+ " ) ENGINE = MEMEORY",
-			
-	INIT_PARAMETER = "INSERT INTO parameter (p_key,p_value)"
-			+ " VALUES ('DIRTY','true')"
-	;
-	
-	
-		
+
+	INIT_PARAMETER = "INSERT INTO parameter (p_key,p_value)" + " VALUES ('DIRTY','true')";
 
 	private final String INDEX_1 = "CREATE INDEX transaction_hash USING BTREE ON transaction (tx_hash);";
 
 	private final String INDEX_2 = " CREATE INDEX output_tx_index USING BTREE ON output (tx_index);";
-	
+
 	private static final Logger logger = LogManager.getLogger("DBInitialisator");
-	
+
 	public void initializeDB() {
 
 		DatabaseConnection dbconn = new DatabaseConnection();
 
-		int smallInputScriptSize = 0,
-				smallOutputScriptSize = 0;
-		
+		int smallInputScriptSize = 0, smallOutputScriptSize = 0;
+
 		try {
 
-			PropertiesLoader properties = PropertiesLoader.getInstance();	
+			PropertiesLoader properties = PropertiesLoader.getInstance();
 			smallInputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_INPUT_SCRIPT));
 			smallOutputScriptSize = Integer.parseInt(properties.getProperty(MAX_INMEMORY_OUTPUT_SCRIPT));
-			
+
 			PreparedStatement ps;
 
 			ps = dbconn.getPreparedStatement(BLOCK);
@@ -146,27 +135,27 @@ public class DBInitialisator {
 			ps = dbconn.getPreparedStatement(INPUT);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(SMALL_OUT_SCRIPT_SCRIPT);
-			ps.setInt(1,smallOutputScriptSize);
+			ps.setInt(1, smallOutputScriptSize);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(LARGE_OUT_SCRIPT_SCRIPT);
-			ps.setInt(1,LARGE_OUTPUT_SCRIPT);
+			ps.setInt(1, LARGE_OUTPUT_SCRIPT);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(SMALL_IN_SCRIPT_SCRIPT);
-			ps.setInt(1,smallInputScriptSize);
+			ps.setInt(1, smallInputScriptSize);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(LARGE_IN_SCRIPT_SCRIPT);
-			ps.setInt(1,LARGE_INPUT_SCRIPT);
+			ps.setInt(1, LARGE_INPUT_SCRIPT);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(PARAMETER);
 			ps.execute();
 			ps.close();
@@ -174,7 +163,7 @@ public class DBInitialisator {
 			ps = dbconn.getPreparedStatement(INIT_PARAMETER);
 			ps.execute();
 			ps.close();
-			
+
 			ps = dbconn.getPreparedStatement(INDEX_1);
 			ps.execute();
 			ps.close();
@@ -182,6 +171,8 @@ public class DBInitialisator {
 			ps = dbconn.getPreparedStatement(INDEX_2);
 			ps.execute();
 			ps.close();
+
+			dbconn.closeConnection();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
