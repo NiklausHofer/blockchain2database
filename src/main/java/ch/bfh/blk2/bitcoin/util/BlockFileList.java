@@ -49,7 +49,7 @@ public class BlockFileList implements Iterable<File> {
 
 		for (File f : compleatList)
 			// Don't remove the newest file. It is always needet
-			if (fileMap.get(f.getName()) < height && !f.equals(newestFile)) {
+			if (fileMap.containsKey(f.getName()) && fileMap.get(f.getName()) < height && !f.equals(newestFile)) {
 				prunedList.remove(f);
 				logger.debug("Ignoring file: " + f.getName());
 			}

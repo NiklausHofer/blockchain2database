@@ -96,7 +96,7 @@ public class DBInitialisator {
 			+ " p_key VARCHAR(256),"
 			+ " p_value VARCHAR(256) NOT NULL,"
 			+ " PRIMARY KEY(p_key)"
-			+ " ) ENGINE = MEMEORY",
+			+ " ) ENGINE = MEMORY",
 
 	INIT_PARAMETER = "INSERT INTO parameter (p_key,p_value)" + " VALUES ('DIRTY','true')";
 

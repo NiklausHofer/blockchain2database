@@ -383,7 +383,7 @@ public class FooClass {
 				+ height
 				+ " with Hash "
 				+ block.getHashAsString()
-				+ ". Inserting "
+				+ " . Inserting "
 				+ block.getTransactions().size()
 				+ " transactions. Took "
 				+ ((System.currentTimeMillis() - startTime) / 1000.0)
