@@ -17,25 +17,12 @@ import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 public class TransactionNodeQuery implements Query<Integer>{
 
 	private static final String
-			GET_ADDR_ID="SELECT addr_id FROM address WHERE addr_hash = ?",
+			GET_ADDR_OUTPUT_TX="SELECT tx_id FROM output WHERE address = ?",
 			
-			GET_ADDR_NEXT_TX =
-					"SELECT spent_in_tx"
+			GET_NEXT_TX =
+					"SELECT spent_by_tx"
 					+ " FROM output"
-					+ " WHERE spent = 1"
-					+ " AND addr_id = ?",
-			
-			GET_NEXT_TX=
-				"SELECT spent_in_tx"
-				+ " FROM output"
-				+ " WHERE spent = 1",
-			
-			COUNT_ADDR =
-				"SELECT COUNT(addr_id) as count"
-				+ " FROM output"
-				+ " WHERE addr_id = ?",
-				
-			TX_ID = "tx_id"
+					+ " WHERE spent_by_tx IS NOT NULL"
 			;
 	
 	private static final int MAX = 6;
@@ -62,87 +49,81 @@ public class TransactionNodeQuery implements Query<Integer>{
 		logger.debug("max search depth : "+ MAX);
 
 		try{
-			long idA=-1,idB=-1;
+			List<Long> listA=new ArrayList<>(),listB= new ArrayList<>();
 
-			//Get id of addesses A and B
-			PreparedStatement statement=connection.getPreparedStatement(GET_ADDR_ID);
+			//Get List of transactions where outputs go to Adresses A and B
+			PreparedStatement statement=connection.getPreparedStatement(GET_ADDR_OUTPUT_TX);
 			statement.setString(1, addrA);
 			ResultSet result = statement.executeQuery();
-			if(result.next()){
-				idA =result.getLong("addr_id");
-			}else{
+			while(result.next()){
+				 listA.add(result.getLong("tx_id"));
+			}
+			
+			if(listA.isEmpty()){
 				logger.fatal("address not found in database ["+addrA+"]");
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);
 			}
 
+			statement=connection.getPreparedStatement(GET_ADDR_OUTPUT_TX);
 			statement.setString(1, addrB);
 			result = statement.executeQuery();
-			if(result.next()){
-				idB =result.getLong("addr_id");
-			}else{
-				logger.fatal("address not found in database ["+addrB+"]");
+			while(result.next()){
+				 listA.add(result.getLong("tx_id"));
+			}
+			
+			if(listA.isEmpty()){
+				logger.fatal("address not found in database ["+addrA+"]");
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);
 			}
 			
-			
 			result.close();
 			statement.close();
 
-			//get transaction id where the outputs of this address were spent
-			List<Long> nextTx = new ArrayList<>();
-			statement = connection.getPreparedStatement(GET_ADDR_NEXT_TX);
-			statement.setLong(1, idA);
-			result = statement.executeQuery();
-			while(result.next()){
-				nextTx.add(result.getLong("spent_in_tx"));
-			};
-
-			logger.debug("found transactions : "+nextTx.size()); 
+			logger.debug("start transactions : "+listA.size()); 
+			logger.debug("end transactions : "+listB.size());
 			
-			while(count < MAX && !found && !nextTx.isEmpty()){
+			
+			while(count < MAX && !found && !listA.isEmpty()){
 				
-				logger.debug("found transactions : "+nextTx.size());
-				 logger.debug("steps : "+count);
-					count ++;
-					//check if addr b is in one of the next transactions
-					int addrCount = 0;
-					String countAddrIn = CreateWhereInStatement(COUNT_ADDR, TX_ID, nextTx.size());
-					statement = connection.getPreparedStatement(countAddrIn);
-					statement.setLong(1,idB);
-
-					for(int i=0;i<nextTx.size();i++)
-						statement.setLong(i+2,nextTx.get(i));
-
-					result = statement.executeQuery();
-					if(result.next()){
-						addrCount = result.getInt("count");
-					}
+				count ++;
 				
-					if(addrCount > 0){
-						logger.debug("found a path");
+				logger.debug("found transactions : "+listA.size());
+				logger.debug("steps : "+count);
+				//check if addr b is in one of the next transactions
+
+				String countAddrIn = CreateWhereInStatement(GET_NEXT_TX, "tx_id", listA.size());
+				statement = connection.getPreparedStatement(countAddrIn);
+
+				for(int i=0;i<listA.size();i++)
+					statement.setLong(i+1,listA.get(i));
+
+				result = statement.executeQuery();
+
+				listA = new ArrayList<>();
+
+				while(result.next()){
+					long nextTx =result.getLong("spent_by_tx");
+
+					if(listB.contains(nextTx))
 						found = true;
-					}
-					else{
-                        logger.debug("path not jet found");
-						//get next transactions
-						String getNextTxIn = CreateWhereInStatement(GET_NEXT_TX, TX_ID, nextTx.size());
-						statement = connection.getPreparedStatement(getNextTxIn);
-						
-						for(int i=0;i<nextTx.size();i++)
-							statement.setLong(i+1,nextTx.get(i));
-						
-						//statement.set(1, nextTx);
-						result = statement.executeQuery();
-						nextTx = new ArrayList<>();
-						while(result.next()){
-							nextTx.add(result.getLong("spent_in_tx"));
-						}
-					}
+
+					listA.add(nextTx);
 				}
+
+				result.close();
+				statement.close();
+
+				if(found){
+					logger.debug("found a path");
+					break;
+				}
+
+				logger.debug("path not jet found");
+			}
 			
 			if(found)
 				this.result =count; 
