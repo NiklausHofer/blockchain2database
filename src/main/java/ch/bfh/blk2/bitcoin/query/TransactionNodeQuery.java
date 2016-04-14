@@ -70,11 +70,11 @@ public class TransactionNodeQuery implements Query<Integer>{
 			statement.setString(1, addrB);
 			result = statement.executeQuery();
 			while(result.next()){
-				 listA.add(result.getLong("tx_id"));
+				 listB.add(result.getLong("tx_id"));
 			}
 			
-			if(listA.isEmpty()){
-				logger.fatal("address not found in database ["+addrA+"]");
+			if(listB.isEmpty()){
+				logger.fatal("address not found in database ["+addrB+"]");
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);
