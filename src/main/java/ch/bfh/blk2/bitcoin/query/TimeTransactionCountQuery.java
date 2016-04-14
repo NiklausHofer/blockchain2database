@@ -15,9 +15,11 @@ public class TimeTransactionCountQuery implements Query<Long>{
 	private static final Logger logger = LogManager.getLogger("TimeTransactionCountQuerie");
 	
 	private static final String SQL=
-			"SELECT COUNT(tx_id) AS count FROM transaction WHERE"
-			+ " blk_time > ?"
-			+ " AND blk_time < ?";
+			"SELECT count(transaction.tx_id)"
+			+ " FROM block INNER JOIN transaction"
+			+ " ON transaction.blk_id = block.blk_id"
+			+ " WHERE block.time > ?"
+			+ " AND block.time < ?";
 	
 	private String start,end;
 	private long result=-1;
@@ -26,7 +28,7 @@ public class TimeTransactionCountQuery implements Query<Long>{
 	 * Get the number of Transactions between two dates
 	 * 
 	 */
-	public TimeTransactionCountQuery(String start,String end) {		
+	public TimeTransactionCountQuery(String start,String end) {
 		this.start=start;
 		this.end=end;
 	}

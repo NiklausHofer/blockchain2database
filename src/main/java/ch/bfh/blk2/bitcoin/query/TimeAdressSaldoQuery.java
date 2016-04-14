@@ -14,12 +14,14 @@ public class TimeAdressSaldoQuery implements Query<Long> {
 	private static final Logger logger = LogManager.getLogger("TimeAdressSaldoQuery");
 
 	private static final String SQL=
-			"SELECT SUM(output.amount) AS amount FROM output,address,transaction WHERE"
-			+ " output.addr_id = address.addr_id"
-			+ " AND transaction.tx_id = output.tx_id"
-			+ " AND transaction.blk_time < ?"
-			+ " AND address.addr_hash = ?"
-			+ " AND output.spent = 0";
+			" SELECT SUM(output.amount) AS amount"
+			+ " FROM block INNER JOIN ("
+			+ " transaction INNER JOIN output"
+			+ " ON transaction.tx_id = output.tx_id)"
+			+ " ON block.blk_id = transaction.blk_id"
+			+ " WHERE output.spent_by_tx IS NULL"
+			+ " AND block.time < ?"
+			+ " AND output.address = ?";
 	
 	//select transaction.tx_id,output_id,address.addr_id, output.amount from address,output, transaction where blk_time < '2005-06-01' and transaction.tx_id = output.tx_id and address.addr_id = output.addr_id and address.addr_hash = 'foo' and spent = 0;
 	
