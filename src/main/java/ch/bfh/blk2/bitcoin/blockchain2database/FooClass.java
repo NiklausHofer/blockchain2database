@@ -109,28 +109,39 @@ public class FooClass {
 		// Get the height of the chain in our database
 		int dbMaxHeight = getChainHeight();
 		Sha256Hash blkHash = getBlockHashAtHeight(dbMaxHeight);
-		logger.debug("Highest block in the database (" + dbMaxHeight + "): " + blkHash);
 
-		// Get the hash of 30 Blocks back...
-		Sha256Hash saveHash = getBlockHashAtHeight(dbMaxHeight - 30);
+		BlockFileList bflist;
+		BlockSorter blockSorter;
+		List<Sha256Hash> validChain;
+		if (dbMaxHeight < 32) {
 
-		// Generate the chain from that block on
-		BlockFileList bflist = new BlockFileList(dbMaxHeight - 30, saveHash);
-		BlockSorter blockSorter = new BlockSorter(bflist);
-		List<Sha256Hash> validChain = blockSorter.getLongestBranch();
+			bflist = new BlockFileList();
+			blockSorter = new BlockSorter(bflist);
+			validChain = blockSorter.getLongestBranch();
+		} else {
+			logger.debug("Highest block in the database (" + dbMaxHeight + "): " + blkHash);
 
-		logger.debug("dbMaxheight:\t" + dbMaxHeight);
-		logger.debug("dbMaxHeight - 30:\t" + (dbMaxHeight - 30));
-		logger.debug("validChain size\t:" + validChain.size());
+			// Get the hash of 30 Blocks back...
+			Sha256Hash saveHash = getBlockHashAtHeight(dbMaxHeight - 30);
 
-		if (dbMaxHeight - 30 + validChain.size() < dbMaxHeight) {
-			logger.fatal(
-					"The chain in the database is longer than the one on disk. Something is very likely wrong. Aborting");
-			System.exit(1);
-		}
-		if (dbMaxHeight - 30 + validChain.size() == dbMaxHeight) {
-			logger.info("Chain in the database appears to be in order and up to date. Nothing to do for now");
-			System.exit(0);
+			// Generate the chain from that block on
+			bflist = new BlockFileList(dbMaxHeight - 30, saveHash);
+			blockSorter = new BlockSorter(bflist);
+			validChain = blockSorter.getLongestBranch();
+
+			logger.debug("dbMaxheight:\t" + dbMaxHeight);
+			logger.debug("dbMaxHeight - 30:\t" + (dbMaxHeight - 30));
+			logger.debug("validChain size\t:" + validChain.size());
+
+			if (dbMaxHeight - 30 + validChain.size() < dbMaxHeight) {
+				logger.fatal(
+						"The chain in the database is longer than the one on disk. Something is very likely wrong. Aborting");
+				System.exit(1);
+			}
+			if (dbMaxHeight - 30 + validChain.size() == dbMaxHeight) {
+				logger.info("Chain in the database appears to be in order and up to date. Nothing to do for now");
+				System.exit(0);
+			}
 		}
 
 		// Check if there are Orphan blocks in the database
@@ -305,7 +316,11 @@ public class FooClass {
 		return id;
 	}
 
-	private Sha256Hash getBlockHashAtHeight(long height) {
+	private Sha256Hash getBlockHashAtHeight(long height) throws IllegalArgumentException {
+		if (height < -1)
+			throw new IllegalArgumentException("Block Height can not be negative!");
+		if (height == -1)
+			return Sha256Hash.ZERO_HASH;
 		Sha256Hash hash = null;
 
 		try {
@@ -373,10 +388,10 @@ public class FooClass {
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 		dataBlock.writeBlock();
 
-		for (int blk_index = 0;blk_index < block.getTransactions().size();blk_index++) {
+		for (int blk_index = 0; blk_index < block.getTransactions().size(); blk_index++) {
 			Transaction transaction = block.getTransactions().get(blk_index);
 			DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
-					block.getTime(),blk_index);
+					block.getTime(), blk_index);
 			dataTransaction.writeTransaction();
 		}
 
