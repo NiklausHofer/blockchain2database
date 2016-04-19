@@ -72,8 +72,7 @@ public class DataInput {
 		dowriteInput();
 	}
 
-	public void writeInput(long amount0) {
-		this.connection = connection;
+	public void writeInput(long amount) {
 		this.amount = amount;
 		dowriteInput();
 	}
