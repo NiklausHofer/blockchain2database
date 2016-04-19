@@ -68,6 +68,11 @@ public class DBInitialisator {
 			+ "tx_index BIGINT,"
 			+ "script_size BIGINT,"
 			+ "script VARBINARY(?),"
+			+ "isOpReturn BOOLEAN,"
+			+ "isPayToScriptHash BOOLEAN,"
+			+ "isSentToAddress BOOLEAN,"
+			+ "isSentoToMultiSig BOOLEAN,"
+			+ "isSentToRawPubKey BOOLEAN,"
 			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = MEMORY;",
 
@@ -76,6 +81,11 @@ public class DBInitialisator {
 			+ "tx_index BIGINT,"
 			+ "script_size BIGINT,"
 			+ "script VARBINARY(?),"
+			+ "isOpReturn BOOLEAN,"
+			+ "isPayToScriptHash BOOLEAN,"
+			+ "isSentToAddress BOOLEAN,"
+			+ "isSentoToMultiSig BOOLEAN,"
+			+ "isSentToRawPubKey BOOLEAN,"
 			+ "PRIMARY KEY(tx_id,tx_index)"
 			+ ")ENGINE = INNODB;",
 

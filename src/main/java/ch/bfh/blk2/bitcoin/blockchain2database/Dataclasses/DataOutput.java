@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionOutput;
+import org.bitcoinj.script.Script;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -21,11 +22,11 @@ public class DataOutput {
 			+ " (amount, tx_id, tx_index, address, largescript)"
 			+ " VALUES(?, ?, ?, ?, ?);",
 
-	INSERT_SMALL_SCRIPT = "INSERT IGNORE INTO small_out_script (tx_id,tx_index,script_size,script)"
-			+ " VALUES(?, ?, ?, ?);",
+	INSERT_SMALL_SCRIPT = "INSERT IGNORE INTO small_out_script (tx_id,tx_index,script_size,script, isOpReturn, isPayToScriptHash, isSentToAddress, isSentoToMultiSig, isSentToRawPubKey)"
+			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);",
 
-	INSERT_LARGE_SCRIPT = "INSERT IGNORE INTO large_out_script (tx_id,tx_index,script_size,script)"
-			+ " VALUES(?, ?, ?, ?);";
+	INSERT_LARGE_SCRIPT = "INSERT IGNORE INTO large_out_script (tx_id,tx_index,script_size,script, isOpReturn, isPayToScriptHash, isSentToAddress, isSentoToMultiSig, isSentToRawPubKey)"
+			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);";
 
 	private static int maxScriptSize = Integer
 			.parseInt(PropertiesLoader.getInstance().getProperty("max_inmemory_output_script"));
@@ -108,6 +109,14 @@ public class DataOutput {
 				insertScriptStatement.setLong(2, output.getIndex());
 				insertScriptStatement.setLong(3, script.length);
 				insertScriptStatement.setBytes(4, script);
+
+				Script s = new Script(script);
+
+				insertScriptStatement.setBoolean(5, s.isOpReturn());
+				insertScriptStatement.setBoolean(6, s.isPayToScriptHash());
+				insertScriptStatement.setBoolean(7, s.isSentToAddress());
+				insertScriptStatement.setBoolean(8, s.isSentToMultiSig());
+				insertScriptStatement.setBoolean(9, s.isSentToRawPubKey());
 
 				insertScriptStatement.executeUpdate();
 				insertScriptStatement.close();
