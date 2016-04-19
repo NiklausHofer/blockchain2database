@@ -2,13 +2,10 @@ package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
@@ -16,7 +13,6 @@ import org.bitcoinj.core.TransactionOutput;
 import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
-import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class DataTransaction {
 
@@ -26,13 +22,14 @@ public class DataTransaction {
 	private Transaction transaction;
 	private DatabaseConnection connection;
 	private Date date;
-	private long tx_id,blk_index;
+	private long tx_id, blk_index;
 
 	private String transactionInsertQuery = "INSERT INTO transaction"
 			+ " (version, lock_time, blk_time, blk_id, tx_hash, blk_index) "
 			+ " VALUES (?, ?, ?, ?, ?, ?);";
 
-	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date, long blk_index) {
+	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date,
+			long blk_index) {
 		this.transaction = transaction;
 		this.blockId = blockId;
 		this.connection = connection;
@@ -41,7 +38,7 @@ public class DataTransaction {
 	}
 
 	public void writeTransaction() {
-		
+
 		tx_id = -1;
 
 		try {
@@ -80,17 +77,25 @@ public class DataTransaction {
 			System.exit(1);
 		}
 
-		for (TransactionOutput output : transaction.getOutputs()){
-			DataOutput dataOutput = new DataOutput(output,tx_id);
+		for (TransactionOutput output : transaction.getOutputs()) {
+			DataOutput dataOutput = new DataOutput(output, tx_id);
 			dataOutput.writeOutput(connection);
 		}
-			
-		for (int tx_index = 0;tx_index<transaction.getInputs().size();tx_index++){
-			
+
+		for (int tx_index = 0; tx_index < transaction.getInputs().size(); tx_index++) {
+
 			TransactionInput input = transaction.getInputs().get(tx_index);
-			
-			DataInput dataInput = new DataInput(input,tx_id,tx_index,date);
-			dataInput.writeInput(connection);
+
+			DataInput dataInput = new DataInput(input, tx_id, tx_index, date, connection);
+			if (transaction.isCoinBase()) {
+				long totalAmount = 0;
+				for (TransactionOutput out : transaction.getOutputs())
+					totalAmount += out.getValue().getValue();
+				dataInput.writeInput(totalAmount);
+				return;
+			}
+
+			dataInput.writeInput();
 		}
 	}
 }

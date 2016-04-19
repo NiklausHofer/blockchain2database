@@ -27,6 +27,7 @@ public class DataInput {
 	private long tx_id;
 	private long tx_index;
 	private Date date;
+	private DatabaseConnection connection;
 
 	// get from DB querry
 	private long prev_tx_id;
@@ -56,19 +57,32 @@ public class DataInput {
 	private String insertLargeScript = "INSERT IGNORE INTO large_in_script (tx_id,tx_index,script_size,script)"
 			+ " VALUES(?, ?, ?, ?);";
 
-	public DataInput(TransactionInput input, long tx_id, long tx_index, Date date) {
+	public DataInput(TransactionInput input, long tx_id, long tx_index, Date date, DatabaseConnection con) {
 		this.input = input;
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.date = date;
+		this.connection = con;
 
 	}
 
-	public void writeInput(DatabaseConnection connection) {
+	public void writeInput() {
+		this.connection = connection;
+		getPrevAmount();
+		dowriteInput();
+	}
+
+	public void writeInput(long amount0) {
+		this.connection = connection;
+		this.amount = amount;
+		dowriteInput();
+	}
+
+	private void dowriteInput() {
 
 		try {
 
-			getPrevAmount(connection);
+			//getPrevAmount(connection);
 
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(dataInputQuery);
 
@@ -94,8 +108,8 @@ public class DataInput {
 			statement.executeUpdate();
 			statement.close();
 
-			updateOutputs(connection);
-			insertScript(connection);
+			updateOutputs();
+			insertScript();
 
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id);
@@ -106,7 +120,7 @@ public class DataInput {
 		}
 	}
 
-	private void updateOutputs(DatabaseConnection connection) {
+	private void updateOutputs() {
 
 		try {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputUpdateQuery);
@@ -130,7 +144,7 @@ public class DataInput {
 		}
 	}
 
-	private void getPrevAmount(DatabaseConnection connection) {
+	private void getPrevAmount() {
 		try {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery);
 			statement.setString(1, input.getOutpoint().getHash().toString());
@@ -173,7 +187,7 @@ public class DataInput {
 		}
 	}
 
-	private void insertScript(DatabaseConnection connection) {
+	private void insertScript() {
 
 		if (script == null)
 			return;
