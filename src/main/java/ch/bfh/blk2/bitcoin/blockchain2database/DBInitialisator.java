@@ -35,6 +35,7 @@ public class DBInitialisator {
 			+ "blk_time TIMESTAMP DEFAULT 0,"
 			+ "blk_id BIGINT,"
 			+ "tx_hash VARCHAR(64),"
+			+ "blk_index BIGINT,"
 			+ "FOREIGN KEY(blk_id) REFERENCES block(blk_id)"
 			+ ")ENGINE = MEMORY;",
 

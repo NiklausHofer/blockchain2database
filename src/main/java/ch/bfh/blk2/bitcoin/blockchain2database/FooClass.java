@@ -373,9 +373,10 @@ public class FooClass {
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 		dataBlock.writeBlock();
 
-		for (Transaction transaction : block.getTransactions()) {
+		for (int blk_index = 0;blk_index < block.getTransactions().size();blk_index++) {
+			Transaction transaction = block.getTransactions().get(blk_index);
 			DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
-					block.getTime());
+					block.getTime(),blk_index);
 			dataTransaction.writeTransaction();
 		}
 
