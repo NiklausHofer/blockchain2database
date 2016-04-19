@@ -3,51 +3,45 @@ package ch.bfh.blk2.bitcoin.query;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
-public class CountAddressHigherSaldoQuery implements Query<Long>{
+public class CountAddressHigherSaldoQuery implements Query<Long> {
 
 	private static final Logger logger = LogManager.getLogger("TimeTransactionCountQuerie");
-	
-	private static final String SQL=
-			"SELECT COUNT(addr_id) AS count FROM"
-			+ " (SELECT addr_id,SUM(amount) AS sum_amount"
-			+ " FROM output"
-			+ " WHERE spent = 0"
-			+ " GROUP BY addr_id) AS sum_addr"
-			+ " WHERE sum_amount > ?";
-	
+
+	// Use the stored procedure
+	private static final String SQL = "call count_addr_with_balance_higher_than(?)";
+
 	private long amount;
-	private long result=-1;
-	
+	private long result = -1;
+
 	/**
 	 * Get the number of addresses that have more than a given amount
-	 * 
+	 *
 	 */
-	public CountAddressHigherSaldoQuery(long amount) {		
-		this.amount= amount;
+	public CountAddressHigherSaldoQuery(long amount) {
+		this.amount = amount;
 	}
-	
+
 	@Override
 	public void exequte(DatabaseConnection connection) {
-		
-		logger.info("Counting Addresses that have a Saldo higher than"+this.amount);
-		
-		try{
-		PreparedStatement statement = connection.getPreparedStatement(SQL);
-		statement.setLong(1, this.amount);
-		
-		ResultSet resultSet = statement.executeQuery();
-		
-		if(resultSet.next())
-			this.result = resultSet.getLong("count");
-					
-		} catch (SQLException e) {	
+
+		logger.info("Counting Addresses that have a Saldo higher than" + this.amount);
+
+		try {
+			PreparedStatement statement = connection.getPreparedStatement(SQL);
+			statement.setLong(1, this.amount);
+
+			ResultSet resultSet = statement.executeQuery();
+
+			if (resultSet.next())
+				this.result = resultSet.getLong("count");
+
+		} catch (SQLException e) {
 			e.printStackTrace();
 			logger.fatal("Failed to exequte Query");
 			connection.commit();
@@ -61,15 +55,13 @@ public class CountAddressHigherSaldoQuery implements Query<Long>{
 		return this.result;
 	}
 
-	public String resultToString(){
-		
-		if(this.result<1)
-			return "no address received mor than "+ this.amount;
-		else{
-			return "found "+this.result+" addresses that have a Saldo greater than "
-					+ this.amount +" satoshi";
-		}
-	}
+	@Override
+	public String resultToString() {
 
+		if (this.result < 1)
+			return "no address received mor than " + this.amount;
+		else
+			return "found " + this.result + " addresses that have a Saldo greater than " + this.amount + " satoshi";
+	}
 
 }

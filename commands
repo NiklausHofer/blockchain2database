@@ -25,3 +25,6 @@ grep -vP "^\s" errorlog | sort |uniq
 # Size of Database w/ and w/o indexes
 > SELECT ROUND((SUM(data_length+index_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = 'btc';
 > SELECT ROUND((SUM(data_length) / 1024 / 1024), 2) `Size in MB` FROM information_schema.TABLES WHERE table_schema = 'btc';
+
+# See inserting time predictions
+grep "Inserting 1M" log
