@@ -1,5 +1,5 @@
---CREATE USER IF NOT EXISTS 'testnet3'@'localhost'  IDENTIFIED BY 'foobar';
-DROP DATABASE IF EXISTS testnet3;
-CREATE DATABASE testnet3;
-GRANT ALL PRIVILEGES ON testnet3.* TO 'testnet3'@'localhost';
+CREATE USER IF NOT EXISTS 'mainnet'@'localhost' IDENTIFIED BY 'foobar';
+DROP DATABASE IF EXISTS btc;
+CREATE DATABASE btc;
+GRANT ALL PRIVILEGES ON btc.* TO 'mainnet'@'localhost';
 
