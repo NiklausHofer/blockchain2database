@@ -110,13 +110,25 @@ public class DataOutput {
 				insertScriptStatement.setLong(3, script.length);
 				insertScriptStatement.setBytes(4, script);
 
-				Script s = new Script(script);
+				try {
+					Script s = new Script(script);
 
-				insertScriptStatement.setBoolean(5, s.isOpReturn());
-				insertScriptStatement.setBoolean(6, s.isPayToScriptHash());
-				insertScriptStatement.setBoolean(7, s.isSentToAddress());
-				insertScriptStatement.setBoolean(8, s.isSentToMultiSig());
-				insertScriptStatement.setBoolean(9, s.isSentToRawPubKey());
+					insertScriptStatement.setBoolean(5, s.isOpReturn());
+					insertScriptStatement.setBoolean(6, s.isPayToScriptHash());
+					insertScriptStatement.setBoolean(7, s.isSentToAddress());
+					insertScriptStatement.setBoolean(8, s.isSentToMultiSig());
+					insertScriptStatement.setBoolean(9, s.isSentToRawPubKey());
+				} catch (ScriptException e) {
+					insertScriptStatement.setNull(5, java.sql.Types.NULL);
+					insertScriptStatement.setNull(6, java.sql.Types.NULL);
+					insertScriptStatement.setNull(7, java.sql.Types.NULL);
+					insertScriptStatement.setNull(8, java.sql.Types.NULL);
+					insertScriptStatement.setNull(9, java.sql.Types.NULL);
+					logger.debug("ScriptException was thrown when trying to parse the script for Output "
+							+ output.getIndex()
+							+ " of transaction "
+							+ output.getParentTransactionHash().toString());
+				}
 
 				insertScriptStatement.executeUpdate();
 				insertScriptStatement.close();
