@@ -128,9 +128,15 @@
 			</div>
 			
 			<div>
-			<a target="_blank" href="diag_nodup_complete.png" style="font-size:30px">
-			View Database Schema
+			<a ref="../" style="font-size:15px">
+			[Home]
 			</a>
+			<a target="_blank" href="../schema.png" style="font-size:15px">
+			[View Database Schema]
+			</a>
+			</div>
+			<div>		
+			<a href="../" style="font-size:30px"> Home </a>
 			</div>
 			
 			<div class="info">
