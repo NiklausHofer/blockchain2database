@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS parameter(
+   p_key VARCHAR(256),
+   p_value VARCHAR(256) NOT NULL,
+     PRIMARY KEY(p_key)
+) ENGINE = MEMORY;

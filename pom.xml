@@ -62,55 +62,91 @@
   </dependencies>
   
   <build>
-  <plugins>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.2</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
       </plugin>
-           <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+      <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
+          <executions>
+            <execution>
+              <id>copy-resources</id>
+              <!-- here the phase you need -->
+              <phase>test</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${basedir}/target/classes</outputDirectory>
+                <resources>          
+                  <resource>
+                    <directory>src/resources </directory>
+                    <includes>
+                      <include>log4j2.xml</include>
+                      <include>blockchain.properties</include>
+                      <include>db.properties</include>
+                    </includes>
+                    <filtering>true</filtering>
+                  </resource>
+                </resources>              
+              </configuration>            
+            </execution>
+          </executions>
+      </plugin> 
+        
+        <!-- Javadoc 
+          generate $ mvn javadoc:javadoc
+        -->
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.10.3</version>
+          <configuration>
+          </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>4.0</version>
+        <configuration>
+            <url>jdbc:mysql://localhost:3306/</url>
+        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.191</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+      <!-- Plugin properties, so we can use project properties in flyway -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0.0</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
-            <!-- here the phase you need -->
-            <phase>test</phase>
+            <phase>initialize</phase>
             <goals>
-              <goal>copy-resources</goal>
+              <goal>read-project-properties</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes</outputDirectory>
-              <resources>          
-                <resource>
-                  <directory>src/resources </directory>
-                  <includes>
-                    <include>log4j2.xml</include>
-                    <include>blockchain.properties</include>
-                    <include>db.properties</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>              
-            </configuration>            
+              <files>
+                <file>src/resources/db.properties</file>
+                <file>resources/db.properties</file>
+                <file>db.properties</file>
+              </files>
+            </configuration>
           </execution>
         </executions>
-      </plugin> 
-      
-      <!-- Javadoc 
-      	generate $ mvn javadoc:javadoc
-      -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
-        <configuration>
-        </configuration>
       </plugin>
-  </plugins>
+    </plugins>
   </build>
 </project>
