@@ -126,27 +126,6 @@
           </dependency>
         </dependencies>
       </plugin>
-      <!-- Plugin properties, so we can use project properties in flyway -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>properties-maven-plugin</artifactId>
-        <version>1.0.0</version>
-        <executions>
-          <execution>
-            <phase>initialize</phase>
-            <goals>
-              <goal>read-project-properties</goal>
-            </goals>
-            <configuration>
-              <files>
-                <file>src/resources/db.properties</file>
-                <file>resources/db.properties</file>
-                <file>db.properties</file>
-              </files>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 </project>
