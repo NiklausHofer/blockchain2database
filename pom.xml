@@ -115,9 +115,50 @@
         <groupId>org.flywaydb</groupId>
         <artifactId>flyway-maven-plugin</artifactId>
         <version>4.0</version>
-        <configuration>
-            <url>jdbc:mysql://localhost:3306/</url>
-        </configuration>
+        <executions>
+          <execution>
+            <id>default-cli</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>migrate</goal>
+            </goals>
+            <configuration>
+              <url>jdbc:mysql://localhost:3306/</url>
+              <locations>
+                <location>
+                  filesystem:src/main/resources/db/migration/mainnet
+                </location>
+                <location>
+                  filesystem:src/main/resources/db/migration/all
+                </location>
+              </locations>
+              <schemas>
+                <schema>mainnet</schema>
+              </schemas>
+            </configuration>
+          </execution>
+          <execution>
+            <id>testnet3</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>migrate</goal>
+            </goals>
+            <configuration>
+              <url>jdbc:mysql://localhost:3306/</url>
+              <locations>
+                <location>
+                  filesystem:src/main/resources/db/migration/testnet3
+                </location>
+                <location>
+                  filesystem:src/main/resources/db/migration/all
+                </location>
+              </locations>
+              <schemas>
+                <schema>testnet3</schema>
+              </schemas>
+            </configuration>
+          </execution>
+        </executions>
         <dependencies>
           <dependency>
             <groupId>com.h2database</groupId>
