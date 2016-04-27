@@ -10,3 +10,5 @@ CREATE TABLE IF NOT EXISTS output(
     PRIMARY KEY(tx_id,tx_index),
     FOREIGN KEY(tx_id) REFERENCES transaction(tx_id)
 )ENGINE = MEMORY;
+
+CREATE INDEX output_address_index USING BTREE ON output (address);

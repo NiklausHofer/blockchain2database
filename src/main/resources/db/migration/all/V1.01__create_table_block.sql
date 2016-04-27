@@ -9,3 +9,5 @@ CREATE TABLE IF NOT EXISTS block(
   version BIGINT,
   nonce BIGINT
 )ENGINE = MEMORY;
+
+CREATE INDEX block_hash_index USING BTREE ON block (hash);
