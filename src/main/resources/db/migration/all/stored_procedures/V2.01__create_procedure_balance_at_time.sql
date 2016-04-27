@@ -1,7 +1,6 @@
 -- Get the balance of an address at a given time
 DELIMITER //
-
-CREATE OR REPLACE PROCEDURE get_balance( addr varchar(255), time DATETIME )
+CREATE PROCEDURE get_balance( addr varchar(255), time DATETIME )
   BEGIN
     SELECT SUM(amount) as balance
       FROM output
@@ -14,6 +13,5 @@ CREATE OR REPLACE PROCEDURE get_balance( addr varchar(255), time DATETIME )
         )  
         AND address = addr;
   END;
-
 //
 DELIMITER ;

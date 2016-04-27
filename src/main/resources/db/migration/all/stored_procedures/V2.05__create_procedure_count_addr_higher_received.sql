@@ -1,7 +1,6 @@
 -- Count how many addresses currently have a balance higher than the given parameter
 DELIMITER // 
-
-CREATE OR REPLACE PROCEDURE count_addr_which_received_higher_than( myamount bigint )
+CREATE PROCEDURE count_addr_which_received_higher_than( myamount bigint )
   BEGIN
     SELECT COUNT(address) AS count
     FROM
@@ -12,7 +11,6 @@ CREATE OR REPLACE PROCEDURE count_addr_which_received_higher_than( myamount bigi
       ) AS sum_addr
       WHERE sum_amount > myamount;
   END;
-
 //
 DELIMITER ;
 
