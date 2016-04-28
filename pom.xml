@@ -62,55 +62,111 @@
   </dependencies>
   
   <build>
-  <plugins>
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.2</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
+    <plugins>
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.2</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
       </plugin>
-           <plugin>
-        <artifactId>maven-resources-plugin</artifactId>
-        <version>2.7</version>
+      <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.7</version>
+          <executions>
+            <execution>
+              <id>copy-resources</id>
+              <!-- here the phase you need -->
+              <phase>test</phase>
+              <goals>
+                <goal>copy-resources</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${basedir}/target/classes</outputDirectory>
+                <resources>          
+                  <resource>
+                    <directory>src/resources </directory>
+                    <includes>
+                      <include>log4j2.xml</include>
+                      <include>blockchain.properties</include>
+                      <include>db.properties</include>
+                    </includes>
+                    <filtering>true</filtering>
+                  </resource>
+                </resources>              
+              </configuration>            
+            </execution>
+          </executions>
+      </plugin> 
+        
+        <!-- Javadoc 
+          generate $ mvn javadoc:javadoc
+        -->
+      <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.10.3</version>
+          <configuration>
+          </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.flywaydb</groupId>
+        <artifactId>flyway-maven-plugin</artifactId>
+        <version>4.0</version>
         <executions>
           <execution>
-            <id>copy-resources</id>
-            <!-- here the phase you need -->
-            <phase>test</phase>
+            <id>default-cli</id>
+            <phase>compile</phase>
             <goals>
-              <goal>copy-resources</goal>
+              <goal>migrate</goal>
             </goals>
             <configuration>
-              <outputDirectory>${basedir}/target/classes</outputDirectory>
-              <resources>          
-                <resource>
-                  <directory>src/resources </directory>
-                  <includes>
-                    <include>log4j2.xml</include>
-                    <include>blockchain.properties</include>
-                    <include>db.properties</include>
-                  </includes>
-                  <filtering>true</filtering>
-                </resource>
-              </resources>              
-            </configuration>            
+              <url>jdbc:mysql://localhost:3306/</url>
+              <locations>
+                <location>
+                  filesystem:src/main/resources/db/migration/mainnet
+                </location>
+                <location>
+                  filesystem:src/main/resources/db/migration/all
+                </location>
+              </locations>
+              <schemas>
+                <schema>mainnet</schema>
+              </schemas>
+            </configuration>
+          </execution>
+          <execution>
+            <id>testnet3</id>
+            <phase>compile</phase>
+            <goals>
+              <goal>migrate</goal>
+            </goals>
+            <configuration>
+              <url>jdbc:mysql://localhost:3306/</url>
+              <locations>
+                <location>
+                  filesystem:src/main/resources/db/migration/testnet3
+                </location>
+                <location>
+                  filesystem:src/main/resources/db/migration/all
+                </location>
+              </locations>
+              <schemas>
+                <schema>testnet3</schema>
+              </schemas>
+            </configuration>
           </execution>
         </executions>
-      </plugin> 
-      
-      <!-- Javadoc 
-      	generate $ mvn javadoc:javadoc
-      -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <version>2.10.3</version>
-        <configuration>
-        </configuration>
+        <dependencies>
+          <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.4.191</version>
+          </dependency>
+        </dependencies>
       </plugin>
-  </plugins>
+    </plugins>
   </build>
 </project>

@@ -1,0 +1,9 @@
+GRANT SELECT, SHOW VIEW ON TABLE block TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE input TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE large_in_script TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE large_out_script TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE output TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE parameter TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE small_in_script TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE small_out_script TO 'privweb'@'localhost';
+GRANT SELECT, SHOW VIEW ON TABLE transaction TO 'privweb'@'localhost';

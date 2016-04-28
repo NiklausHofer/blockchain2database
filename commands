@@ -28,3 +28,9 @@ grep -vP "^\s" errorlog | sort |uniq
 
 # See inserting time predictions
 grep "Inserting 1M" log
+
+# Run flyway
+mvn flyway:migrate
+
+# Run flyway for testnet3
+mvn flyway:migrate@testnet3
