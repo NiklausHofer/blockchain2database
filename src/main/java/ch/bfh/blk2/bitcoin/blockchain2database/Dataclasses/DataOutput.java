@@ -6,7 +6,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.script.Script;
 
 import com.mysql.jdbc.PreparedStatement;
 
@@ -19,7 +18,7 @@ public class DataOutput {
 	private static final Logger logger = LogManager.getLogger("DataOutput");
 
 	private static final String INSERT_OUTPUT = "INSERT INTO output"
-			+ " (amount, tx_id, tx_index, address, largescript)"
+			+ " (amount, tx_id, tx_index, address, scriptType)"
 			+ " VALUES(?, ?, ?, ?, ?);",
 
 	INSERT_SMALL_SCRIPT = "INSERT IGNORE INTO small_out_script (tx_id,tx_index,script_size,script, isOpReturn, isPayToScriptHash, isSentToAddress, isSentoToMultiSig, isSentToRawPubKey)"
@@ -44,6 +43,8 @@ public class DataOutput {
 
 		String address = null;
 
+		OutputScript outScript;
+
 		try {
 			address = Utility.getAddressFromOutput(output).toString();
 		} catch (ScriptException e) {
@@ -66,22 +67,15 @@ public class DataOutput {
 			else
 				statement.setString(4, address);
 
-			try {
-				script = output.getScriptBytes();
-			} catch (ScriptException e) {
-				logger.debug("invalid output script");
-			}
-			if (script == null)
-				statement.setNull(5, java.sql.Types.NULL);
-			else if (script.length > maxScriptSize)
-				statement.setBoolean(5, true);
-			else
-				statement.setBoolean(5, false);
+			outScript = OuputScriptCreator.parseScript(output);
+
+			statement.setInt(5, outScript.getType().getValue());
 
 			statement.executeUpdate();
 
 			statement.close();
-			insertScript(connection);
+
+			outScript.writeOutputScript();
 
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Output #" + output.getIndex() + " on transaction " + txId);
@@ -90,56 +84,6 @@ public class DataOutput {
 			connection.closeConnection();
 			System.exit(1);
 		}
-	}
-
-	private void insertScript(DatabaseConnection connection) {
-
-		if (script == null)
-			return;
-		else
-			try {
-				PreparedStatement insertScriptStatement;
-
-				if (script.length > maxScriptSize)
-					insertScriptStatement = (PreparedStatement) connection.getPreparedStatement(INSERT_LARGE_SCRIPT);
-				else
-					insertScriptStatement = (PreparedStatement) connection.getPreparedStatement(INSERT_SMALL_SCRIPT);
-
-				insertScriptStatement.setLong(1, txId);
-				insertScriptStatement.setLong(2, output.getIndex());
-				insertScriptStatement.setLong(3, script.length);
-				insertScriptStatement.setBytes(4, script);
-
-				try {
-					Script s = new Script(script);
-
-					insertScriptStatement.setBoolean(5, s.isOpReturn());
-					insertScriptStatement.setBoolean(6, s.isPayToScriptHash());
-					insertScriptStatement.setBoolean(7, s.isSentToAddress());
-					insertScriptStatement.setBoolean(8, s.isSentToMultiSig());
-					insertScriptStatement.setBoolean(9, s.isSentToRawPubKey());
-				} catch (ScriptException e) {
-					insertScriptStatement.setNull(5, java.sql.Types.NULL);
-					insertScriptStatement.setNull(6, java.sql.Types.NULL);
-					insertScriptStatement.setNull(7, java.sql.Types.NULL);
-					insertScriptStatement.setNull(8, java.sql.Types.NULL);
-					insertScriptStatement.setNull(9, java.sql.Types.NULL);
-					logger.debug("ScriptException was thrown when trying to parse the script for Output "
-							+ output.getIndex()
-							+ " of transaction "
-							+ output.getParentTransactionHash().toString());
-				}
-
-				insertScriptStatement.executeUpdate();
-				insertScriptStatement.close();
-
-			} catch (SQLException e) {
-				logger.fatal("failed to insert output script");
-				logger.fatal("output [tx : " + txId + ", #" + output.getIndex() + "]", e);
-				connection.commit();
-				connection.closeConnection();
-				System.exit(1);
-			}
 	}
 
 }
