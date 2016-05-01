@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS output(
   tx_id BIGINT,
-  tx_index BIGINT,
+  tx_index INT,
   amount BIGINT,
   spent_by_index BIGINT,
   spent_by_tx BIGINT,

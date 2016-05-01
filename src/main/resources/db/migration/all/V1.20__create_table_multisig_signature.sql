@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS multisig_signature(
   tx_id BIGINT,
-  tx_index BIGINT,
+  tx_index INT,
   signature_id BIGINT,
   idx INT,
     PRIMARY KEY(tx_id,tx_index,signature_id,idx),

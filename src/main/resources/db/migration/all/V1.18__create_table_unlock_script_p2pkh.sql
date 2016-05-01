@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS unlock_script_p2pkh(
   tx_id BIGINT,
-  tx_index BIGINT,
+  tx_index INT,
   script_size INT,
   pubkey_id BIGINT,
   signature_id BIGINT,

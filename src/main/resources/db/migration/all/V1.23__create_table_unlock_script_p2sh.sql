@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS unlock_script_p2sh(
   tx_id BIGINT,
-  tx_index BIGINT,
+  tx_index INT,
   script_size INT,
   script_id BIGINT,
   redeem_script_id BIGINT,

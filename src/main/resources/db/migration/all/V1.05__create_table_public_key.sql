@@ -5,4 +5,4 @@ CREATE TABLE IF NOT EXISTS public_key(
     PRIMARY KEY(id)
 )ENGINE = MEMORY;
 
-CREATE UNIQUE INDEX public_key_hash ON public_key(pubkey_hash);
+CREATE INDEX public_key_hash ON public_key(pubkey_hash);

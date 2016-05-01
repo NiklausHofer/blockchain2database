@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS input(
   tx_id BIGINT,
-  tx_index BIGINT,
+  tx_index INT,
   prev_tx_id BIGINT,
   prev_output_index BIGINT,
   sequence_number BIGINT,
