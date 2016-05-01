@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS public_key(
+  id BIGINT,
+  pubkey_hash VARCHAR(64) UNIQUE,
+  pubkey VARBINARY(512) UNIQUE,
+    PRIMARY KEY(id)
+)ENGINE = MEMORY;
+
+CREATE UNIQUE INDEX public_key_hash ON public_key(pubkey_hash);
