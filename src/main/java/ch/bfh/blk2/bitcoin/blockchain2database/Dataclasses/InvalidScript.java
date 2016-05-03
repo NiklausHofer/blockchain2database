@@ -1,5 +1,7 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+
 public class InvalidScript implements OutputScript {
 
 	/**
@@ -14,7 +16,7 @@ public class InvalidScript implements OutputScript {
 	}
 
 	@Override
-	public void writeOutputScript() {
+	public void writeOutputScript(DatabaseConnection connection) {
 		return;
 	}
 

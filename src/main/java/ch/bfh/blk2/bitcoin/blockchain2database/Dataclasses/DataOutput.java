@@ -75,7 +75,7 @@ public class DataOutput {
 
 			statement.close();
 
-			outScript.writeOutputScript();
+			outScript.writeOutputScript(connection);
 
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Output #" + output.getIndex() + " on transaction " + txId);

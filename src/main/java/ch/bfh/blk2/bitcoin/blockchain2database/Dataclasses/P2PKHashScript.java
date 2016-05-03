@@ -2,6 +2,8 @@ package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import org.bitcoinj.script.Script;
 
+import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+
 public class P2PKHashScript implements OutputScript {
 
 	private Script script;
@@ -19,7 +21,7 @@ public class P2PKHashScript implements OutputScript {
 	}
 
 	@Override
-	public void writeOutputScript() {
+	public void writeOutputScript(DatabaseConnection connection) {
 		// TODO Auto-generated method stub
 
 	}

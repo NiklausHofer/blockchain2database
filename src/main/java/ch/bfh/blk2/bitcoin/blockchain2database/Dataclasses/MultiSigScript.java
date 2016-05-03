@@ -2,6 +2,8 @@ package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import org.bitcoinj.script.Script;
 
+import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
+
 public class MultiSigScript implements OutputScript {
 
 	private Script script;
@@ -18,7 +20,7 @@ public class MultiSigScript implements OutputScript {
 	}
 
 	@Override
-	public void writeOutputScript() {
+	public void writeOutputScript(DatabaseConnection connection) {
 		// TODO Auto-generated method stub
 
 	}
