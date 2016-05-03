@@ -8,6 +8,7 @@ GRANT SELECT, SHOW VIEW ON TABLE out_script_p2sh TO 'pubweb'@'localhost' WITH MA
 GRANT SELECT, SHOW VIEW ON TABLE out_script_p2raw_pub_key TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE out_script_multisig TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE multisig_pubkeys TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
+GRANT SELECT, SHOW VIEW ON TABLE multisig_lock TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE out_script_op_return TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE op_codes TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE script TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
@@ -20,4 +21,4 @@ GRANT SELECT, SHOW VIEW ON TABLE unlock_script_multisig TO 'pubweb'@'localhost' 
 GRANT SELECT, SHOW VIEW ON TABLE multisig_signature TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2raw_pub_key TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_other TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
-GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
+GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_other TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};

@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS multisig_lock(
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    min INT,
+    max INT
+)ENGINE = MEMORY;

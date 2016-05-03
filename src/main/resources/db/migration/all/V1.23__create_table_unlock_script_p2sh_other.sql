@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS unlock_script_p2sh(
+CREATE TABLE IF NOT EXISTS unlock_script_p2sh_other(
   tx_id BIGINT,
   tx_index INT,
   script_size INT,

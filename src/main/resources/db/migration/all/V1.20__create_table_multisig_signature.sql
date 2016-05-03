@@ -1,10 +1,8 @@
 CREATE TABLE IF NOT EXISTS multisig_signature(
-  tx_id BIGINT,
-  tx_index INT,
+  multisig_open_id BIGINT,
   signature_id BIGINT,
   idx INT,
-    PRIMARY KEY(tx_id,tx_index,signature_id,idx),
-    FOREIGN KEY(tx_id) REFERENCES unlock_script_multisig(tx_id),
-    FOREIGN KEY(tx_index) REFERENCES unlock_script_multisig(tx_index),
+    PRIMARY KEY(multisig_open_id,signature_id,idx),
+    FOREIGN KEY(multisig_open_id) REFERENCES multisig_open(id),
     FOREIGN KEY(signature_id) REFERENCES signature(id)
 )ENGINE = MEMORY;
