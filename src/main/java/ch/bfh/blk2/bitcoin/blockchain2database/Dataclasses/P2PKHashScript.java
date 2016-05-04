@@ -55,7 +55,7 @@ public class P2PKHashScript implements OutputScript {
 		insertScriptStatement.executeLargeUpdate();
 		}catch(SQLException e){
 			logger.fatal("Failed to write P2PK script");
-			logger address: [" + script.getToAddress(Utility.PARAMS, false).toString() + "]");
+			logger.fatal("in output [tx_id: "+txId+", tx_index:"+txIndex+"]");
 			logger.fatal(e);
 			connection.commit();
 			connection.closeConnection();
@@ -86,6 +86,7 @@ public class P2PKHashScript implements OutputScript {
 				id = result.getLong(1);
 			}else{
 				logger.fatal("Bad generatedKeySet from Address [" + address + "]");
+				logger.fatal("in output [tx_id: "+txId+", tx_index:"+txIndex+"]");
 				connection.commit();
 				connection.closeConnection();
 				System.exit(1);
