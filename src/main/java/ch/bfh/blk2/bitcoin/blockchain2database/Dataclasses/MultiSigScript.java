@@ -1,12 +1,14 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
-import java.util.ArrayList;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.script.Script;
-import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
@@ -21,7 +23,10 @@ public class MultiSigScript implements OutputScript {
 	private int min = -1;
 	private int max = -1;
 
-	List<byte[]> publickeys;
+	List<ECKey> publickeys;
+
+	private final String insertQuery = "INSERT INTO out_script_multisig(tx_id, tx_index, script_size, min, max) VALUES( ?, ?, ?, ?, ? );";
+	private final String insertConnectionQuery = "INSERT INTO multisig_pubkeys(tx_id, tx_index, public_key_id, index) VALUES(?,?,?,?);";
 
 	public MultiSigScript(Script script, int scriptSize, long tx_id, int tx_index) {
 		if (!script.isSentToMultiSig())
@@ -31,8 +36,6 @@ public class MultiSigScript implements OutputScript {
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.scriptSize = scriptSize;
-
-		publickeys = new ArrayList<>();
 	}
 
 	@Override
@@ -43,51 +46,66 @@ public class MultiSigScript implements OutputScript {
 	@Override
 	public void writeOutputScript(DatabaseConnection connection) {
 		parse();
-		// TODO Auto-generated method stub
+
+		PreparedStatement insertStatement = connection.getPreparedStatement(insertQuery);
+		try {
+			insertStatement.setLong(1, tx_id);
+			insertStatement.setInt(2, tx_index);
+			insertStatement.setInt(3, scriptSize);
+			insertStatement.setInt(4, min);
+			insertStatement.setInt(5, max);
+			insertStatement.executeUpdate();
+		} catch (SQLException e) {
+			logger.fatal(
+					"Unable to insert the output (of type multisig) #" + tx_index + " of transaction with id " + tx_id,
+					e);
+			System.exit(1);
+		}
+
+		connect2pubkeys(connection);
+	}
+
+	private void connect2pubkeys(DatabaseConnection connection) {
+		int index = 0;
+		for (ECKey key : publickeys) {
+			byte[] pubKeyBytes = key.getPubKey();
+			long pubkey_id = -1;
+			// TODO Insert the public keys
+			PreparedStatement insertStatement = connection.getPreparedStatement(insertConnectionQuery);
+
+			try {
+				insertStatement.setLong(1, tx_id);
+				insertStatement.setInt(2, tx_index);
+				insertStatement.setLong(3, pubkey_id);
+				insertStatement.setInt(4, index++);
+
+				insertStatement.executeUpdate();
+			} catch (SQLException e) {
+				logger.fatal("Unable to connect multisig output #"
+						+ tx_index
+						+ " of tx "
+						+ tx_id
+						+ " to publickey w/ id "
+						+ pubkey_id, e);
+				System.exit(1);
+			}
+		}
 	}
 
 	private void parse() {
-		List<ScriptChunk> chunks = script.getChunks();
-		int predictedNumberOfPubKeys = chunks.size() - 3;
-
-		// The minimum amount of signatures needet
-		int firstOpCode = chunks.get(0).opcode;
-		if (firstOpCode < 81 || firstOpCode > 96)
-			failParse();
-		min = firstOpCode - 80;
-
-		// Assume all the upcoming chunks are pubkeys, until the next value appears
-		int i = 1;
-		while (i < chunks.size() && chunks.get(i).opcode < 76)
-			publickeys.add(chunks.get(i++).data);
-		if (i >= chunks.size())
-			failParse();
-		int nextOpCode = chunks.get(i).opcode;
-		if (nextOpCode < 81 || nextOpCode > 96)
-			failParse();
-		max = nextOpCode - 80;
-
-		if (predictedNumberOfPubKeys != publickeys.size()) {
-			logger.warn("Multisig script for output #"
+		try {
+			publickeys = script.getPubKeys();
+			max = publickeys.size();
+			min = script.getNumberOfSignaturesRequiredToSpend();
+		} catch (ScriptException e) {
+			logger.fatal("Multisig Script for output #"
 					+ tx_index
 					+ " of transaction "
 					+ tx_id
-					+ " is parsable, but of an unexpected format.");
-			logger.warn("We expected there to be "
-					+ predictedNumberOfPubKeys
-					+ " pubkeys, but we have found "
-					+ publickeys.size()
-					+ " of them");
-			logger.warn(script.toString());
+					+ " is of an unexpected format", e);
+			logger.fatal(script.toString());
+			System.exit(1);
 		}
-
-	}
-
-	private void failParse() {
-		logger.fatal(
-				"Multisig Script for output #" + tx_index + " of transaction " + tx_id + " is of an unexpected format");
-		logger.fatal(script.toString());
-		System.exit(1);
 	}
 
 }
