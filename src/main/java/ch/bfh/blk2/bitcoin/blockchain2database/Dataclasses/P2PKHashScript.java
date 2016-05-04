@@ -54,7 +54,7 @@ public class P2PKHashScript implements OutputScript {
 		insertScriptStatement.setLong(4, pubkeyId);
 		insertScriptStatement.executeLargeUpdate();
 		}catch(SQLException e){
-			logger.fatal("Failed to write P2PK script");
+			logger.fatal("Failed to write P2PKH script");
 			logger.fatal("in output [tx_id: "+txId+", tx_index:"+txIndex+"]");
 			logger.fatal(e);
 			connection.commit();
