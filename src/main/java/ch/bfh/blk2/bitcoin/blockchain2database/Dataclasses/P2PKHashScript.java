@@ -1,7 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
@@ -20,11 +19,10 @@ public class P2PKHashScript implements OutputScript {
 	private int txIndex,
 		scriptSize;
 
-	private final static String GET_PUBKEY_ID = "SELECT id FROM public_key WHERE pubkey_hash = ?",
-			INSERT_IGNORE_KEY_HASH ="INSERT IGNORE INTO public_key (pubkey_hash) VALUES(?)",
+	private final static String
 			INSERT_P2PKH_SCRIPT = "INSERT INTO out_script_p2pkh (tx_id,tx_index,script_size,public_key_id) VALUES(?,?,?,?)";
 	
-	public P2PKHashScript(Script script,int scriptSize,long TxId,int TxIndex) {
+	public P2PKHashScript(Script script,int scriptSize,long txId,int txIndex) {
 		if (!script.isSentToAddress())
 			throw new IllegalArgumentException("Script must be of type Pay to PubKeyHash");
 
@@ -43,9 +41,12 @@ public class P2PKHashScript implements OutputScript {
 	@Override
 	public void writeOutputScript(DatabaseConnection connection) {
 
-		try{		
+		String address = script.getToAddress(Utility.PARAMS, false).toString();
 		
-		long pubkeyId = getPubkeyId(connection);
+		PubKeyManager pm = new PubKeyManager();
+		long pubkeyId = pm.insertPubkeyHash(connection,address);
+		
+		try{		
 		
 		PreparedStatement insertScriptStatement = connection.getPreparedStatement(INSERT_P2PKH_SCRIPT);
 		insertScriptStatement.setLong(1, txId);
@@ -61,43 +62,6 @@ public class P2PKHashScript implements OutputScript {
 			connection.closeConnection();
 			System.exit(1);
 		}
-	}
-	
-	
-	private long getPubkeyId(DatabaseConnection connection) throws SQLException{
-		
-		String address = script.getToAddress(Utility.PARAMS, false).toString();
-		long id = -1;
-		
-		PreparedStatement insertAddr = connection.getPreparedStatement(INSERT_IGNORE_KEY_HASH);
-		insertAddr.setString(1,address);
-		insertAddr.executeUpdate();
-		ResultSet generatedKeys = insertAddr.getGeneratedKeys();
-		
-		if(generatedKeys.next()){
-			id = generatedKeys.getLong(1);
-		}else{
-			logger.debug("Adress does exist in DB try to querry its ID: ["+address+"]");
-			PreparedStatement getAddrId = connection.getPreparedStatement(GET_PUBKEY_ID);
-			getAddrId.setString(1, address);
-			getAddrId.executeQuery();
-			ResultSet result = getAddrId.getResultSet();
-			if(result.next()){
-				id = result.getLong(1);
-			}else{
-				logger.fatal("Bad generatedKeySet from Address [" + address + "]");
-				logger.fatal("in output [tx_id: "+txId+", tx_index:"+txIndex+"]");
-				connection.commit();
-				connection.closeConnection();
-				System.exit(1);
-			}
-			result.close();
-			insertAddr.close();
-		}
-		
-		generatedKeys.close();
-		insertAddr.close();
-		return id;
 	}
 
 }
