@@ -70,7 +70,10 @@ public class MultiSigScript implements OutputScript {
 		for (ECKey key : publickeys) {
 			byte[] pubKeyBytes = key.getPubKey();
 			long pubkey_id = -1;
-			// TODO Insert the public keys
+
+			PubKeyManager pkm = new PubKeyManager();
+			pubkey_id = pkm.insertRawPK(connection, pubKeyBytes);
+
 			PreparedStatement insertStatement = connection.getPreparedStatement(insertConnectionQuery);
 
 			try {
