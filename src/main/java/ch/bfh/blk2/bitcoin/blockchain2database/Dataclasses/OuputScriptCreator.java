@@ -6,16 +6,17 @@ import org.bitcoinj.script.Script;
 
 public class OuputScriptCreator {
 
-	public static OutputScript parseScript(TransactionOutput out) {
+	public static OutputScript parseScript(TransactionOutput out,long txId,int txIndex) {
 		try {
 			byte[] outputBytes = out.getScriptBytes();
+			int scriptSize = outputBytes.length;
 			Script script = new Script(outputBytes);
 
 			if (script.isSentToAddress())
-				return new P2PKHashScript(script);
+				return new P2PKHashScript(script,scriptSize,txId,txIndex);
 
 			if (script.isPayToScriptHash())
-				return new P2SHScript(script);
+				return new P2SHScript(script,scriptSize,txId,txIndex);
 
 			if (script.isSentToRawPubKey())
 				return new P2RawPubKeyScript(script);

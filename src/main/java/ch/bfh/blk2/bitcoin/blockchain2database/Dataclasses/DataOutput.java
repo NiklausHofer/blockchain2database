@@ -17,8 +17,8 @@ public class DataOutput {
 	private static final Logger logger = LogManager.getLogger("DataOutput");
 
 	private static final String INSERT_OUTPUT = "INSERT INTO output"
-			+ " (amount, tx_id, tx_index, address, scriptType)"
-			+ " VALUES(?, ?, ?, ?, ?);",
+			+ " (amount, tx_id, tx_index, scriptType)"
+			+ " VALUES(?, ?, ?, ?);",
 
 	INSERT_SMALL_SCRIPT = "INSERT IGNORE INTO small_out_script (tx_id,tx_index,script_size,script, isOpReturn, isPayToScriptHash, isSentToAddress, isSentoToMultiSig, isSentToRawPubKey)"
 			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?);",
@@ -66,7 +66,7 @@ public class DataOutput {
 			else
 				statement.setString(4, address);
 
-			outScript = OuputScriptCreator.parseScript(output);
+			outScript = OuputScriptCreator.parseScript(output,txId,output.getIndex());
 
 			statement.setInt(5, outScript.getType().getValue());
 
