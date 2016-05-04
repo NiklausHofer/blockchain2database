@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -9,8 +10,6 @@ import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.core.TransactionOutput;
-
-import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 

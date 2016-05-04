@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -16,8 +17,6 @@ import org.bitcoinj.core.Sha256Hash;
 import org.bitcoinj.core.Transaction;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
-
-import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataBlock;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.DataTransaction;

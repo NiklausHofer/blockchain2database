@@ -1,13 +1,12 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionOutput;
-
-import com.mysql.jdbc.PreparedStatement;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
