@@ -44,7 +44,7 @@ public class OtherScript implements OutputScript {
 			insertStatement.setLong(1, tx_id);
 			insertStatement.setInt(2, tx_index);
 			insertStatement.setInt(3, scriptSize);
-			insertStatement.setInt(4, scriptId);
+			insertStatement.setLong(4, scriptId);
 		} catch (SQLException e) {
 			logger.fatal("Unable to insert the output script of type other for output #"
 					+ tx_index
