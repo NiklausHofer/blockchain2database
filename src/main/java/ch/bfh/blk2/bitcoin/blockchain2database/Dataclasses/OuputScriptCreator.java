@@ -22,10 +22,10 @@ public class OuputScriptCreator {
 				return new P2RawPubKeyScript(script,scriptSize,txId,txIndex);
 
 			if (script.isSentToMultiSig())
-				return new MultiSigScript(script);
+				return new MultiSigScript(script, scriptSize, txId, txIndex);
 
 			if (script.isOpReturn())
-				return new OPReturnScript(script);
+				return new OPReturnScript(script, scriptSize, txId, txIndex);
 
 			return new OtherScript(script, scriptSize, txId, txIndex);
 		} catch (ScriptException e) {
