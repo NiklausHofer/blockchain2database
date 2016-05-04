@@ -50,7 +50,3 @@ GRANT SELECT, SHOW VIEW ON TABLE unlock_script_other TO 'privweb'@'localhost';
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_multisig TO 'privweb'@'localhost';
 -- table unlock_script_p2sh_other created in file V1.26__create_table_unlock_script_p2sh_other.sql
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_other TO 'privweb'@'localhost';
--- table parameter created in file V1.98__create_table_parameter.sql
-GRANT SELECT, SHOW VIEW ON TABLE parameter TO 'privweb'@'localhost';
--- table  created in file V1.99__insert_param_dirty.sql
-GRANT SELECT, SHOW VIEW ON TABLE  TO 'privweb'@'localhost';
