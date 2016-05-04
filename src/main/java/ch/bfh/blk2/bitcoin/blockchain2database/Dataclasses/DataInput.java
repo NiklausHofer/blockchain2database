@@ -30,6 +30,7 @@ public class DataInput {
 
 	// get from DB querry
 	private long prev_tx_id;
+	private int prev_script_type;
 	private long amount;
 
 	private byte[] script = null;
@@ -37,7 +38,7 @@ public class DataInput {
 	private long input_id = -1;
 
 	// Querry Strings
-	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount"
+	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount, output.script_type"
 			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
 			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
@@ -50,12 +51,6 @@ public class DataInput {
 			+ " WHERE tx_id = ?"
 			+ " AND tx_index = ?;";
 
-	private String insertSmallScript = "INSERT IGNORE INTO small_in_script (tx_id,tx_index,script_size,script)"
-			+ " VALUES(?, ?, ?, ?);";
-
-	private String insertLargeScript = "INSERT IGNORE INTO large_in_script (tx_id,tx_index,script_size,script)"
-			+ " VALUES(?, ?, ?, ?);";
-
 	public DataInput(TransactionInput input, long tx_id, long tx_index, Date date, DatabaseConnection con) {
 		this.input = input;
 		this.tx_id = tx_id;
@@ -66,8 +61,7 @@ public class DataInput {
 	}
 
 	public void writeInput() {
-		this.connection = connection;
-		getPrevAmount();
+		retrievePrevOutInformation();
 		dowriteInput();
 	}
 
@@ -79,10 +73,7 @@ public class DataInput {
 	private void dowriteInput() {
 
 		try {
-
-			//getPrevAmount(connection);
-
-			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(dataInputQuery);
+			PreparedStatement statement = connection.getPreparedStatement(dataInputQuery);
 
 			statement.setLong(1, tx_id);
 			statement.setLong(2, tx_index);
@@ -107,7 +98,8 @@ public class DataInput {
 			statement.close();
 
 			updateOutputs();
-			insertScript();
+
+			// TODO insert the scripts
 
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id);
@@ -121,7 +113,7 @@ public class DataInput {
 	private void updateOutputs() {
 
 		try {
-			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(outputUpdateQuery);
+			PreparedStatement statement = connection.getPreparedStatement(outputUpdateQuery);
 
 			statement.setLong(1, tx_id);
 			statement.setLong(2, tx_index);
@@ -142,9 +134,9 @@ public class DataInput {
 		}
 	}
 
-	private void getPrevAmount() {
+	private void retrievePrevOutInformation() {
 		try {
-			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(inputAmountQuery);
+			PreparedStatement statement = connection.getPreparedStatement(inputAmountQuery);
 			statement.setString(1, input.getOutpoint().getHash().toString());
 			statement.setLong(2, input.getOutpoint().getIndex());
 
@@ -153,7 +145,7 @@ public class DataInput {
 			if (rs.next()) {
 				prev_tx_id = rs.getLong(1);
 				amount = rs.getLong(2);
-
+				prev_script_type = rs.getInt(3);
 			} else {
 				logger.fatal(
 						"Got a malformed response from the database while looking for an output reffered to by one of "
@@ -183,36 +175,5 @@ public class DataInput {
 			connection.closeConnection();
 			System.exit(1);
 		}
-	}
-
-	private void insertScript() {
-
-		if (script == null)
-			return;
-		else
-			try {
-				PreparedStatement insertScriptStatement;
-
-				if (script.length > maxScriptSize)
-					insertScriptStatement = (PreparedStatement) connection.getPreparedStatement(insertLargeScript);
-				else
-					insertScriptStatement = (PreparedStatement) connection.getPreparedStatement(insertSmallScript);
-
-				insertScriptStatement.setLong(1, tx_id);
-				insertScriptStatement.setLong(2, tx_index);
-				insertScriptStatement.setLong(3, script.length);
-				insertScriptStatement.setBytes(4, script);
-
-				insertScriptStatement.executeUpdate();
-				insertScriptStatement.close();
-
-			} catch (SQLException e) {
-				logger.fatal("failed to insert input script");
-				logger.fatal("input [tx : " + tx_id + ", #" + tx_index + "]", e);
-				connection.commit();
-				connection.closeConnection();
-				System.exit(1);
-			}
-
 	}
 }
