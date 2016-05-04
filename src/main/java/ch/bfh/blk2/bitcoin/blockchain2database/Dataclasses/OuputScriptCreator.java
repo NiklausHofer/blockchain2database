@@ -19,7 +19,7 @@ public class OuputScriptCreator {
 				return new P2SHScript(script,scriptSize,txId,txIndex);
 
 			if (script.isSentToRawPubKey())
-				return new P2RawPubKeyScript(script);
+				return new P2RawPubKeyScript(script,scriptSize,txId,txIndex);
 
 			if (script.isSentToMultiSig())
 				return new MultiSigScript(script);
