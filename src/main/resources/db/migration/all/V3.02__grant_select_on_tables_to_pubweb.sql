@@ -1,5 +1,3 @@
--- table multisig_lock created in file V1.01__create_table_multisig_lock.sql
-GRANT SELECT, SHOW VIEW ON TABLE multisig_lock TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table block created in file V1.02__create_table_block.sql
 GRANT SELECT, SHOW VIEW ON TABLE block TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table transaction created in file V1.03__create_table_transaction.sql
@@ -34,8 +32,6 @@ GRANT SELECT, SHOW VIEW ON TABLE input TO 'pubweb'@'localhost' WITH MAX_STATEMEN
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_coinbase TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table signature created in file V1.18__create_table_signature.sql
 GRANT SELECT, SHOW VIEW ON TABLE signature TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
--- table multisig_open created in file V1.19__create_table_multisig_open.sql
-GRANT SELECT, SHOW VIEW ON TABLE multisig_open TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table unlock_script_p2pkh created in file V1.20__create_table_unlock_script_p2pkh.sql
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2pkh TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table unlock_script_multisig created in file V1.21__create_table_unlock_script_multisig.sql
@@ -50,3 +46,7 @@ GRANT SELECT, SHOW VIEW ON TABLE unlock_script_other TO 'pubweb'@'localhost' WIT
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_multisig TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
 -- table unlock_script_p2sh_other created in file V1.26__create_table_unlock_script_p2sh_other.sql
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_other TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
+-- table p2sh_multisig_pubkeys created in file V1.27__create_table_p2sh_multisig_pubkeys.sql
+GRANT SELECT, SHOW VIEW ON TABLE p2sh_multisig_pubkeys TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};
+-- table p2sh_multisig_signatures created in file V1.28__create_table_p2sh_multisig_signatures.sql
+GRANT SELECT, SHOW VIEW ON TABLE p2sh_multisig_signatures TO 'pubweb'@'localhost' WITH MAX_STATEMENT_TIME ${MAX_QUERY_TIME};

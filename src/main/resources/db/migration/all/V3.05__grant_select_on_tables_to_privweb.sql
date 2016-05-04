@@ -1,5 +1,3 @@
--- table multisig_lock created in file V1.01__create_table_multisig_lock.sql
-GRANT SELECT, SHOW VIEW ON TABLE multisig_lock TO 'privweb'@'localhost';
 -- table block created in file V1.02__create_table_block.sql
 GRANT SELECT, SHOW VIEW ON TABLE block TO 'privweb'@'localhost';
 -- table transaction created in file V1.03__create_table_transaction.sql
@@ -34,8 +32,6 @@ GRANT SELECT, SHOW VIEW ON TABLE input TO 'privweb'@'localhost';
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_coinbase TO 'privweb'@'localhost';
 -- table signature created in file V1.18__create_table_signature.sql
 GRANT SELECT, SHOW VIEW ON TABLE signature TO 'privweb'@'localhost';
--- table multisig_open created in file V1.19__create_table_multisig_open.sql
-GRANT SELECT, SHOW VIEW ON TABLE multisig_open TO 'privweb'@'localhost';
 -- table unlock_script_p2pkh created in file V1.20__create_table_unlock_script_p2pkh.sql
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2pkh TO 'privweb'@'localhost';
 -- table unlock_script_multisig created in file V1.21__create_table_unlock_script_multisig.sql
@@ -50,3 +46,7 @@ GRANT SELECT, SHOW VIEW ON TABLE unlock_script_other TO 'privweb'@'localhost';
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_multisig TO 'privweb'@'localhost';
 -- table unlock_script_p2sh_other created in file V1.26__create_table_unlock_script_p2sh_other.sql
 GRANT SELECT, SHOW VIEW ON TABLE unlock_script_p2sh_other TO 'privweb'@'localhost';
+-- table p2sh_multisig_pubkeys created in file V1.27__create_table_p2sh_multisig_pubkeys.sql
+GRANT SELECT, SHOW VIEW ON TABLE p2sh_multisig_pubkeys TO 'privweb'@'localhost';
+-- table p2sh_multisig_signatures created in file V1.28__create_table_p2sh_multisig_signatures.sql
+GRANT SELECT, SHOW VIEW ON TABLE p2sh_multisig_signatures TO 'privweb'@'localhost';
