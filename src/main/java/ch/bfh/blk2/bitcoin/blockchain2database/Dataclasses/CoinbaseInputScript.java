@@ -12,7 +12,7 @@ import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class CoinbaseInputScript implements InputScript{
 	
-	private static final Logger logger = LogManager.getLogger("InputScriptCreator");
+	private static final Logger logger = LogManager.getLogger("CoinbaseInputScript");
 	
 	private final static String INSERT_COINBASE_SCRIPT = 
 			"INSERT INTO unlock_script_coinbase (tx_id,tx_index,script_size,information) VALUES (?,?,?,?)";
