@@ -49,6 +49,7 @@ public class InputScriptCreator {
 		
 		logger.fatal("Infalid Inputscript");
 		System.exit(1);
+		return null;
 	}
 	
 	
