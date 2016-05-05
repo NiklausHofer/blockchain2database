@@ -83,7 +83,8 @@ public class DataInput {
 			statement.setLong(5, input.getSequenceNumber());
 			statement.setLong(6, amount);
 
-			InputScript inScript = InputScriptCreator.parseScript(input, tx_id,tx_index,prev_script_type);
+			InputScript inScript = InputScriptCreator.parseScript
+					(input, tx_id,tx_index,prev_script_type,prev_tx_id,(int) input.getOutpoint().getIndex());
 			statement.setInt(7, inScript.getType().getValue());
 
 			statement.executeUpdate();
@@ -139,13 +140,13 @@ public class DataInput {
 				amount = rs.getLong(2);
 				
 				//TODO check if this works !!WARNING!!
-				prev_script_type = ScriptType.values()[rs.getInt(3)];
+				prev_script_type = ScriptType.values()[rs.getInt(4)];
 				
 				/*
 				 *  if value and index does not match
 				 * 
 				for(ScriptType t : ScriptType.values()){
-					if(t.getValue() == rs.getInt(3)){
+					if(t.getValue() == rs.getInt(4)){
 						prev_script_type = t;
 						break;
 					}

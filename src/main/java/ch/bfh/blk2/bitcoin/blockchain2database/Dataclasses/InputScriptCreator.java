@@ -1,15 +1,20 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptChunk;
 
 public class InputScriptCreator {
 		
 	private static final Logger logger = LogManager.getLogger("InputScriptCreator");
 
-	public static InputScript parseScript(TransactionInput in, long txId, int txIndex,ScriptType prefOutType){
+	public static InputScript parseScript
+		(TransactionInput in, long txId, int txIndex,ScriptType prefOutType, long prevTxId, int prevTxIndex){
 		
 		byte [] inputBytes = in.getScriptBytes();
 		int scriptSize = inputBytes.length;
@@ -48,8 +53,22 @@ public class InputScriptCreator {
 	
 	
 	private static boolean isP2SHMultisig(Script script){
-		//TODO --analize script
-		// is multisig?
-		return false;
+		
+		ScriptChunk lastChunk = script.getChunks().get(script.getChunks().size()-1);
+		
+		if(lastChunk.data != null){
+			try{
+			Script reedemScript = new Script(lastChunk.data);	
+			return reedemScript.isSentToMultiSig();
+			}
+			catch(ScriptException e){
+				logger.debug("invalid reedem Script or data");
+				logger.debug("cant parse to script");
+				return false;
+			}
+			
+		}else{
+			return false;
+		}
 	}
 }
