@@ -64,6 +64,8 @@ public class OPReturnScript implements OutputScript {
 				insertStatement.setNull(4, java.sql.Types.NULL);
 
 				insertStatement.executeUpdate();
+
+				insertStatement.close();
 			}
 		} catch (ScriptException e) {
 			logger.fatal("Something went wrong when parsing the script for OP_Return output #"

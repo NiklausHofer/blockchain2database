@@ -55,6 +55,8 @@ public class MultiSigScript implements OutputScript {
 			insertStatement.setInt(4, min);
 			insertStatement.setInt(5, max);
 			insertStatement.executeUpdate();
+
+			insertStatement.close();
 		} catch (SQLException e) {
 			logger.fatal(
 					"Unable to insert the output (of type multisig) #" + tx_index + " of transaction with id " + tx_id,
@@ -83,6 +85,8 @@ public class MultiSigScript implements OutputScript {
 				insertStatement.setInt(4, index++);
 
 				insertStatement.executeUpdate();
+
+				insertStatement.close();
 			} catch (SQLException e) {
 				logger.fatal("Unable to connect multisig output #"
 						+ tx_index

@@ -11,7 +11,7 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
-public class ScriptWriter {
+public class ScriptManager {
 
 	private static final Logger logger = LogManager.getLogger("ScriptWriter");
 
@@ -20,7 +20,7 @@ public class ScriptWriter {
 	private final String currentScriptIdQuery = "SELECT MAX(script_id) FROM script;";
 	private final String insertInstruction = "INSERT INTO script (script_id, script_index, op_code, data) VALUES(?, ?, ?, ?);";
 
-	public ScriptWriter(Script script) {
+	public ScriptManager(Script script) {
 		this.script = script;
 	}
 
@@ -36,7 +36,12 @@ public class ScriptWriter {
 		try {
 			PreparedStatement queryStatement = connection.getPreparedStatement(currentScriptIdQuery);
 			ResultSet rs_1 = queryStatement.executeQuery();
-			scriptId = rs_1.getLong(1);
+			if (rs_1.next()) {
+				rs_1.close();
+				queryStatement.close();
+				scriptId = rs_1.getLong(1);
+			} else
+				throw new SQLException("Did not get a result as expected");
 		} catch (SQLException e) {
 			logger.fatal("Unable to retrieve current max script_id!", e);
 			System.exit(1);
@@ -55,6 +60,10 @@ public class ScriptWriter {
 					insertStatement.setBytes(4, chunk.data);
 				else
 					insertStatement.setNull(4, java.sql.Types.NULL);
+
+				insertStatement.executeUpdate();
+
+				insertStatement.close();
 			} catch (SQLException e) {
 				logger.fatal("Unable to write chunk #" + index + " for this script", e);
 				System.exit(1);

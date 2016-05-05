@@ -36,7 +36,7 @@ public class OtherScript implements OutputScript {
 
 	@Override
 	public void writeOutputScript(DatabaseConnection connection) {
-		ScriptWriter scriptWriter = new ScriptWriter(script);
+		ScriptManager scriptWriter = new ScriptManager(script);
 		long scriptId = scriptWriter.writeScript(connection);
 
 		PreparedStatement insertStatement = connection.getPreparedStatement(insertQuery);
@@ -47,6 +47,8 @@ public class OtherScript implements OutputScript {
 			insertStatement.setLong(4, scriptId);
 
 			insertStatement.executeUpdate();
+
+			insertStatement.close();
 		} catch (SQLException e) {
 			logger.fatal("Unable to insert the output script of type other for output #"
 					+ tx_index
