@@ -54,6 +54,9 @@ public class CoinbaseInputScript implements InputScript{
 		insertStatement.setInt(3, scriptSize);
 		insertStatement.setBytes(4,information);
 		
+		insertStatement.executeLargeUpdate();
+		insertStatement.close();
+		
 		}catch(SQLException e){
 			logger.fatal("faild to insert Input script of type Coinbase",e);
 			connection.commit();
