@@ -26,7 +26,7 @@ public class InputScriptCreator {
 			return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2SH)
 			if (isP2SHMultisig(script))
-				return new P2SHMultisigInputScript();
+				return new P2SHMultisigInputScript(txId, txIndex, script, scriptSize);
 			else
 				return new P2SHOtherInputScript();
 		if (prefOutType == ScriptType.OUT_OTHER)

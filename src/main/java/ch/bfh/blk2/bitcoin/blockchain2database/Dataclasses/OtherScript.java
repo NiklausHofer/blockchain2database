@@ -36,8 +36,8 @@ public class OtherScript implements OutputScript {
 
 	@Override
 	public void writeOutputScript(DatabaseConnection connection) {
-		ScriptManager scriptWriter = new ScriptManager(script);
-		long scriptId = scriptWriter.writeScript(connection);
+		ScriptManager scriptWriter = new ScriptManager();
+		long scriptId = scriptWriter.writeScript(connection, script);
 
 		PreparedStatement insertStatement = connection.getPreparedStatement(insertQuery);
 		try {
