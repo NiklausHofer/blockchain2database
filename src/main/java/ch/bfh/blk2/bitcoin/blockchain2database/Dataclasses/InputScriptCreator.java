@@ -23,7 +23,7 @@ public class InputScriptCreator {
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
 			return new P2PKHInputScript();
 		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY)
-			return new P2RawPubKeyInputscript();
+			return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2SH)
 			if (isP2SHMultisig(script))
 				return new P2SHMultisigInputScript();
