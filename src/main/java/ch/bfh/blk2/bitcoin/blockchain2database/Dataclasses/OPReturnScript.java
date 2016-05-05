@@ -34,8 +34,8 @@ public class OPReturnScript implements OutputScript {
 	}
 
 	@Override
-	public OutputType getType() {
-		return OutputType.OP_RETURN;
+	public ScriptType getType() {
+		return ScriptType.OUT_OP_RETURN;
 	}
 
 	@Override

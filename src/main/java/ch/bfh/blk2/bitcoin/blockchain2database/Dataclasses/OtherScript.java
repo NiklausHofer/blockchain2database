@@ -30,8 +30,8 @@ public class OtherScript implements OutputScript {
 	}
 
 	@Override
-	public OutputType getType() {
-		return OutputType.OTHER;
+	public ScriptType getType() {
+		return ScriptType.OUT_OTHER;
 	}
 
 	@Override

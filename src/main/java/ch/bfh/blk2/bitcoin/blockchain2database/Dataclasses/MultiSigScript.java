@@ -39,8 +39,8 @@ public class MultiSigScript implements OutputScript {
 	}
 
 	@Override
-	public OutputType getType() {
-		return OutputType.MULTISIG;
+	public ScriptType getType() {
+		return ScriptType.OUT_MULTISIG;
 	}
 
 	@Override

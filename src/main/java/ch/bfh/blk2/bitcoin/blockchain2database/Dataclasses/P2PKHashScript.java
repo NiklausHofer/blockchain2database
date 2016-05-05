@@ -34,8 +34,8 @@ public class P2PKHashScript implements OutputScript {
 	
 
 	@Override
-	public OutputType getType() {
-		return OutputType.P2PKHASH;
+	public ScriptType getType() {
+		return ScriptType.OUT_P2PKHASH;
 	}
 
 	@Override

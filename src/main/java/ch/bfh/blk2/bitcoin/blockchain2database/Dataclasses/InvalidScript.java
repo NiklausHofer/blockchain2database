@@ -11,8 +11,8 @@ public class InvalidScript implements OutputScript {
 	}
 
 	@Override
-	public OutputType getType() {
-		return OutputType.INVALID;
+	public ScriptType getType() {
+		return ScriptType.OUT_INVALID;
 	}
 
 	@Override

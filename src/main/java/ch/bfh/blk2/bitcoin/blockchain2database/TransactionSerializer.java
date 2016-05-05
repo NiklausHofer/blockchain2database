@@ -31,7 +31,7 @@ public class TransactionSerializer {
 				for (TransactionOutput output : transaction.getOutputs()) {
 					int type = -1;
 					try {
-						OutputScript os = OuputScriptCreator.parseScript(output);
+						OutputScript os = OuputScriptCreator.parseScript(output, 0, 0);
 						type = os.getType().getValue();
 					} catch (NullPointerException e) {
 						System.out.println(output);

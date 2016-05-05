@@ -35,8 +35,8 @@ public class P2SHScript implements OutputScript {
 
 	
 	@Override
-	public OutputType getType() {
-		return OutputType.P2SH;
+	public ScriptType getType() {
+		return ScriptType.OUT_P2SH;
 	}
 
 	@Override
