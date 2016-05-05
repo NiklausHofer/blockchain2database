@@ -6,3 +6,4 @@ CREATE TABLE IF NOT EXISTS public_key(
 )ENGINE = MEMORY;
 
 CREATE INDEX public_key_hash ON public_key(pubkey_hash);
+CREATE INDEX public_key ON public_key(pubkey);
