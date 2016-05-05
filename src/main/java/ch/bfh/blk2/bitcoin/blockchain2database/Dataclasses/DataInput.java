@@ -24,13 +24,13 @@ public class DataInput {
 	// initialized in constructor
 	private TransactionInput input;
 	private long tx_id;
-	private long tx_index;
+	private int tx_index;
 	private Date date;
 	private DatabaseConnection connection;
 
 	// get from DB querry
 	private long prev_tx_id;
-	private int prev_script_type;
+	private ScriptType prev_script_type;
 	private long amount;
 
 	private byte[] script = null;
@@ -43,7 +43,7 @@ public class DataInput {
 			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String dataInputQuery = "INSERT INTO input "
-			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount, largescript)"
+			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount, script_type)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?, ?);";
 
 	private String outputUpdateQuery = "UPDATE output"
@@ -51,7 +51,7 @@ public class DataInput {
 			+ " WHERE tx_id = ?"
 			+ " AND tx_index = ?;";
 
-	public DataInput(TransactionInput input, long tx_id, long tx_index, Date date, DatabaseConnection con) {
+	public DataInput(TransactionInput input, long tx_id, int tx_index, Date date, DatabaseConnection con) {
 		this.input = input;
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
@@ -67,6 +67,7 @@ public class DataInput {
 
 	public void writeInput(long amount) {
 		this.amount = amount;
+		this.prev_script_type = ScriptType.NO_PREV_OUT;
 		dowriteInput();
 	}
 
@@ -82,17 +83,8 @@ public class DataInput {
 			statement.setLong(5, input.getSequenceNumber());
 			statement.setLong(6, amount);
 
-			try {
-				script = input.getScriptBytes();
-			} catch (ScriptException e) {
-				logger.debug("invalid input script");
-			}
-			if (script == null)
-				statement.setNull(7, java.sql.Types.NULL);
-			else if (script.length > maxScriptSize)
-				statement.setBoolean(7, true);
-			else
-				statement.setBoolean(7, false);
+			InputScript inScript = InputScriptCreator.parseScript(input, tx_id,tx_index,prev_script_type);
+			statement.setInt(7, inScript.getType().getValue());
 
 			statement.executeUpdate();
 			statement.close();
@@ -145,7 +137,21 @@ public class DataInput {
 			if (rs.next()) {
 				prev_tx_id = rs.getLong(1);
 				amount = rs.getLong(2);
-				prev_script_type = rs.getInt(3);
+				
+				//TODO check if this works !!WARNING!!
+				prev_script_type = ScriptType.values()[rs.getInt(3)];
+				
+				/*
+				 *  if value and index does not match
+				 * 
+				for(ScriptType t : ScriptType.values()){
+					if(t.getValue() == rs.getInt(3)){
+						prev_script_type = t;
+						break;
+					}
+				}
+				*/
+				
 			} else {
 				logger.fatal(
 						"Got a malformed response from the database while looking for an output reffered to by one of "
