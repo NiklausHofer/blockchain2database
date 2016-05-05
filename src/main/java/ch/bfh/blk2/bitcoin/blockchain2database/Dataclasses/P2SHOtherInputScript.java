@@ -22,6 +22,16 @@ public class P2SHOtherInputScript implements InputScript{
 	private long txId;
 	private Script script;
 	
+	
+	public P2SHOtherInputScript(Script script,long txId,int txIndex,int scriptSize) {
+		
+		this.txId = txId;
+		this.txIndex = txIndex;
+		this.scriptSize = scriptSize;
+		this.script = script;
+		
+	}
+	
 	@Override
 	public ScriptType getType() {
 		return ScriptType.IN_P2SH_OTHER;

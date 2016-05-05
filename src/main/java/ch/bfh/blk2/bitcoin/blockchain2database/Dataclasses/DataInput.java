@@ -140,6 +140,7 @@ public class DataInput {
 				amount = rs.getLong(2);
 				
 				//TODO check if this works !!WARNING!!
+				// only if value = index in Enum ScriptType
 				prev_script_type = ScriptType.values()[rs.getInt(4)];
 				
 				/*

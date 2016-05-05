@@ -28,7 +28,7 @@ public class InputScriptCreator {
 			if (isP2SHMultisig(script))
 				return new P2SHMultisigInputScript(txId, txIndex, script, scriptSize);
 			else
-				return new P2SHOtherInputScript();
+				return new P2SHOtherInputScript(script,txId,txIndex,scriptSize);
 		if (prefOutType == ScriptType.OUT_OTHER)
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.NO_PREV_OUT)

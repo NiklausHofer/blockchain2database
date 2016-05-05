@@ -26,6 +26,7 @@ public class CoinbaseInputScript implements InputScript{
 		this.txId = txId;
 		this.txIndex = txIndex;
 		this.scriptSize = scriptSize;
+		this.script = script;
 	}
 
 	@Override
