@@ -25,8 +25,8 @@ public class MultiSigScript implements OutputScript {
 
 	List<ECKey> publickeys;
 
-	private final String insertQuery = "INSERT INTO out_script_multisig(tx_id, tx_index, script_size, min, max) VALUES( ?, ?, ?, ?, ? );";
-	private final String insertConnectionQuery = "INSERT INTO multisig_pubkeys(tx_id, tx_index, public_key_id, index) VALUES(?,?,?,?);";
+	private final String insertQuery = "INSERT INTO out_script_multisig(tx_id, tx_index, script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ? );";
+	private final String insertConnectionQuery = "INSERT INTO multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
 
 	public MultiSigScript(Script script, int scriptSize, long tx_id, int tx_index) {
 		if (!script.isSentToMultiSig())

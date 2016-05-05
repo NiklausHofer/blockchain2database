@@ -89,8 +89,7 @@ public class PubKeyManager {
 			}
 
 		} catch (SQLException e) {
-			logger.fatal("Failed to Insert pubkey and adresse [" + pkHash + "]");
-			logger.fatal(e);
+			logger.fatal("Failed to Insert pubkey and adresse [" + pkHash + "]", e);
 			connection.commit();
 			connection.closeConnection();
 			System.exit(1);

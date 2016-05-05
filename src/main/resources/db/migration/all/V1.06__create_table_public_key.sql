@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS public_key(
-  id BIGINT,
+  id BIGINT AUTO_INCREMENT,
   pubkey_hash VARCHAR(64) UNIQUE,
   pubkey VARBINARY(520) UNIQUE,
     PRIMARY KEY(id)

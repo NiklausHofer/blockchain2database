@@ -14,7 +14,7 @@ public class DataOutput {
 	private static final Logger logger = LogManager.getLogger("DataOutput");
 
 	private static final String INSERT_OUTPUT = "INSERT INTO output"
-			+ " (tx_id, tx_index, amount, scriptType)"
+			+ " (tx_id, tx_index, amount, script_type_id)"
 			+ " VALUES(?, ?, ?, ?);";
 
 	private TransactionOutput output;
@@ -43,8 +43,7 @@ public class DataOutput {
 			outScript.writeOutputScript(connection);
 
 		} catch (SQLException e) {
-			logger.fatal("Failed to write Output #" + output.getIndex() + " on transaction " + txId);
-			logger.fatal(e);
+			logger.fatal("Failed to write Output #" + output.getIndex() + " on transaction " + txId, e);
 			connection.commit();
 			connection.closeConnection();
 			System.exit(1);

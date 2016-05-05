@@ -8,16 +8,11 @@ import java.util.Date;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionInput;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
-import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 
 public class DataInput {
-
-	private static int maxScriptSize = Integer
-			.parseInt(PropertiesLoader.getInstance().getProperty("max_inmemory_input_script"));
 
 	private static final Logger logger = LogManager.getLogger("DataInput");
 
@@ -38,12 +33,12 @@ public class DataInput {
 	private long input_id = -1;
 
 	// Querry Strings
-	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount, output.script_type"
+	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount, output.script_type_id"
 			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
 			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
 
 	private String dataInputQuery = "INSERT INTO input "
-			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount, script_type)"
+			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount, script_type_id)"
 			+ " VALUES( ?, ?, ?, ?, ?, ?, ?);";
 
 	private String outputUpdateQuery = "UPDATE output"
@@ -83,8 +78,8 @@ public class DataInput {
 			statement.setLong(5, input.getSequenceNumber());
 			statement.setLong(6, amount);
 
-			InputScript inScript = InputScriptCreator.parseScript
-					(input, tx_id,tx_index,prev_script_type,prev_tx_id,(int) input.getOutpoint().getIndex());
+			InputScript inScript = InputScriptCreator.parseScript(input, tx_id, tx_index, prev_script_type, prev_tx_id,
+					(int) input.getOutpoint().getIndex());
 			statement.setInt(7, inScript.getType().getValue());
 
 			statement.executeUpdate();
@@ -92,11 +87,10 @@ public class DataInput {
 
 			updateOutputs();
 
-			// TODO insert the scripts
+			inScript.writeInput(connection);
 
 		} catch (SQLException e) {
-			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id);
-			logger.fatal(e);
+			logger.fatal("Failed to write Input #" + input_id + " on Transaction #" + tx_id, e);
 			connection.commit();
 			connection.closeConnection();
 			System.exit(1);
@@ -119,8 +113,7 @@ public class DataInput {
 			statement.close();
 
 		} catch (SQLException e) {
-			logger.fatal("Failed to update Output [tx: " + prev_tx_id + " , # " + input.getOutpoint().getIndex());
-			logger.fatal(e);
+			logger.fatal("Failed to update Output [tx: " + prev_tx_id + " , # " + input.getOutpoint().getIndex(), e);
 			connection.commit();
 			connection.closeConnection();
 			System.exit(1);
@@ -138,14 +131,14 @@ public class DataInput {
 			if (rs.next()) {
 				prev_tx_id = rs.getLong(1);
 				amount = rs.getLong(2);
-				
+
 				//TODO check if this works !!WARNING!!
 				// only if value = index in Enum ScriptType
-				prev_script_type = ScriptType.values()[rs.getInt(4)];
-				
+				prev_script_type = ScriptType.values()[rs.getInt(3)];
+
 				/*
 				 *  if value and index does not match
-				 * 
+				 *
 				for(ScriptType t : ScriptType.values()){
 					if(t.getValue() == rs.getInt(4)){
 						prev_script_type = t;
@@ -153,7 +146,7 @@ public class DataInput {
 					}
 				}
 				*/
-				
+
 			} else {
 				logger.fatal(
 						"Got a malformed response from the database while looking for an output reffered to by one of "
@@ -177,8 +170,7 @@ public class DataInput {
 					+ "'s Inputs. We were looking for output #"
 					+ input.getOutpoint().getIndex()
 					+ " of Tranasaction "
-					+ input.getOutpoint().getHash().toString());
-			logger.fatal(e);
+					+ input.getOutpoint().getHash().toString(), e);
 			connection.commit();
 			connection.closeConnection();
 			System.exit(1);

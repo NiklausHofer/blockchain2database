@@ -16,23 +16,25 @@ public class InputScriptCreator {
 
 		byte[] inputBytes = in.getScriptBytes();
 		int scriptSize = inputBytes.length;
+
+		if (in.isCoinBase())
+			return new CoinbaseInputScript(inputBytes, txId, txIndex, scriptSize);
+
 		Script script = new Script(inputBytes);
 
 		if (prefOutType == ScriptType.OUT_MULTISIG)
 			return new MultisigInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
-			return new P2PKHInputScript(script,txId,txIndex,scriptSize);
+			return new P2PKHInputScript(script, txId, txIndex, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY)
 			return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2SH)
 			if (isP2SHMultisig(script))
 				return new P2SHMultisigInputScript(txId, txIndex, script, scriptSize);
 			else
-				return new P2SHOtherInputScript(script,txId,txIndex,scriptSize);
+				return new P2SHOtherInputScript(script, txId, txIndex, scriptSize);
 		if (prefOutType == ScriptType.OUT_OTHER)
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
-		if (prefOutType == ScriptType.NO_PREV_OUT)
-			return new CoinbaseInputScript(script,txId,txIndex,scriptSize);
 
 		// input script must be one of these types
 		// input script can't be invalid

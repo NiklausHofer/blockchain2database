@@ -125,7 +125,7 @@
         <executions>
           <execution>
             <id>default-cli</id>
-            <phase>compile</phase>
+            <phase>none</phase>
             <goals>
               <goal>migrate</goal>
             </goals>

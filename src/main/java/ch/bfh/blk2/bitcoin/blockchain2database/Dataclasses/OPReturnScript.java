@@ -61,12 +61,12 @@ public class OPReturnScript implements OutputScript {
 						+ " of transaction with id "
 						+ tx_id
 						+ " had less than two script chunks!");
+
 				insertStatement.setNull(4, java.sql.Types.NULL);
-
-				insertStatement.executeUpdate();
-
-				insertStatement.close();
 			}
+			insertStatement.executeUpdate();
+
+			insertStatement.close();
 		} catch (ScriptException e) {
 			logger.fatal("Something went wrong when parsing the script for OP_Return output #"
 					+ tx_index

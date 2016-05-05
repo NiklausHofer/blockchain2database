@@ -14,7 +14,7 @@ public class P2RawPubKeyInputscript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2RawPubKeyInputscript");
 
-	private final String INPUT_QUERY = "INSERT INTO unlock_script_p2raw_pub_key(tx_id, tx_index, script_size, signature_id;";
+	private final String INPUT_QUERY = "INSERT INTO unlock_script_p2raw_pub_key(tx_id, tx_index, script_size, signature_id) VALUES ( ?, ?, ? ,? );;";
 
 	private long tx_id;
 	private int tx_index;

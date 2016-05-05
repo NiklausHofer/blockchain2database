@@ -17,9 +17,9 @@ public class P2SHMultisigInputScript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2SHMultisigInputScript");
 
-	private final String INPUT_QUERY = "INSERT INTO unlock_scrip_p2sh_multisig(tx_id, tx_index, script_size, redeem_script_size, min, max) VALUES( ?, ?, ?, ?, ?, ? );";
-	private final String CONNECT_PUBKEYS_QUERY = "INSERT INTO p2sh_multisig_pubkeys(tx_id, tx_index, public_key_id, index) VALUES(?,?,?,?);";
-	private final String CONNECTION_SIGNATURES_QUERY = "INSERT INTO p2sh_multisig_signature(tx_id, tx_index, signature_id, index) VALUES( ?, ?, ?, ? );";
+	private final String INPUT_QUERY = "INSERT INTO unlock_script_p2sh_multisig(tx_id, tx_index, script_size, redeem_script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ?, ? );";
+	private final String CONNECT_PUBKEYS_QUERY = "INSERT INTO p2sh_multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
+	private final String CONNECTION_SIGNATURES_QUERY = "INSERT INTO p2sh_multisig_signature(tx_id, tx_index, signature_id, idx) VALUES( ?, ?, ?, ? );";
 
 	private long tx_id;
 	private int tx_index;
@@ -157,7 +157,7 @@ public class P2SHMultisigInputScript implements InputScript {
 			// extract information from the redeem script
 			publickeys = redeem_script.getPubKeys();
 			max = publickeys.size();
-			min = script.getNumberOfSignaturesRequiredToSpend();
+			min = redeem_script.getNumberOfSignaturesRequiredToSpend();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig redeem Script for p2sh input #"
 					+ tx_index

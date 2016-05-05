@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS signature(
-  id  BIGINT,
-  signature VARBINARY(65),
+  id  BIGINT AUTO_INCREMENT,
+  signature VARBINARY(78),
   pubkey_id BIGINT,
     PRIMARY KEY(id),
     FOREIGN KEY(pubkey_id) REFERENCES public_key(id)
