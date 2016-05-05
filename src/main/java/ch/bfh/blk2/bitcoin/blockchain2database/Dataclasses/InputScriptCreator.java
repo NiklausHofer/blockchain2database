@@ -21,7 +21,7 @@ public class InputScriptCreator {
 		if (prefOutType == ScriptType.OUT_MULTISIG)
 			return new MultisigInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
-			return new P2PKHInputScript();
+			return new P2PKHInputScript(script,txId,txIndex,scriptSize);
 		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY)
 			return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2SH)
@@ -32,7 +32,7 @@ public class InputScriptCreator {
 		if (prefOutType == ScriptType.OUT_OTHER)
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.NO_PREV_OUT)
-			return new CoinbaseInputScript();
+			return new CoinbaseInputScript(script,txId,txIndex,scriptSize);
 
 		// input script must be one of these types
 		// input script can't be invalid
