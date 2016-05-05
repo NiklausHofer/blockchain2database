@@ -15,13 +15,10 @@ public class ScriptManager {
 
 	private static final Logger logger = LogManager.getLogger("ScriptWriter");
 
-	private Script script;
-
 	private final String currentScriptIdQuery = "SELECT MAX(script_id) FROM script;";
 	private final String insertInstruction = "INSERT INTO script (script_id, script_index, op_code, data) VALUES(?, ?, ?, ?);";
 
-	public ScriptManager(Script script) {
-		this.script = script;
+	public ScriptManager() {
 	}
 
 	/**
@@ -29,7 +26,7 @@ public class ScriptManager {
 	 *
 	 * @return
 	 */
-	public long writeScript(DatabaseConnection connection) {
+	public long writeScript(DatabaseConnection connection, Script script) {
 		long scriptId = -2;
 
 		// First, figure out current script id in the script table

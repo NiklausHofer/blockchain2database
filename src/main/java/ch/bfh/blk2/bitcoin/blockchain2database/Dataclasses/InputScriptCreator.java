@@ -30,7 +30,7 @@ public class InputScriptCreator {
 			else
 				return new P2SHOtherInputScript();
 		if (prefOutType == ScriptType.OUT_OTHER)
-			return new OtherInputScript();
+			return new OtherInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.NO_PREV_OUT)
 			return new CoinbaseInputScript();
 
