@@ -41,7 +41,7 @@ public class InputScriptCreator {
 			return new OtherInputScript();
 		}
 		if(prefOutType == ScriptType.NO_PREV_OUT){
-			return new CoinbaseInputScript();
+			return new CoinbaseInputScript(script,txId,txIndex,scriptSize);
 		}
 		
 		// input script must be one of these types
