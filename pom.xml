@@ -125,7 +125,6 @@
         <executions>
           <execution>
             <id>default-cli</id>
-            <phase>none</phase>
             <goals>
               <goal>migrate</goal>
             </goals>
@@ -146,7 +145,6 @@
           </execution>
           <execution>
             <id>testnet3</id>
-            <phase>compile</phase>
             <goals>
               <goal>migrate</goal>
             </goals>
