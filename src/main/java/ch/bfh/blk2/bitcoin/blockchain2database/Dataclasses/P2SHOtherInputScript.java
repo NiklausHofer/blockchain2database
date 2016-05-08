@@ -14,7 +14,7 @@ public class P2SHOtherInputScript implements InputScript {
 	private static final Logger logger = LogManager.getLogger("P2SHOtherInputScript");
 
 	private final static String INSERT_P2SH_OTHER_SCRIPT = "INSERT INTO unlock_script_p2sh_other"
-			+ " (tx_id,tx_index,script_size,script_id,reedem_script_id,reedem_script_size)"
+			+ " (tx_id,tx_index,script_size,script_id,redeem_script_id,redeem_script_size)"
 			+ " VALUES (?,?,?,?,?,?)";
 
 	private int txIndex, scriptSize;

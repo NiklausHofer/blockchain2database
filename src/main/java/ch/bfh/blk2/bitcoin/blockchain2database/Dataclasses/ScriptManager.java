@@ -13,7 +13,7 @@ import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class ScriptManager {
 
-	private static final Logger logger = LogManager.getLogger("ScriptWriter");
+	private static final Logger logger = LogManager.getLogger("ScriptManager");
 
 	private final String currentScriptIdQuery = "SELECT MAX(script_id) FROM script;";
 	private final String insertInstruction = "INSERT INTO script (script_id, script_index, op_code, data) VALUES(?, ?, ?, ?);";
