@@ -1,5 +1,6 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.security.spec.ECPoint;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -53,8 +54,16 @@ public class PubKeyManager {
 
 	public long insertRawPK(DatabaseConnection connection, byte[] pubKey) {
 
-		String pkHash = ECKey.fromPublicOnly(pubKey).toAddress(Utility.PARAMS).toString();
-
+		ECKey publicKey = null;
+		try{
+			publicKey = ECKey.fromPublicOnly(pubKey);
+		} catch( IllegalArgumentException e){
+			String keyPrint = new String( pubKey );
+			logger.debug("Unable to create an ECKey from public key " + keyPrint, e);
+			throw e;
+		}
+		String pkHash = publicKey.toAddress(Utility.PARAMS).toString();
+		
 		long pkId = -1;
 
 		try {

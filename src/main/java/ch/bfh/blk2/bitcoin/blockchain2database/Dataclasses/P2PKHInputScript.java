@@ -38,8 +38,14 @@ public class P2PKHInputScript implements InputScript {
 		byte[] signature = getSignature();
 		byte[] pubkey = getPubkey();
 
+		long pubkeyId = -1;
 		PubKeyManager pm = new PubKeyManager();
-		long pubkeyId = pm.insertRawPK(connection, pubkey);
+		try{
+			pubkeyId = pm.insertRawPK(connection, pubkey);
+		} catch (IllegalArgumentException e){
+			logger.fatal(script.toString());
+			System.exit(1);
+		}
 
 		SigManager sm = new SigManager();
 		long signId = sm.saveAndGetSigId(connection, signature, pubkeyId);

@@ -17,21 +17,27 @@ public class OtherScript implements OutputScript {
 	private long tx_id;
 	private int tx_index;
 	private int scriptSize;
+	private ScriptType type;
 
 	private final String insertQuery = "INSERT INTO out_script_other(tx_id, tx_index, script_size, script_id) VALUES(?, ?, ?, ?);";
 
-	public OtherScript(Script script, int scriptSize, long tx_id, int tx_index) {
+	public OtherScript(Script script, int scriptSize, long tx_id, int tx_index, ScriptType type) {
 		// Don't check for script type.
 		// We want to allow any script to be saved like this if desired
 		this.script = script;
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.scriptSize = scriptSize;
+		this.type = type;
+	}
+
+	public OtherScript(Script script, int scriptSize, long tx_id, int tx_index){
+		this(script, scriptSize, tx_id, tx_index, ScriptType.OUT_OTHER);
 	}
 
 	@Override
 	public ScriptType getType() {
-		return ScriptType.OUT_OTHER;
+		return type;
 	}
 
 	@Override

@@ -25,9 +25,20 @@ public class InputScriptCreator {
 		if (prefOutType == ScriptType.OUT_MULTISIG)
 			return new MultisigInputScript(txId, txIndex, script, scriptSize);
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
-			return new P2PKHInputScript(script, txId, txIndex, scriptSize);
+			if( script.getChunks().size() == 2 )
+				return new P2PKHInputScript(script, txId, txIndex, scriptSize);
+			else{
+				logger.debug("Non standard Pay to public key hash input script looking like so: " + script.toString());
+				return new OtherInputScript(txId, txIndex, script, scriptSize, ScriptType.IN_P2PKH_SPEC);
+			}
 		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY)
-			return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
+			if( script.getChunks().size() == 1 )
+				return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
+			else{
+				logger.debug("Non standard Pay to raw public key input script looking like so: " + script.toString());
+				return new OtherInputScript(txId, txIndex, script, scriptSize, ScriptType.IN_P2RAWPUBKEY_SPEC);
+			}
+				
 		if (prefOutType == ScriptType.OUT_P2SH)
 			if (isP2SHMultisig(script))
 				return new P2SHMultisigInputScript(txId, txIndex, script, scriptSize);

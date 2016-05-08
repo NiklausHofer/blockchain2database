@@ -19,17 +19,23 @@ public class OtherInputScript implements InputScript {
 	private int tx_index;
 	private Script script;
 	private int script_size;
+	private ScriptType type;
 
-	public OtherInputScript(long tx_id, int tx_index, Script script, int script_size) {
+	public OtherInputScript(long tx_id, int tx_index, Script script, int script_size, ScriptType type) {
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.script = script;
 		this.script_size = script_size;
+		this.type = type;
+	}
+
+	public OtherInputScript(long tx_id, int tx_index, Script script, int script_size) {
+		this(tx_id, tx_index, script, script_size, ScriptType.IN_OTHER);
 	}
 
 	@Override
 	public ScriptType getType() {
-		return ScriptType.IN_OTHER;
+		return type;
 	}
 
 	@Override
