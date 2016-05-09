@@ -5,6 +5,7 @@ import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.Utils;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
@@ -40,7 +41,7 @@ public class CoinbaseInputScript implements InputScript {
 			insertStatement.setLong(1, txId);
 			insertStatement.setInt(2, txIndex);
 			insertStatement.setInt(3, scriptSize);
-			insertStatement.setBytes(4, script);
+			insertStatement.setString(4, Utils.HEX.encode(script));
 
 			insertStatement.executeUpdate();
 			insertStatement.close();

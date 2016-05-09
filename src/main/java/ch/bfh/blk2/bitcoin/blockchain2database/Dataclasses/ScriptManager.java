@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptChunk;
 
@@ -54,7 +55,7 @@ public class ScriptManager {
 				insertStatement.setInt(2, index++);
 				insertStatement.setInt(3, chunk.opcode);
 				if (chunk.data != null)
-					insertStatement.setBytes(4, chunk.data);
+					insertStatement.setString(4, Utils.HEX.encode(chunk.data));
 				else
 					insertStatement.setNull(4, java.sql.Types.NULL);
 

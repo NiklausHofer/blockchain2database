@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ScriptException;
+import org.bitcoinj.core.Utils;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptChunk;
 
@@ -54,7 +55,7 @@ public class OPReturnScript implements OutputScript {
 			insertStatement.setInt(2, tx_index);
 			insertStatement.setInt(3, scriptSize);
 			if (chunks.size() >= 2)
-				insertStatement.setBytes(4, chunks.get(2).data);
+				insertStatement.setString(4, Utils.HEX.encode(chunks.get(2).data));
 			else {
 				logger.warn("OP_RETURN output script #"
 						+ tx_index

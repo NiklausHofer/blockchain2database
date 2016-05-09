@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bitcoinj.core.Utils;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
@@ -48,7 +49,7 @@ public class SigManager {
 		PreparedStatement insertStatement = connection.getPreparedStatement(INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION);
 
 		try {
-			insertStatement.setBytes(1, signature);
+			insertStatement.setString(1, Utils.HEX.encode(signature));
 			insertStatement.setNull(2, java.sql.Types.BIGINT);
 
 			insertStatement.execute();
@@ -111,7 +112,7 @@ public class SigManager {
 		PreparedStatement insertStatement = connection.getPreparedStatement(INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION);
 
 		try {
-			insertStatement.setBytes(1, signature);
+			insertStatement.setString(1, Utils.HEX.encode(signature));
 			insertStatement.setLong(2, pubkeyId);
 
 			insertStatement.execute();

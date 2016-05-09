@@ -73,14 +73,14 @@ public class PubKeyManager {
 			if (pkId != -1) {
 
 				PreparedStatement updatePK = connection.getPreparedStatement(UPDATE_PK);
-				updatePK.setBytes(1, pubKey);
+				updatePK.setString(1, publicKey.getPublicKeyAsHex());
 				updatePK.setLong(2, pkId);
 				updatePK.executeUpdate();
 				updatePK.close();
 			} else {
 				PreparedStatement insertPK = connection.getPreparedStatement(INSERT_PUBKEY);
 				insertPK.setString(1, pkHash);
-				insertPK.setBytes(2, pubKey);
+				insertPK.setString(2, publicKey.getPublicKeyAsHex());
 				insertPK.executeUpdate();
 
 				ResultSet generatedKeys = insertPK.getGeneratedKeys();
