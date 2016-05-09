@@ -2,6 +2,7 @@ package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -23,7 +24,8 @@ public class MultiSigScript implements OutputScript {
 	private int min = -1;
 	private int max = -1;
 
-	List<ECKey> publickeys;
+	//List<ECKey> publickeys;
+	private List<byte[]> publicKeys;
 
 	private final String insertQuery = "INSERT INTO out_script_multisig(tx_id, tx_index, script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ? );";
 	private final String insertConnectionQuery = "INSERT INTO multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
@@ -36,6 +38,8 @@ public class MultiSigScript implements OutputScript {
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.scriptSize = scriptSize;
+
+		publicKeys = new ArrayList<>();
 	}
 
 	@Override
@@ -69,12 +73,12 @@ public class MultiSigScript implements OutputScript {
 
 	private void connect2pubkeys(DatabaseConnection connection) {
 		int index = 0;
-		for (ECKey key : publickeys) {
-			byte[] pubKeyBytes = key.getPubKey();
+		for (byte[] key : publicKeys) {
+			//byte[] pubKeyBytes = key.getPubKey();
 			long pubkey_id = -1;
 
 			PubKeyManager pkm = new PubKeyManager();
-			pubkey_id = pkm.insertRawPK(connection, pubKeyBytes);
+			pubkey_id = pkm.insertRawPK(connection, key);
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(insertConnectionQuery);
 
@@ -101,8 +105,23 @@ public class MultiSigScript implements OutputScript {
 
 	private void parse() {
 		try {
-			publickeys = script.getPubKeys();
-			max = publickeys.size();
+			try{
+				// see if BitcoinJ/Bouncycastle are able to propperly cast the addresses
+				List<ECKey> ecPubKeys = script.getPubKeys();
+				for(ECKey ecKey: ecPubKeys)
+					publicKeys.add(ecKey.getPubKey());
+			} catch (IllegalArgumentException e){
+				logger.debug("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
+				logger.debug("Will attempt to manually extract the byte sequences");
+				
+				int scriptLenght = script.getChunks().size();
+				// We expect this to be a perfectly normal multisig script
+				int expectedNumOfPubKeys = scriptLenght - 3;
+				
+				for( int i=1; i <= expectedNumOfPubKeys; i++)
+					publicKeys.add(script.getChunks().get(i).data);
+			}
+			max = publicKeys.size();
 			min = script.getNumberOfSignaturesRequiredToSpend();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig Script for output #"
@@ -113,7 +132,6 @@ public class MultiSigScript implements OutputScript {
 			logger.fatal(script.toString());
 			System.exit(1);
 		} catch (IllegalArgumentException e){
-			logger.fatal("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
 			System.exit(1);
 		}
 	}
