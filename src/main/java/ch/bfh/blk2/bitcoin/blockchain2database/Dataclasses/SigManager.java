@@ -47,7 +47,7 @@ public class SigManager {
 		long signatureId = -1;
 
 		PreparedStatement insertStatement = connection.getPreparedStatement(INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION);
-
+		
 		try {
 			insertStatement.setString(1, Utils.HEX.encode(signature));
 			insertStatement.setNull(2, java.sql.Types.BIGINT);
@@ -63,7 +63,7 @@ public class SigManager {
 			resultSet.close();
 			insertStatement.close();
 		} catch (SQLException e) {
-			logger.fatal("Unable to insert signature " + new String(signature), e);
+			logger.fatal("Unable to insert signature " + Utils.HEX.encode(signature), e);
 			System.exit(1);
 		}
 
@@ -125,7 +125,7 @@ public class SigManager {
 
 			insertStatement.close();
 		} catch (SQLException e) {
-			logger.fatal("Unable to insert signature " + new String(signature), e);
+			logger.fatal("Unable to insert signature " + Utils.HEX.encode(signature), e);
 			System.exit(1);
 		}
 

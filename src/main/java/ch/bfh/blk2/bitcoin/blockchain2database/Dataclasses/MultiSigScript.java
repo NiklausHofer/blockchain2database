@@ -112,6 +112,9 @@ public class MultiSigScript implements OutputScript {
 					+ " is of an unexpected format", e);
 			logger.fatal(script.toString());
 			System.exit(1);
+		} catch (IllegalArgumentException e){
+			logger.fatal("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
+			System.exit(1);
 		}
 	}
 
