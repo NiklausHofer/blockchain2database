@@ -48,19 +48,33 @@ public class OPReturnScript implements OutputScript {
 			insertStatement.setLong(1, tx_id);
 			insertStatement.setInt(2, tx_index);
 			insertStatement.setInt(3, scriptSize);
-			insertStatement.setString(4, Utils.HEX.encode(chunks.get(1).data));
+
+			byte[] data = chunks.get(1).data;
+			if (data == null)
+				data = new byte[0];
+
+			insertStatement.setString(4, Utils.HEX.encode(data));
 
 			insertStatement.executeUpdate();
 
 			insertStatement.close();
-		} catch (ScriptException e) {
-			logger.fatal("Something went wrong when parsing the script for OP_Return output #"
-					+ tx_index
-					+ " for transaction with id "
-					+ tx_id, e);
+		} catch (ScriptException | NullPointerException e) {
+			logger.fatal(
+					"Something went wrong when parsing the script for OP_Return output #"
+							+ tx_index
+							+ " for transaction with id "
+							+ tx_id
+							+ ". The script in question is: "
+							+ script.toString(),
+					e);
 			System.exit(1);
 		} catch (SQLException e) {
-			logger.fatal("Unable to write OP_RETURN output #" + tx_index + " for transaction with id " + tx_id + ". Script: " + script.toString(), e);
+			logger.fatal("Unable to write OP_RETURN output #"
+					+ tx_index
+					+ " for transaction with id "
+					+ tx_id
+					+ ". Script: "
+					+ script.toString(), e);
 			System.exit(1);
 		}
 

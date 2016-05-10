@@ -16,22 +16,31 @@ public class OuputScriptCreator {
 			int scriptSize = outputBytes.length;
 			Script script = new Script(outputBytes);
 
-			if (script.isSentToAddress())
-				return new P2PKHashScript(script, scriptSize, txId, txIndex);
+			try {
+				if (script.isSentToAddress())
+					return new P2PKHashScript(script, scriptSize, txId, txIndex);
 
-			if (script.isPayToScriptHash())
-				return new P2SHScript(script, scriptSize, txId, txIndex);
+				if (script.isPayToScriptHash())
+					return new P2SHScript(script, scriptSize, txId, txIndex);
 
-			if (script.isSentToRawPubKey())
-				return new P2RawPubKeyScript(script, scriptSize, txId, txIndex);
+				if (script.isSentToRawPubKey())
+					return new P2RawPubKeyScript(script, scriptSize, txId, txIndex);
 
-			if (script.isSentToMultiSig())
-				return new MultiSigScript(script, scriptSize, txId, txIndex);
+				if (script.isSentToMultiSig())
+					return new MultiSigScript(script, scriptSize, txId, txIndex);
 
-			if (script.isOpReturn())
-				return new OPReturnScript(script, scriptSize, txId, txIndex);
+				if (script.isOpReturn())
+					return new OPReturnScript(script, scriptSize, txId, txIndex);
+
+			} catch (IllegalArgumentException e) {
+				logger.debug("There was an error when trying to detect the script type for the following scrip: "
+						+ script.toString()
+						+ " It will be saved as OtherScript");
+				return new OtherScript(script, scriptSize, txId, txIndex);
+			}
 
 			return new OtherScript(script, scriptSize, txId, txIndex);
+
 		} catch (ScriptException e) {
 			return new InvalidScript();
 		}
