@@ -60,12 +60,18 @@ public class PubKeyManager {
 		boolean valid = true;
 
 		try {
+			// ECKey fails to create a key from an empty char array. It throws some other
+			// Exception, but I don't trust that is a stable condition.
+			if( pkBytes.length == 0 )
+				throw new IllegalArgumentException();
+
 			ECKey publicKey = ECKey.fromPublicOnly(pkBytes);
 			pkHash = publicKey.toAddress(Utility.PARAMS).toString();
 			pkHex = publicKey.getPublicKeyAsHex();
 		} catch (IllegalArgumentException e) {
 			String keyPrint = new String(pkBytes);
 			logger.debug("Unable to create an ECKey from public key " + keyPrint, e);
+			logger.debug("Will write in a hex represenattion of the keybytes instead and mark the key as invalid.");
 
 			byte[] pubKeyHash = Utils.sha256hash160(pkBytes);
 			pkHash = new Address(Utility.PARAMS, pubKeyHash).toString();
@@ -139,7 +145,7 @@ public class PubKeyManager {
 			if (generatedKeys.next())
 				id = generatedKeys.getLong(1);
 			else {
-				logger.debug("Adress does exist in DB try to querry its ID: [" + pkHash + "]");
+				logger.trace("Adress does exist in DB try to querry its ID: [" + pkHash + "]");
 
 				id = getPKIdFromPubKeyHash(connection, pkHash);
 

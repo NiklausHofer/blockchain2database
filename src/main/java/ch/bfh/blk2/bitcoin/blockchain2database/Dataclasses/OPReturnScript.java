@@ -43,28 +43,13 @@ public class OPReturnScript implements OutputScript {
 	public void writeOutputScript(DatabaseConnection connection) {
 		try {
 			List<ScriptChunk> chunks = script.getChunks();
-			if (chunks.size() > 2)
-				logger.warn("OP_RETURN output script #"
-						+ tx_index
-						+ " of transaction with id "
-						+ tx_id
-						+ " has more than two script chunks. Will use the second one for pushdata and ignore the other ones");
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(insertQuery);
 			insertStatement.setLong(1, tx_id);
 			insertStatement.setInt(2, tx_index);
 			insertStatement.setInt(3, scriptSize);
-			if (chunks.size() >= 2)
-				insertStatement.setString(4, Utils.HEX.encode(chunks.get(2).data));
-			else {
-				logger.warn("OP_RETURN output script #"
-						+ tx_index
-						+ " of transaction with id "
-						+ tx_id
-						+ " had less than two script chunks!");
+			insertStatement.setString(4, Utils.HEX.encode(chunks.get(1).data));
 
-				insertStatement.setNull(4, java.sql.Types.NULL);
-			}
 			insertStatement.executeUpdate();
 
 			insertStatement.close();
@@ -75,7 +60,8 @@ public class OPReturnScript implements OutputScript {
 					+ tx_id, e);
 			System.exit(1);
 		} catch (SQLException e) {
-			logger.fatal("Unable to write OP_RETURN output #" + tx_index + " for transaction with id " + tx_id, e);
+			logger.fatal("Unable to write OP_RETURN output #" + tx_index + " for transaction with id " + tx_id + ". Script: " + script.toString(), e);
+			System.exit(1);
 		}
 
 	}

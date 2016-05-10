@@ -110,7 +110,7 @@ public class MultiSigScript implements OutputScript {
 				List<ECKey> ecPubKeys = script.getPubKeys();
 				for(ECKey ecKey: ecPubKeys)
 					publicKeys.add(ecKey.getPubKey());
-			} catch (IllegalArgumentException e){
+			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e){
 				logger.debug("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
 				logger.debug("Will attempt to manually extract the byte sequences");
 				
@@ -130,8 +130,6 @@ public class MultiSigScript implements OutputScript {
 					+ tx_id
 					+ " is of an unexpected format", e);
 			logger.fatal(script.toString());
-			System.exit(1);
-		} catch (IllegalArgumentException e){
 			System.exit(1);
 		}
 	}

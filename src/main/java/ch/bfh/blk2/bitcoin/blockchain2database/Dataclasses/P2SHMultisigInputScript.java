@@ -1,7 +1,9 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.security.interfaces.ECPublicKey;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -32,13 +34,15 @@ public class P2SHMultisigInputScript implements InputScript {
 	private int min = -1;
 	private int max = -1;
 
-	List<ECKey> publickeys;
+	private List<byte[]> publicKeys;
 
 	public P2SHMultisigInputScript(long tx_id, int tx_index, Script script, int script_size) {
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.script = script;
 		this.script_size = script_size;
+		
+		publicKeys = new ArrayList<byte[]>();
 	}
 
 	@Override
@@ -115,12 +119,11 @@ public class P2SHMultisigInputScript implements InputScript {
 
 	private void connect2pubkeys(DatabaseConnection connection) {
 		int index = 0;
-		for (ECKey key : publickeys) {
-			byte[] pubKeyBytes = key.getPubKey();
+		for (byte[] pkBytes : publicKeys) {
 			long pubkey_id = -1;
 
 			PubKeyManager pkm = new PubKeyManager();
-			pubkey_id = pkm.insertRawPK(connection, pubKeyBytes);
+			pubkey_id = pkm.insertRawPK(connection, pkBytes);
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(CONNECT_PUBKEYS_QUERY);
 
@@ -154,9 +157,23 @@ public class P2SHMultisigInputScript implements InputScript {
 			redeem_script_size = redeemScriptChunk.data.length;
 			redeem_script = new Script(redeemScriptChunk.data);
 
-			// extract information from the redeem script
-			publickeys = redeem_script.getPubKeys();
-			max = publickeys.size();
+			try{
+				// extract information from the redeem script
+				List<ECKey> ecPubKeys = redeem_script.getPubKeys();
+				for(ECKey ecKey: ecPubKeys)
+					publicKeys.add(ecKey.getPubKey());
+			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e){
+				logger.debug("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
+				logger.debug("Will attempt to manually extract the byte sequences");
+				
+				int scriptLenght = redeem_script.getChunks().size();
+				// We expect this to be a perfectly normal multisig script
+				int expectedNumOfPubKeys = scriptLenght - 3;
+				
+				for( int i=1; i <= expectedNumOfPubKeys; i++)
+					publicKeys.add(redeem_script.getChunks().get(i).data);
+			}
+			max = publicKeys.size();
 			min = redeem_script.getNumberOfSignaturesRequiredToSpend();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig redeem Script for p2sh input #"
