@@ -18,12 +18,13 @@ public class BlockDeleter {
 
 	// Find the signatures used
 	private static final String GET_SIGNATURE_IDS = "SELECT signature_id AS signature_id FROM multisig_signature WHERE tx_id = ?"
-			+ "UNION ALL SELECT signature_id AS signature_id FROM p2sh_multisig_signature WHERE tx_id = ?"
-			+ "UNION ALL SELECT signature_id AS signature_id FROM unlock_script_p2pkh;";
+			+ " UNION ALL SELECT signature_id AS signature_id FROM p2sh_multisig_signatures WHERE tx_id = ?"
+			+ " UNION ALL SELECT signature_id AS signature_id FROM unlock_script_p2pkh WHERE tx_id = ?"
+			+ " UNION ALL SELECT signature_id AS signature_id FROM unlock_script_p2raw_pub_key WHERE tx_id = ?;";
 
 	// delete references to the signature table
 	private static final String DELETE_MULTISIG_SIGNATURE = "DELETE FROM multisig_signature WHERE tx_id = ?;";
-	private static final String DELETE_P2SH_MULTISIG_SIGNATURE = "DELETE FROM p2sh_multisig_signature WHERE tx_id = ?;";
+	private static final String DELETE_P2SH_MULTISIG_SIGNATURE = "DELETE FROM p2sh_multisig_signatures WHERE tx_id = ?;";
 	// signatures are NOT deduplicated in the current build, so we can just remove them without loosing any information
 	private static final String DELETE_SIGNATURES = "DELETE FROM signature WHERE id = ?;";
 
@@ -33,9 +34,9 @@ public class BlockDeleter {
 
 	// Find references to scripts
 	private static final String FIND_SCRIPTS = "SELECT script_id AS script_id FROM unlock_script_p2sh_other WHERE tx_id = ?"
-			+ "UNION ALL SELECT redeem_script_id AS script_id FROM unlock_script_p2sh_other WHERE tx_id = ?"
-			+ "UNION ALL SELECT script_id AS script_id FROM unlock_script_other WHERE tx_id = ?"
-			+ "UNION ALL SELECT script_id AS script_id FROM out_script_other WHERE tx_id = ?;";
+			+ " UNION ALL SELECT redeem_script_id AS script_id FROM unlock_script_p2sh_other WHERE tx_id = ?"
+			+ " UNION ALL SELECT script_id AS script_id FROM unlock_script_other WHERE tx_id = ?"
+			+ " UNION ALL SELECT script_id AS script_id FROM out_script_other WHERE tx_id = ?;";
 
 	// Delete the scripts we've just found
 	private static final String DELETE_SCRIPT = "DELETE FROM script WHERE script_id = ?";
@@ -108,7 +109,10 @@ public class BlockDeleter {
 
 			ResultSet rs = statement.getResultSet();
 
-			blk_id = rs.getInt("blk_id");
+			if (rs.next())
+				blk_id = rs.getInt("blk_id");
+			else
+				throw new SQLException("Got no result for this block. WTF");
 		} catch (SQLException e) {
 			logger.fatal("Unable to get blk_id for Block with hash [ " + blockHash + "]", e);
 			System.exit(1);
@@ -145,6 +149,9 @@ public class BlockDeleter {
 		PreparedStatement statement = connection.getPreparedStatement(GET_SIGNATURE_IDS);
 		try {
 			statement.setLong(1, tx_id);
+			statement.setLong(2, tx_id);
+			statement.setLong(3, tx_id);
+			statement.setLong(4, tx_id);
 			statement.executeQuery();
 
 			ResultSet rs = statement.getResultSet();
@@ -210,6 +217,9 @@ public class BlockDeleter {
 		try {
 			statement = connection.getPreparedStatement(FIND_SCRIPTS);
 			statement.setLong(1, tx_id);
+			statement.setLong(2, tx_id);
+			statement.setLong(3, tx_id);
+			statement.setLong(4, tx_id);
 			statement.executeQuery();
 
 			ResultSet rs = statement.getResultSet();
