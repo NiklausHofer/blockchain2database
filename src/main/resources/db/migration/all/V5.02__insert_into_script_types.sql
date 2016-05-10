@@ -17,4 +17,8 @@ INSERT INTO script_type (id, script_type) VALUES
   (12, 'IN_P2SH_OTHER'),
   (13, 'IN_OTHER'),
   (14, 'IN_INVALID'),
-  (15, 'NO_PREV_OUT');
+  (15, 'NO_PREV_OUT'),
+  (16, 'IN_P2PKH_SPEC'),
+  (17, 'IN_P2RAWPUBKEY_SPEC'),
+  (18, 'IN_MLUTISIG_SPEC'),
+  (19, 'IN_P2SH_OTHER_REDEEM');

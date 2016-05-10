@@ -63,7 +63,7 @@ public class ScriptManager {
 
 				insertStatement.close();
 			} catch (SQLException e) {
-				logger.fatal("Unable to write chunk #" + index + " for this script", e);
+				logger.fatal("Unable to write chunk #" + index + " for this script: " + script.toString(), e);
 				System.exit(1);
 			}
 		}

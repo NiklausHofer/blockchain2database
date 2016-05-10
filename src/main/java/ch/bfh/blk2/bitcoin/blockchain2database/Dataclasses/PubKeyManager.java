@@ -90,14 +90,14 @@ public class PubKeyManager {
 			if (pkId != -1) {
 
 				PreparedStatement updatePK = connection.getPreparedStatement(UPDATE_PK);
-				updatePK.setString(1, pkHash);
+				updatePK.setString(1, pkHex);
 				updatePK.setLong(2, pkId);
 				updatePK.executeUpdate();
 				updatePK.close();
 			} else {
 				PreparedStatement insertPK = connection.getPreparedStatement(INSERT_PUBKEY);
 				insertPK.setString(1, pkHash);
-				insertPK.setString(2, pkHash);
+				insertPK.setString(2, pkHex);
 				insertPK.setBoolean(3, valid);
 				insertPK.executeUpdate();
 

@@ -9,4 +9,10 @@ CREATE VIEW script_type_lookup AS
   FROM input
     RIGHT JOIN unlock_script_other
       ON input.tx_id = unlock_script_other.tx_id
-      AND input.tx_index = unlock_script_other.tx_index;
+      AND input.tx_index = unlock_script_other.tx_index
+  UNION ALL
+  SELECT 12 AS script_type_id, script_id AS script_id
+  FROM unlock_script_p2sh_other
+  UNION ALL
+  SELECT 19 AS script_type_id, redeem_script_id AS script_id
+  FROM unlock_script_p2sh_other;
