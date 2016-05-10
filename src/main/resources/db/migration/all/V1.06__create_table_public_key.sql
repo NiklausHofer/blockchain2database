@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS public_key(
   id BIGINT AUTO_INCREMENT,
   pubkey_hash VARCHAR(64) UNIQUE,
   pubkey VARCHAR(520) UNIQUE,
+  valid_pubkey BOOLEAN,
     PRIMARY KEY(id)
 )ENGINE = MEMORY;
 
