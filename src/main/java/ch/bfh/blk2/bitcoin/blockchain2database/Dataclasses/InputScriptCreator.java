@@ -22,8 +22,19 @@ public class InputScriptCreator {
 
 		Script script = new Script(inputBytes);
 
-		if (prefOutType == ScriptType.OUT_MULTISIG)
-			return new MultisigInputScript(txId, txIndex, script, scriptSize);
+		if (prefOutType == ScriptType.OUT_MULTISIG){
+			
+			boolean isRawMultisig = true;				
+			for(ScriptChunk sc : script.getChunks())
+				if(!sc.isPushData())
+					isRawMultisig = false;
+				
+			if(isRawMultisig)
+				return new MultisigInputScript(txId, txIndex, script, scriptSize);
+			else
+				return new OtherInputScript(txId, txIndex, script, scriptSize,ScriptType.IN_MLUTISIG_SPEC);
+		}
+		
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
 			if( script.getChunks().size() == 2 )
 				return new P2PKHInputScript(script, txId, txIndex, scriptSize);
