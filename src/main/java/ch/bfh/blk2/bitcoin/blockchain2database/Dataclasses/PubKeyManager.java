@@ -69,13 +69,14 @@ public class PubKeyManager {
 			pkHash = publicKey.toAddress(Utility.PARAMS).toString();
 			pkHex = publicKey.getPublicKeyAsHex();
 		} catch (IllegalArgumentException e) {
-			String keyPrint = new String(pkBytes);
-			logger.debug("Unable to create an ECKey from public key " + keyPrint, e);
+			//String keyPrint = new String(pkBytes);
+			pkHex = Utils.HEX.encode(pkBytes);
+
+			logger.debug("Unable to create an ECKey from public key " + pkHex, e);
 			logger.debug("Will write in a hex represenattion of the keybytes instead and mark the key as invalid.");
 
 			byte[] pubKeyHash = Utils.sha256hash160(pkBytes);
 			pkHash = new Address(Utility.PARAMS, pubKeyHash).toString();
-			pkHex = Utils.HEX.encode(pkBytes);
 
 			valid = false;
 		}

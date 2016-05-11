@@ -157,24 +157,16 @@ public class P2SHMultisigInputScript implements InputScript {
 			redeem_script_size = redeemScriptChunk.data.length;
 			redeem_script = new Script(redeemScriptChunk.data);
 
-			try{
-				// extract information from the redeem script
-				List<ECKey> ecPubKeys = redeem_script.getPubKeys();
-				for(ECKey ecKey: ecPubKeys)
-					publicKeys.add(ecKey.getPubKey());
-			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e){
-				logger.debug("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
-				logger.debug("Will attempt to manually extract the byte sequences");
+			int scriptLenght = redeem_script.getChunks().size();
+			// We expect this to be a perfectly normal multisig script
+			int expectedNumOfPubKeys = scriptLenght - 3;
 				
-				int scriptLenght = redeem_script.getChunks().size();
-				// We expect this to be a perfectly normal multisig script
-				int expectedNumOfPubKeys = scriptLenght - 3;
-				
-				for( int i=1; i <= expectedNumOfPubKeys; i++)
-					publicKeys.add(redeem_script.getChunks().get(i).data);
-			}
+			for( int i=1; i <= expectedNumOfPubKeys; i++)
+				publicKeys.add(redeem_script.getChunks().get(i).data);
+
 			max = publicKeys.size();
-			min = redeem_script.getNumberOfSignaturesRequiredToSpend();
+			//min = redeem_script.getNumberOfSignaturesRequiredToSpend();
+            min = redeem_script.getChunks().get(0).decodeOpN();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig redeem Script for p2sh input #"
 					+ tx_index

@@ -105,24 +105,15 @@ public class MultiSigScript implements OutputScript {
 
 	private void parse() {
 		try {
-			try{
-				// see if BitcoinJ/Bouncycastle are able to propperly cast the addresses
-				List<ECKey> ecPubKeys = script.getPubKeys();
-				for(ECKey ecKey: ecPubKeys)
-					publicKeys.add(ecKey.getPubKey());
-			} catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e){
-				logger.debug("Unable to decode the public keys for multisig output #" + tx_index + " of transaction " + tx_id + ". The script is: " + script.toString(), e);
-				logger.debug("Will attempt to manually extract the byte sequences");
+			int scriptLenght = script.getChunks().size();
+			// We expect this to be a perfectly normal multisig script
+			int expectedNumOfPubKeys = scriptLenght - 3;
 				
-				int scriptLenght = script.getChunks().size();
-				// We expect this to be a perfectly normal multisig script
-				int expectedNumOfPubKeys = scriptLenght - 3;
-				
-				for( int i=1; i <= expectedNumOfPubKeys; i++)
-					publicKeys.add(script.getChunks().get(i).data);
-			}
+			for( int i=1; i <= expectedNumOfPubKeys; i++)
+				publicKeys.add(script.getChunks().get(i).data);
 			max = publicKeys.size();
-			min = script.getNumberOfSignaturesRequiredToSpend();
+			//min = script.getNumberOfSignaturesRequiredToSpend();
+            min = script.getChunks().get(0).decodeOpN();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig Script for output #"
 					+ tx_index
