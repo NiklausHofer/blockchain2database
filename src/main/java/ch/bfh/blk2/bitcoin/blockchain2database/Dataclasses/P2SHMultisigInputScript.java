@@ -21,7 +21,7 @@ public class P2SHMultisigInputScript implements InputScript {
 
 	private final String INPUT_QUERY = "INSERT INTO unlock_script_p2sh_multisig(tx_id, tx_index, script_size, redeem_script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ?, ? );";
 	private final String CONNECT_PUBKEYS_QUERY = "INSERT INTO p2sh_multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
-	private final String CONNECTION_SIGNATURES_QUERY = "INSERT INTO p2sh_multisig_signature(tx_id, tx_index, signature_id, idx) VALUES( ?, ?, ?, ? );";
+	private final String CONNECTION_SIGNATURES_QUERY = "INSERT INTO p2sh_multisig_signatures(tx_id, tx_index, signature_id, idx) VALUES( ?, ?, ?, ? );";
 
 	private long tx_id;
 	private int tx_index;
@@ -76,6 +76,8 @@ public class P2SHMultisigInputScript implements InputScript {
 		}
 
 		connect2pubkeys(connection);
+		
+		connect2signatures(connection);
 	}
 
 	private void connect2signatures(DatabaseConnection connection) {
@@ -91,8 +93,14 @@ public class P2SHMultisigInputScript implements InputScript {
 						+ tx_id
 						+ " is supposed to be of type multisig. But it looks like this:");
 				logger.warn(script.toString());
+				logger.warn("Separate last chunk looks like this: " + redeem_script.toString());
 			}
-			long sigId = sima.saveAndGetSigId(connection, chunk.data);
+			byte[] chunkData = chunk.data;
+			if( chunkData == null ){
+				chunkData = new byte[0];
+				logger.debug("P2SH Multisig unlock script with 0 data push looks like so: " + script.toString());
+			}
+			long sigId = sima.saveAndGetSigId(connection, chunkData);
 
 			PreparedStatement connectionStatement = connection.getPreparedStatement(CONNECTION_SIGNATURES_QUERY);
 
