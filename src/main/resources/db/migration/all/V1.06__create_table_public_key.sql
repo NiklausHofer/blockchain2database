@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS public_key(
     PRIMARY KEY(id)
 )ENGINE = MEMORY;
 
-CREATE INDEX public_key_hash ON public_key(pubkey_hash);
-CREATE INDEX public_key ON public_key(pubkey);
+CREATE INDEX public_key_hash USING BTREE ON public_key(pubkey_hash);
+CREATE INDEX public_key USING BTREE ON public_key(pubkey);

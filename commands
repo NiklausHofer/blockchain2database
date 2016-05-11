@@ -34,3 +34,6 @@ mvn flyway:migrate
 
 # Run flyway for testnet3
 mvn flyway:migrate@testnet3
+
+# Reset database
+mvn flyway:clean@testnet3 flyway:migrate@testnet3
