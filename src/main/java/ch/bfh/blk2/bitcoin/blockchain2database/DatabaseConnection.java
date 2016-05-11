@@ -16,12 +16,20 @@ public class DatabaseConnection {
 	private String driver, url, user, password;
 
 	private Connection connection;
+	
+	public DatabaseConnection(){
+		this(PROPERTIES_FILE);
+	}
 
-	public DatabaseConnection() {
-
+	/**
+	 * For use in tests. Use the default constructor for production code
+	 * 
+	 * @param propertiesFile
+	 */
+	public DatabaseConnection(String propertiesFile) {
 		try {
 			Properties properties = new Properties();
-			properties.load(new FileInputStream(PROPERTIES_FILE));
+			properties.load(new FileInputStream(propertiesFile));
 
 			driver = properties.getProperty(DRIVER);
 			url = properties.getProperty(URL);
@@ -29,9 +37,9 @@ public class DatabaseConnection {
 			password = properties.getProperty(PASSWORD);
 
 			connect();
-
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
 	}
 
@@ -41,8 +49,7 @@ public class DatabaseConnection {
 
 		try {
 			preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-
-		} catch (SQLException e) {
+		} catch (SQLException | NullPointerException e) {
 			e.printStackTrace();
 		}
 
