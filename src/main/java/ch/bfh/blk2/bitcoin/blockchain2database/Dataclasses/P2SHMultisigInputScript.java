@@ -86,19 +86,11 @@ public class P2SHMultisigInputScript implements InputScript {
 
 		for (int i = 0; i < chunks.size() - 1; i++) {
 			ScriptChunk chunk = chunks.get(i);
-			if (chunk.opcode > 75) {
-				logger.warn("The script of input #"
-						+ tx_index
-						+ " of transaction w/ id "
-						+ tx_id
-						+ " is supposed to be of type multisig. But it looks like this:");
-				logger.warn(script.toString());
-				logger.warn("Separate last chunk looks like this: " + redeem_script.toString());
-			}
 			byte[] chunkData = chunk.data;
 			if( chunkData == null ){
 				chunkData = new byte[0];
 				logger.debug("P2SH Multisig unlock script with 0 data push looks like so: " + script.toString());
+				System.exit(1);
 			}
 			long sigId = sima.saveAndGetSigId(connection, chunkData);
 

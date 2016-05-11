@@ -87,7 +87,7 @@ public class DataTransaction {
 
 			DataInput dataInput = new DataInput(input, tx_id, tx_index, date, connection);
 			if (transaction.isCoinBase()) {
-				logger.debug("Inserting a Coinbase Input");
+				logger.trace("Inserting a Coinbase Input");
 				long totalAmount = 0;
 				for (TransactionOutput out : transaction.getOutputs())
 					totalAmount += out.getValue().getValue();

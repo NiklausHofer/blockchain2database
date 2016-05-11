@@ -1,11 +1,15 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
+import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptChunk;
+import org.bitcoinj.script.ScriptOpCodes;
+import org.bitcoinj.wallet.RedeemData;
 
 public class InputScriptCreator {
 
@@ -68,12 +72,22 @@ public class InputScriptCreator {
 
 	private static boolean isP2SHMultisig(Script script) {
 
-		ScriptChunk lastChunk = script.getChunks().get(script.getChunks().size() - 1);
+		List<ScriptChunk> scriptChunks = script.getChunks();
+		ScriptChunk lastChunk = scriptChunks.get(script.getChunks().size() - 1);
 
 		if (lastChunk.data != null)
 			try {
 				Script reedemScript = new Script(lastChunk.data);
-				return reedemScript.isSentToMultiSig();
+				if(! reedemScript.isSentToMultiSig())
+					return false;
+
+				for(int i=0; i< scriptChunks.size()-1; i++ )
+					if(! (scriptChunks.get(i).opcode <= ScriptOpCodes.OP_PUSHDATA4)){
+						logger.debug("The following P2SH Input Script has a valid Multisig redeem script, but a weird redeem script. Will save it as P2SH_other: " + script.toString());
+						return false;
+					}
+				
+				return true;
 			} catch (ScriptException e) {
 				logger.debug("invalid reedem Script or data");
 				logger.debug("cant parse to script");
