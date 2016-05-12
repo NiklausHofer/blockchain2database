@@ -52,6 +52,25 @@
 		$folder = $db->name();
 		if (getDbName()) {
 			$objects = $db->getObjectList( true );
+			// add files
+			
+			$examples = array("examples" => array());
+			
+			$dir = 'SQLexamples';
+			$files = scandir($dir);
+			
+			foreach($files as $file)
+			{
+			  if (!is_dir($file))
+			  {
+        			array_push($examples["examples"],$file);
+  			  }
+ 			}
+ 			
+ 			
+			$objects = $objects + $examples;
+			
+			
 			// sort the object listing based on user preferences
 			$sort = Options::get('ui-tables-sort');
 			if ($sort && ( count($objects['tables']) > 1 ) )

@@ -78,6 +78,20 @@
 		}
 		print "</li>\n";
 	}
+	
+	
+	if (isset($data['examples'])) {
+		$tables = $data['examples'];
+		print '<li id="events"><span class="evtf">'.__('Examples').'</span><span class="count">'.count($tables).'</span>';
+		if (count($tables) > 0)	{
+			foreach($tables as $key=>$table)	{
+				$id = 'e_'. Html::id($table);
+				$table = htmlspecialchars($table);
+				print '<ul><li><span class="file oevt" id="'.$id.'"><a href=\'javascript:objDefault("event", "'.$id.'")\'>'.$table.'</a></span></li></ul>';
+			}
+		}
+		print "</li>\n";
+	}
 	print '</ul>';
 
 ?>
