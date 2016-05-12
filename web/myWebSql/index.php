@@ -128,16 +128,14 @@
 			</div>
 			
 			<div>
-			<a ref="../" style="font-size:15px">
+			<a href="../" style="font-size:20px">
 			[Home]
 			</a>
-			<a target="_blank" href="../schema.png" style="font-size:15px">
+			<a target="_blank" href="../schema.png" style="font-size:20px">
 			[View Database Schema]
 			</a>
 			</div>
-			<div>		
-			<a href="../" style="font-size:30px"> Home </a>
-			</div>
+
 			
 			<div class="info">
 				<span class="server"><?php echo htmlspecialchars(Session::get('auth', 'server_name', true)); ?></span> - <?php echo htmlspecialchars(Session::get('db', 'version_comment')); ?>&nbsp;<?php echo htmlspecialchars(Session::get('db', 'version_full')); ?><br />
