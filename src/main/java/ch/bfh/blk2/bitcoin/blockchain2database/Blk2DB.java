@@ -27,7 +27,7 @@ import ch.bfh.blk2.bitcoin.util.DBKeyStore;
 import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
-public class FooClass {
+public class Blk2DB {
 	private static final Logger logger = LogManager.getLogger("FooClass");
 
 	private BlockProducer blockProducer;
@@ -45,11 +45,11 @@ public class FooClass {
 
 	public static void main(String[] args) {
 
-		FooClass foo = new FooClass();
+		Blk2DB foo = new Blk2DB();
 		foo.start();
 	}
 
-	public FooClass() {
+	public Blk2DB() {
 
 		// Init BitcoinJ
 
