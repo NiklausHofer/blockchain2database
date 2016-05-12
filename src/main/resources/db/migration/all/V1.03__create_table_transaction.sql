@@ -9,4 +9,4 @@ CREATE TABLE IF NOT EXISTS transaction(
     FOREIGN KEY(blk_id) REFERENCES block(blk_id)
 )ENGINE = MEMORY;
 
-CREATE INDEX transaction_hash USING BTREE ON transaction (tx_hash);
+CREATE INDEX tx_hash USING BTREE ON transaction (tx_hash);
