@@ -17,7 +17,7 @@ public class MultisigInputScript implements InputScript {
 	// Not doing this in this version
 	//private final String GET_PUBKEYS = "SELECT public_key.pubkey FROM multisig_pubkeys LEFT JOIN public_key ON multisig_pubkeys.public_key_id = public_key.id WHERE multisig_pubkeys.tx_id = ? AND multisig_pubkeys.tx_index = ?;";
 	private final String INSERT_QUERY = "INSERT INTO unlock_script_multisig(tx_id, tx_index, script_size) VALUES( ?, ?, ? );";
-	private final String CONNECTION_QUERY = "INSERT INTO multisig_signature(tx_id, tx_index, signature_id, idx) VALUES( ?, ?, ?, ? );";
+	private final String CONNECTION_QUERY = "INSERT INTO multisig_signatures(tx_id, tx_index, signature_id, idx) VALUES( ?, ?, ?, ? );";
 
 	private long tx_id;
 	private int tx_index;

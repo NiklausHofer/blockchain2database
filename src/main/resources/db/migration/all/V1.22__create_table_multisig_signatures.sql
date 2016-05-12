@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS multisig_signature(
+CREATE TABLE IF NOT EXISTS multisig_signatures(
   tx_id BIGINT,
   tx_index INT,
   signature_id BIGINT,

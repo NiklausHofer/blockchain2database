@@ -17,14 +17,14 @@ public class BlockDeleter {
 	private static final String GET_TRANSACTION_ID = "SELECT tx_id FROM transaction WHERE blk_id = ?";
 
 	// Find the signatures used
-	private static final String GET_SIGNATURE_IDS = "SELECT signature_id AS signature_id FROM multisig_signature WHERE tx_id = ?"
+	private static final String GET_SIGNATURE_IDS = "SELECT signature_id AS signature_id FROM multisig_signatures WHERE tx_id = ?"
 			+ " UNION ALL SELECT signature_id AS signature_id FROM p2sh_multisig_signatures WHERE tx_id = ?"
 			+ " UNION ALL SELECT signature_id AS signature_id FROM unlock_script_p2pkh WHERE tx_id = ?"
 			+ " UNION ALL SELECT signature_id AS signature_id FROM unlock_script_p2raw_pub_key WHERE tx_id = ?;";
 
 	// delete references to the signature table
-	private static final String DELETE_MULTISIG_SIGNATURE = "DELETE FROM multisig_signature WHERE tx_id = ?;";
-	private static final String DELETE_P2SH_MULTISIG_SIGNATURE = "DELETE FROM p2sh_multisig_signatures WHERE tx_id = ?;";
+	private static final String DELETE_MULTISIG_SIGNATURES = "DELETE FROM multisig_signatures WHERE tx_id = ?;";
+	private static final String DELETE_P2SH_MULTISIG_SIGNATURES = "DELETE FROM p2sh_multisig_signatures WHERE tx_id = ?;";
 	// signatures are NOT deduplicated in the current build, so we can just remove them without loosing any information
 	private static final String DELETE_SIGNATURES = "DELETE FROM signature WHERE id = ?;";
 
@@ -166,11 +166,11 @@ public class BlockDeleter {
 		// delete the links to those signatures
 		PreparedStatement deleteStatement;
 		try {
-			deleteStatement = connection.getPreparedStatement(DELETE_MULTISIG_SIGNATURE);
+			deleteStatement = connection.getPreparedStatement(DELETE_MULTISIG_SIGNATURES);
 			deleteStatement.setLong(1, tx_id);
 			deleteStatement.executeUpdate();
 
-			deleteStatement = connection.getPreparedStatement(DELETE_P2SH_MULTISIG_SIGNATURE);
+			deleteStatement = connection.getPreparedStatement(DELETE_P2SH_MULTISIG_SIGNATURES);
 			deleteStatement.setLong(1, tx_id);
 			deleteStatement.executeUpdate();
 		} catch (SQLException e) {
