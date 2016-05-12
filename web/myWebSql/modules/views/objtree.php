@@ -1,3 +1,31 @@
+
+
+
+<SCRIPT language="JavaScript"> 
+
+ 
+ function showText(file) 
+ { 
+   
+  var xhttp = new XMLHttpRequest();
+  
+  xhttp.onreadystatechange = function() {
+    if (xhttp.readyState == 4 && xhttp.status == 200) {
+      var text = xhttp.responseText;
+      commandEditor.setCode(text);
+    }
+    else{
+          commandEditor.setCode("file not found");
+    }
+  };
+  	
+  xhttp.open("GET","SQLexamples/"+file, true);
+  xhttp.send();
+
+ } 
+
+
+ </SCRIPT>
 <?php
 
 	print '<ul id="tablelist" class="filetree">';
@@ -80,6 +108,8 @@
 	}
 	
 	
+	
+	//MODIFIED
 	if (isset($data['examples'])) {
 		$tables = $data['examples'];
 		print '<li id="events"><span class="evtf">'.__('Examples').'</span><span class="count">'.count($tables).'</span>';
@@ -87,7 +117,7 @@
 			foreach($tables as $key=>$table)	{
 				$id = 'e_'. Html::id($table);
 				$table = htmlspecialchars($table);
-				print '<ul><li><span class="file oevt" id="'.$id.'"><a href=\'javascript:objDefault("event", "'.$id.'")\'>'.$table.'</a></span></li></ul>';
+				print '<ul><li><span class="file oevt" id="'.$id.'"><a href="javascript:showText(\''.Html::id($table).'\')">'.$table.'</a></span></li></ul>';
 			}
 		}
 		print "</li>\n";

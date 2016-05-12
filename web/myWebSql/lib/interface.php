@@ -53,6 +53,7 @@
 		if (getDbName()) {
 			$objects = $db->getObjectList( true );
 			// add files
+			//MODIFIED
 			
 			$examples = array("examples" => array());
 			
