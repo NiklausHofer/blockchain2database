@@ -37,7 +37,7 @@ public class P2RawPubKeyInputscript implements InputScript {
 	public void writeInput(DatabaseConnection connection) {
 
 		ScriptChunk chunk = script.getChunks().get(0);
-		SigManager sigma = new SigManager();
+		SigManager sigma = SigManager.getInstance();
 
 		long sigId = sigma.saveAndGetSigId(connection, chunk.data);
 

@@ -82,7 +82,7 @@ public class P2SHMultisigInputScript implements InputScript {
 
 	private void connect2signatures(DatabaseConnection connection) {
 		List<ScriptChunk> chunks = script.getChunks();
-		SigManager sima = new SigManager();
+		SigManager sima = SigManager.getInstance();
 
 		for (int i = 0; i < chunks.size() - 1; i++) {
 			ScriptChunk chunk = chunks.get(i);
@@ -122,7 +122,7 @@ public class P2SHMultisigInputScript implements InputScript {
 		for (byte[] pkBytes : publicKeys) {
 			long pubkey_id = -1;
 
-			PubKeyManager pkm = new PubKeyManager();
+			PubKeyManager pkm = PubKeyManager.getInstance();
 			pubkey_id = pkm.insertRawPK(connection, pkBytes);
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(CONNECT_PUBKEYS_QUERY);

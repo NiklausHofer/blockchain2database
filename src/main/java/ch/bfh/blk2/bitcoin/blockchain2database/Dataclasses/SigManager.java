@@ -23,6 +23,16 @@ import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 public class SigManager {
 
 	private static final Logger logger = LogManager.getLogger("SigManager");
+	
+	private static SigManager instance = null;
+	
+	private SigManager(){};
+	
+	public static SigManager getInstance(){
+		if( instance == null)
+			instance = new SigManager();
+		return instance;
+	}
 
 	// Not needet any more...
 	//private final String SEARCH_SIGNATURE = "SELECT id FROM signature WHERE signature = ?";
@@ -86,7 +96,7 @@ public class SigManager {
 	 */
 	public long saveAndGetSigId(DatabaseConnection connection, byte[] signature, byte[] pubkey) {
 
-		PubKeyManager pkm = new PubKeyManager();
+		PubKeyManager pkm = PubKeyManager.getInstance();
 		long pubkeyId = pkm.insertRawPK(connection, pubkey);
 
 		return saveAndGetSigId(connection, signature, pubkeyId);

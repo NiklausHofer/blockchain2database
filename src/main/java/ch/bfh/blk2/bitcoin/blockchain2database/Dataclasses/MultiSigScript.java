@@ -77,7 +77,7 @@ public class MultiSigScript implements OutputScript {
 			//byte[] pubKeyBytes = key.getPubKey();
 			long pubkey_id = -1;
 
-			PubKeyManager pkm = new PubKeyManager();
+			PubKeyManager pkm = PubKeyManager.getInstance();
 			pubkey_id = pkm.insertRawPK(connection, key);
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(insertConnectionQuery);

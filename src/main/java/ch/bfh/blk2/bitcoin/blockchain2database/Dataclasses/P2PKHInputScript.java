@@ -35,11 +35,15 @@ public class P2PKHInputScript implements InputScript {
 	@Override
 	public void writeInput(DatabaseConnection connection) {
 
+		/*
 		byte[] signature = getSignature();
 		byte[] pubkey = getPubkey();
+		*/
+		byte[] signature = script.getChunks().get(0).data;
+		byte[] pubkey = script.getChunks().get(1).data;
 
 		long pubkeyId = -1;
-		PubKeyManager pm = new PubKeyManager();
+		PubKeyManager pm = PubKeyManager.getInstance();
 		try{
 			pubkeyId = pm.insertRawPK(connection, pubkey);
 		} catch (IllegalArgumentException e){
@@ -47,7 +51,7 @@ public class P2PKHInputScript implements InputScript {
 			System.exit(1);
 		}
 
-		SigManager sm = new SigManager();
+		SigManager sm = SigManager.getInstance();
 		long signId = sm.saveAndGetSigId(connection, signature, pubkeyId);
 
 		try {
@@ -71,6 +75,7 @@ public class P2PKHInputScript implements InputScript {
 
 	}
 
+	/*
 	private byte[] getSignature() {
 		return script.getChunks().get(0).data;
 	}
@@ -78,4 +83,5 @@ public class P2PKHInputScript implements InputScript {
 	private byte[] getPubkey() {
 		return script.getChunks().get(1).data;
 	}
+	*/
 }

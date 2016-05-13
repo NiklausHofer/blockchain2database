@@ -53,7 +53,7 @@ public class PubKeyManagerTest {
 		byte pkBytes[] = Utils.HEX.decode(hexKey);
 		// This is an invalid key, so we can't turn it into an eckey
 
-		PubKeyManager pkManager = new PubKeyManager();
+		PubKeyManager pkManager = PubKeyManager.getInstance();
 
 		long first_pubkey_id = pkManager.insertRawPK(connection, pkBytes);
 		long second_pubkey_id = pkManager.insertRawPK(connection, pkBytes);
@@ -78,7 +78,7 @@ public class PubKeyManagerTest {
 		byte pkBytes[] = Utils.HEX.decode(hexKey);
 		ECKey eckey = ECKey.fromPublicOnly(pkBytes);
 
-		PubKeyManager pkManager = new PubKeyManager();
+		PubKeyManager pkManager = PubKeyManager.getInstance();
 
 		String address = eckey.toAddress(new TestNet3Params()).toString();
 
@@ -114,7 +114,7 @@ public class PubKeyManagerTest {
 		byte[] pubKey = Utils.HEX.decode(hexKey);
 		ECKey eckey = ECKey.fromPublicOnly(pubKey);
 
-		PubKeyManager pkManager = new PubKeyManager();
+		PubKeyManager pkManager = PubKeyManager.getInstance();
 
 		String address = eckey.toAddress(new TestNet3Params()).toString();
 
@@ -146,7 +146,7 @@ public class PubKeyManagerTest {
 	public void emptyPubkeyTest() {
 		byte[] pubKey = new byte[0];
 
-		PubKeyManager pkManager = new PubKeyManager();
+		PubKeyManager pkManager = PubKeyManager.getInstance();
 		pkManager.insertRawPK(connection, pubKey);
 
 		ResultSet rs = DBHelper.runQuery("SELECT pubkey_hash, pubkey FROM public_key WHERE pubkey = '';", connection);

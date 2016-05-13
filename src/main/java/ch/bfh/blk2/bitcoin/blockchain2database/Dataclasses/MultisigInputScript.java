@@ -53,7 +53,7 @@ public class MultisigInputScript implements InputScript {
 			System.exit(1);
 		}
 
-		SigManager sima = new SigManager();
+		SigManager sima = SigManager.getInstance();
 
 		int index = 0;
 		for (ScriptChunk chunk : script.getChunks()) {

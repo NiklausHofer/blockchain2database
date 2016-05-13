@@ -41,7 +41,7 @@ public class P2RawPubKeyScript implements OutputScript {
 
 		byte[] pubKey = script.getPubKey();
 
-		PubKeyManager pm = new PubKeyManager();
+		PubKeyManager pm = PubKeyManager.getInstance();
 		long pkId = pm.insertRawPK(connection, pubKey);
 
 		try {

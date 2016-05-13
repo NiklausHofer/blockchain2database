@@ -40,7 +40,7 @@ public class P2PKHashScript implements OutputScript {
 
 		String address = script.getToAddress(Utility.PARAMS, false).toString();
 
-		PubKeyManager pm = new PubKeyManager();
+		PubKeyManager pm = PubKeyManager.getInstance();
 		long pubkeyId = pm.insertPubkeyHash(connection, address);
 
 		try {

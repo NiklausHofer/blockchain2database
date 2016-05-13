@@ -23,10 +23,18 @@ public class PubKeyManager {
 
 	UPDATE_PK = "UPDATE public_key" + " SET pubkey = ?" + " WHERE id = ?",
 
-	INSERT_IGNORE_KEY_HASH = "INSERT IGNORE INTO public_key (pubkey_hash, valid_pubkey) VALUES(?,?)"
-
-	;
-
+	INSERT_IGNORE_KEY_HASH = "INSERT INTO public_key (pubkey_hash, valid_pubkey) VALUES(?,?)";
+	
+	private static PubKeyManager instance = null;
+	
+	private PubKeyManager(){};
+	
+	public static PubKeyManager getInstance(){
+		if( instance == null )
+			instance = new PubKeyManager();
+		return instance;
+	}
+	
 	private long getPKIdFromPubKeyHash(DatabaseConnection connection, String pkHash) {
 
 		long pkId = -1;
@@ -132,43 +140,35 @@ public class PubKeyManager {
 	}
 
 	public long insertPubkeyHash(DatabaseConnection connection, String pkHash) {
-
 		long id = -1;
+		id = getPKIdFromPubKeyHash(connection, pkHash);
+		if( id == -1 ){
+			try {
+				PreparedStatement insertAddr = connection.getPreparedStatement(INSERT_IGNORE_KEY_HASH);
+				insertAddr.setString(1, pkHash);
+				insertAddr.setBoolean(2, true);
+				insertAddr.executeUpdate();
+				ResultSet generatedKeys = insertAddr.getGeneratedKeys();
 
-		try {
-
-			PreparedStatement insertAddr = connection.getPreparedStatement(INSERT_IGNORE_KEY_HASH);
-			insertAddr.setString(1, pkHash);
-			insertAddr.setBoolean(2, true);
-			insertAddr.executeUpdate();
-			ResultSet generatedKeys = insertAddr.getGeneratedKeys();
-
-			if (generatedKeys.next())
-				id = generatedKeys.getLong(1);
-			else {
-				logger.trace("Adress does exist in DB try to querry its ID: [" + pkHash + "]");
-
-				id = getPKIdFromPubKeyHash(connection, pkHash);
-
-				if (id == -1) {
+				if (generatedKeys.next())
+					id = generatedKeys.getLong(1);
+				else {
 					logger.fatal("Bad generatedKeySet from Address [" + pkHash + "]");
 					connection.commit();
 					connection.closeConnection();
 					System.exit(1);
 				}
+
+				generatedKeys.close();
+				insertAddr.close();
+			} catch (SQLException e) {
+				logger.fatal("Failed to Insert adresse [" + pkHash + "]", e);
+				connection.commit();
+				connection.closeConnection();
+				System.exit(1);
 			}
-
-			generatedKeys.close();
-			insertAddr.close();
-
-		} catch (SQLException e) {
-			logger.fatal("Failed to Insert adresse [" + pkHash + "]");
-			logger.fatal(e);
-			connection.commit();
-			connection.closeConnection();
-			System.exit(1);
 		}
-
+		
 		return id;
 	}
 }
