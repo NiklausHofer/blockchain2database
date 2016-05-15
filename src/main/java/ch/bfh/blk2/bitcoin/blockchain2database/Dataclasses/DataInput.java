@@ -147,20 +147,9 @@ public class DataInput {
 				}
 				*/
 
-			} else {
-				logger.fatal(
-						"Got a malformed response from the database while looking for an output reffered to by one of "
-								+ "Tx # "
-								+ tx_id
-								+ " Inputs can not be found\n"
-								+ "The specific output we were looking for  is: "
-								+ input.getOutpoint().getHash().toString()
-								+ " index "
-								+ input.getOutpoint().getIndex());
-				connection.commit();
-				connection.closeConnection();
-				System.exit(2);
-			}
+			} else
+				throw new SQLException("Got a malformed response from the database while looking for the output");
+
 			rs.close();
 			statement.close();
 		} catch (SQLException e) {
