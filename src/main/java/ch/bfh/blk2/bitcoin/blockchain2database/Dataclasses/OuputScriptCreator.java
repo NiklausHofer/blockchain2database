@@ -29,7 +29,8 @@ public class OuputScriptCreator {
 				if (script.isSentToMultiSig())
 					return new MultiSigScript(script, scriptSize, txId, txIndex);
 
-				if (script.isOpReturn())
+				// OP_RETURN w/ data >80 Byte is not relayed by core client, thus not a standard transaction...
+				if (script.isOpReturn() && script.getChunks().get(1).data != null && script.getChunks().get(1).data.length <= 80 )
 					return new OPReturnScript(script, scriptSize, txId, txIndex);
 
 			} catch (IllegalArgumentException e) {

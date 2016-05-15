@@ -26,19 +26,6 @@ public class InputScriptCreator {
 
 		Script script = new Script(inputBytes);
 
-		if (prefOutType == ScriptType.OUT_MULTISIG){
-			
-			boolean isRawMultisig = true;				
-			for(ScriptChunk sc : script.getChunks())
-				if(!sc.isPushData())
-					isRawMultisig = false;
-				
-			if(isRawMultisig)
-				return new MultisigInputScript(txId, txIndex, script, scriptSize);
-			else
-				return new OtherInputScript(txId, txIndex, script, scriptSize,ScriptType.IN_MLUTISIG_SPEC);
-		}
-		
 		if (prefOutType == ScriptType.OUT_P2PKHASH)
 			if( script.getChunks().size() == 2 )
 				return new P2PKHInputScript(script, txId, txIndex, scriptSize);
@@ -46,6 +33,21 @@ public class InputScriptCreator {
 				logger.debug("Non standard Pay to public key hash input script looking like so: " + script.toString());
 				return new OtherInputScript(txId, txIndex, script, scriptSize, ScriptType.IN_P2PKH_SPEC);
 			}
+
+		if (prefOutType == ScriptType.OUT_MULTISIG){
+			boolean isRawMultisig = true;				
+			for(ScriptChunk sc : script.getChunks())
+				if(! (sc.opcode <= ScriptOpCodes.OP_PUSHDATA4)){
+					logger.debug("This is supposed to be a multisig input script, but it has weird operations: " + script.toString());
+					isRawMultisig = false;
+				}
+				
+			if(isRawMultisig)
+				return new MultisigInputScript(txId, txIndex, script, scriptSize);
+			else
+				return new OtherInputScript(txId, txIndex, script, scriptSize,ScriptType.IN_MLUTISIG_SPEC);
+		}
+		
 		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY)
 			if( script.getChunks().size() == 1 )
 				return new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
@@ -59,6 +61,7 @@ public class InputScriptCreator {
 				return new P2SHMultisigInputScript(txId, txIndex, script, scriptSize);
 			else
 				return new P2SHOtherInputScript(script, txId, txIndex, scriptSize);
+
 		if (prefOutType == ScriptType.OUT_OTHER)
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
 
