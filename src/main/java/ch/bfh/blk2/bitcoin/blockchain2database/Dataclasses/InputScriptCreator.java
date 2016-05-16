@@ -20,7 +20,7 @@ public class InputScriptCreator {
 	private final static int MAX_SIG_LENGTH = 73;
 	*/
 
-	public static InputScript parseScript(TransactionInput in, long txId, int txIndex, ScriptType prefOutType,
+	public static InputScript parseScript(TransactionInput in, long txId, int txIndex, ScriptType prevOutType,
 			long prevTxId, int prevTxIndex) {
 
 		byte[] inputBytes = in.getScriptBytes();
@@ -33,7 +33,7 @@ public class InputScriptCreator {
 		Script script = new Script(inputBytes);
 
 		// P2PKH
-		if (prefOutType == ScriptType.OUT_P2PKHASH){
+		if (prevOutType == ScriptType.OUT_P2PKHASH){
 			InputScript inputScript;
 			try{
 				inputScript =  new P2PKHInputScript(script, txId, txIndex, scriptSize);
@@ -47,7 +47,7 @@ public class InputScriptCreator {
 		}
 
 		// MULTISIG
-		if (prefOutType == ScriptType.OUT_MULTISIG){
+		if (prevOutType == ScriptType.OUT_MULTISIG){
 			InputScript inputScript;
 			try{
 				inputScript =  new MultisigInputScript(txId, txIndex, script, scriptSize);
@@ -61,7 +61,7 @@ public class InputScriptCreator {
 		}
 		
 		// RAW PUB KEY
-		if (prefOutType == ScriptType.OUT_P2RAWPUBKEY){
+		if (prevOutType == ScriptType.OUT_P2RAWPUBKEY){
 			InputScript inputScript;
 			try{
 				inputScript= new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
@@ -75,7 +75,7 @@ public class InputScriptCreator {
 		}
 				
 		// P2SH
-		if (prefOutType == ScriptType.OUT_P2SH){
+		if (prevOutType == ScriptType.OUT_P2SH){
 			InputScript inputScript;
 			if (isP2SHMultisig(script))
 				try{
@@ -92,7 +92,7 @@ public class InputScriptCreator {
 		}
 
 		// OTHER
-		if (prefOutType == ScriptType.OUT_OTHER)
+		if (prevOutType == ScriptType.OUT_OTHER)
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
 
 		// input script must be one of these types input script can't be invalid
@@ -109,13 +109,13 @@ public class InputScriptCreator {
 			return false;
 
 		try {
-			Script reedemScript = new Script(lastChunk.data);
-			if(! reedemScript.isSentToMultiSig())
+			Script redeemScript = new Script(lastChunk.data);
+			if(! redeemScript.isSentToMultiSig())
 				return true;
 			
 			return false;
 		} catch (ScriptException e) {
-			logger.debug("invalid reedem Script or data. Can't parse the script");
+			logger.debug("invalid redeem Script or data. Can't parse the script");
 			return false;
 		}
 	}

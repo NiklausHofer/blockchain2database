@@ -38,25 +38,25 @@ public class P2SHOtherInputScript implements InputScript {
 	@Override
 	public void writeInput(DatabaseConnection connection) {
 
-		byte[] reedemScript = getReedemScript();
+		byte[] redeemScript = getRedeemScript();
 
 		//TODO check if this works
 		// remove redeem script
-		Script.removeAllInstancesOf(script.getProgram(), reedemScript);
+		Script.removeAllInstancesOf(script.getProgram(), redeemScript);
 
 		ScriptManager sc = new ScriptManager();
 		long scriptId = sc.writeScript(connection, script);
-		long reedemId = sc.writeScript(connection, new Script(reedemScript));
+		long redeemId = sc.writeScript(connection, new Script(redeemScript));
 
 		try {
 
 			PreparedStatement insertStatement = connection.getPreparedStatement(INSERT_P2SH_OTHER_SCRIPT);
 			insertStatement.setLong(1, txId);
 			insertStatement.setInt(2, txIndex);
-			insertStatement.setInt(3, scriptSize - reedemScript.length);
+			insertStatement.setInt(3, scriptSize - redeemScript.length);
 			insertStatement.setLong(4, scriptId);
-			insertStatement.setLong(5, reedemId);
-			insertStatement.setInt(6, reedemScript.length);
+			insertStatement.setLong(5, redeemId);
+			insertStatement.setInt(6, redeemScript.length);
 
 			insertStatement.executeUpdate();
 			insertStatement.close();
@@ -70,7 +70,7 @@ public class P2SHOtherInputScript implements InputScript {
 
 	}
 
-	public byte[] getReedemScript() {
+	public byte[] getRedeemScript() {
 		return script.getChunks().get(script.getChunks().size() - 1).data;
 	}
 }
