@@ -110,7 +110,7 @@ public class InputScriptCreator {
 
 		try {
 			Script redeemScript = new Script(lastChunk.data);
-			if(! redeemScript.isSentToMultiSig())
+			if(redeemScript.isSentToMultiSig())
 				return true;
 			
 			return false;

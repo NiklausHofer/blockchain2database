@@ -186,6 +186,9 @@ public class P2SHMultisigInputScript implements InputScript {
 	}
 	
 	private void parseRedeemScript() throws IllegalArgumentException{
+		if(!redeem_script.isSentToMultiSig())
+			throw new IllegalArgumentException("Redeem script was not of script Type SENT TO MULTISIG");
+
 		int redeemScriptLenght = redeem_script.getChunks().size();
 		// We expect this to be a perfectly normal multisig script
 		int expectedNumOfPubKeys = redeemScriptLenght - 3;
