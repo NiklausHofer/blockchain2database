@@ -43,17 +43,18 @@ public class P2SHScript implements OutputScript {
 	public void writeOutputScript(DatabaseConnection connection) {
 
 		try{
-		String scriptHash = script.getToAddress(Utility.PARAMS, false).toString();
+			String scriptHash = script.getToAddress(Utility.PARAMS, false).toString();
 		
-		PreparedStatement insertScript = connection.getPreparedStatement(INSERT_P2SHSCRIPT);
-		insertScript.setLong(1, txId);
-		insertScript.setInt(2, txIndex);
-		insertScript.setInt(3, scriptSize);
-		insertScript.setString(4, scriptHash);
+			PreparedStatement insertScript = connection.getPreparedStatement(INSERT_P2SHSCRIPT);
+			insertScript.setLong(1, txId);
+			insertScript.setInt(2, txIndex);
+			insertScript.setInt(3, scriptSize);
+			insertScript.setString(4, scriptHash);
 		
-		insertScript.executeUpdate();
-		}
-		catch(SQLException e){
+			insertScript.executeUpdate();
+		
+			insertScript.close();
+		} catch(SQLException e){
 			logger.fatal("Failed to write P2SH script");
 			logger.fatal("in output [tx_id: "+txId+", tx_index:"+txIndex+"]");
 			logger.fatal(e);

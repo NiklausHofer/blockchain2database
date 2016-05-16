@@ -52,6 +52,8 @@ public class P2RawPubKeyScript implements OutputScript {
 			inserRawPKScript.setInt(3, scriptSize);
 			inserRawPKScript.setLong(4, pkId);
 			inserRawPKScript.executeUpdate();
+			
+			inserRawPKScript.close();
 
 		} catch (SQLException e) {
 			logger.fatal("Failed to write P2raw PK script");

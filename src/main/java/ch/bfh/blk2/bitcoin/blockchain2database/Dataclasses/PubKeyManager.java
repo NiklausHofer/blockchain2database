@@ -62,7 +62,6 @@ public class PubKeyManager {
 	}
 
 	public long insertRawPK(DatabaseConnection connection, byte[] pkBytes) {
-
 		String pkHash = null;
 		String pkHex = null;
 		boolean valid = true;
