@@ -10,12 +10,15 @@ import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.script.Script;
+import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 public class MultiSigScript implements OutputScript {
 
 	private static final Logger logger = LogManager.getLogger("OPReturnScript");
+
+	private final static int MAX_KEY_LENGTH = 65;
 
 	private Script script;
 	private long tx_id;
@@ -30,9 +33,7 @@ public class MultiSigScript implements OutputScript {
 	private final String insertQuery = "INSERT INTO out_script_multisig(tx_id, tx_index, script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ? );";
 	private final String insertConnectionQuery = "INSERT INTO multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
 
-	public MultiSigScript(Script script, int scriptSize, long tx_id, int tx_index) {
-		if (!script.isSentToMultiSig())
-			throw new IllegalArgumentException("Script needs to be of type Bare Multisig");
+	public MultiSigScript(Script script, int scriptSize, long tx_id, int tx_index) throws IllegalArgumentException{
 
 		this.script = script;
 		this.tx_id = tx_id;
@@ -40,6 +41,7 @@ public class MultiSigScript implements OutputScript {
 		this.scriptSize = scriptSize;
 
 		publicKeys = new ArrayList<>();
+		parse();
 	}
 
 	@Override
@@ -49,7 +51,6 @@ public class MultiSigScript implements OutputScript {
 
 	@Override
 	public void writeOutputScript(DatabaseConnection connection) {
-		parse();
 
 		PreparedStatement insertStatement = connection.getPreparedStatement(insertQuery);
 		try {
@@ -104,24 +105,33 @@ public class MultiSigScript implements OutputScript {
 	}
 
 	private void parse() {
+		if (!script.isSentToMultiSig())
+			throw new IllegalArgumentException("Script needs to be of type Bare Multisig");
+
 		try {
 			int scriptLenght = script.getChunks().size();
-			// We expect this to be a perfectly normal multisig script
 			int expectedNumOfPubKeys = scriptLenght - 3;
 				
-			for( int i=1; i <= expectedNumOfPubKeys; i++)
-				publicKeys.add(script.getChunks().get(i).data);
+			for( int i=1; i <= expectedNumOfPubKeys; i++){
+				ScriptChunk pkChunk = script.getChunks().get(i);
+				if( ! pkChunk.isPushData())
+					throw new IllegalArgumentException("Multisig Redeem Script contains non-pushdata operations in invalid positions!");
+				if( pkChunk.data == null ){ // OP_N
+					byte[] arr = new byte[1];
+					arr[0] = (byte) pkChunk.decodeOpN();
+					publicKeys.add(arr);
+					continue;
+				}
+				if( pkChunk.data.length > MAX_KEY_LENGTH)
+					throw new IllegalArgumentException("Multisig Redeem Script contains data that is clearly too long to be a public key.");
+
+				publicKeys.add(pkChunk.data);
+			}
+
 			max = publicKeys.size();
-			//min = script.getNumberOfSignaturesRequiredToSpend();
             min = script.getChunks().get(0).decodeOpN();
 		} catch (ScriptException e) {
-			logger.fatal("Multisig Script for output #"
-					+ tx_index
-					+ " of transaction "
-					+ tx_id
-					+ " is of an unexpected format", e);
-			logger.fatal(script.toString());
-			System.exit(1);
+			throw new IllegalArgumentException("Pay to Multisig output Script is of unexpected/ UNPARSABLE format!");
 		}
 	}
 
