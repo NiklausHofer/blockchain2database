@@ -5,8 +5,6 @@ import java.sql.SQLException;
 
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.AddressFormatException;
-import org.bitcoinj.core.TransactionOutput;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptBuilder;
@@ -15,11 +13,8 @@ import org.bitcoinj.script.ScriptOpCodes;
 import org.junit.*;
 
 import static org.junit.Assert.*;
-import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.OuputScriptCreator;
-import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.P2PKHInputScript;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.P2PKHashScript;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.ScriptType;
-import ch.bfh.blk2.bitcoin.util.Utility;
 
 public class P2PKHashScriptTest {
 	
@@ -71,7 +66,7 @@ public class P2PKHashScriptTest {
 		Address addr = new Address(new TestNet3Params(), "mixzB3ZsBeHFTPkpoYVocFbwE1NBYmkksb");
 		
 		byte [] pkHash = addr.getHash160();
-		int scriptSize = pkHash.length + 4; 
+		int scriptSize = pkHash.length + 5; 
 
 		Script script = createScript(pkHash);
 		
