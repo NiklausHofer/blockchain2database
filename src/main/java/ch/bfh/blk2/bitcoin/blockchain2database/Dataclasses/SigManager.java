@@ -34,17 +34,13 @@ public class SigManager {
 		return instance;
 	}
 
-	// Not needet any more...
+	// Not needed any more...
 	//private final String SEARCH_SIGNATURE = "SELECT id FROM signature WHERE signature = ?";
 
-	private final String INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION = "INSERT INTO signature(signature, pubkey_id) VALUES( ?, ? );";
+	private final String INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION = "INSERT INTO signature(signature) VALUES( ? );";
 
 	/**
-	 * @deprecated In future releases, all signatures will have to be connected
-	 *             to a pubkey
-	 *
-	 *             Save the signature to the database and return the signature's
-	 *             id.
+	 * Save the signature to the database and return the signature's id.
 	 *
 	 * @param connection
 	 *            the DatabaseConnection to be used
@@ -52,7 +48,6 @@ public class SigManager {
 	 *            the signature to be saved and which's id is to be returned
 	 * @return the database id of the signature
 	 */
-	@Deprecated
 	public long saveAndGetSigId(DatabaseConnection connection, byte[] signature) {
 		long signatureId = -1;
 
@@ -60,7 +55,6 @@ public class SigManager {
 		
 		try {
 			insertStatement.setString(1, Utils.HEX.encode(signature));
-			insertStatement.setNull(2, java.sql.Types.BIGINT);
 
 			insertStatement.execute();
 
@@ -71,68 +65,6 @@ public class SigManager {
 				throw new SQLException("No id for a newly inserted row was returned");
 
 			resultSet.close();
-			insertStatement.close();
-		} catch (SQLException e) {
-			logger.fatal("Unable to insert signature " + Utils.HEX.encode(signature), e);
-			System.exit(1);
-		}
-
-		return signatureId;
-	}
-
-	/**
-	 * Save the signature to the database and return the signature's id.
-	 *
-	 * The signature entry in the database will also get connected to the
-	 * provided public key.
-	 *
-	 * @param connection
-	 *            the DatabaseConnection to be used
-	 * @param signature
-	 *            the signature to be saved and which's id is to be returned
-	 * @param pubkey
-	 *            the pubkey which the signature is connected with
-	 * @return the database id of the signature
-	 */
-	public long saveAndGetSigId(DatabaseConnection connection, byte[] signature, byte[] pubkey) {
-
-		PubKeyManager pkm = PubKeyManager.getInstance();
-		long pubkeyId = pkm.insertRawPK(connection, pubkey);
-
-		return saveAndGetSigId(connection, signature, pubkeyId);
-	}
-
-	/**
-	 * Save the signature to the database and return the signature's id.
-	 *
-	 * The signature entry in the database will also get connected to the
-	 * provided public key.
-	 *
-	 * @param connection
-	 *            the DatabaseConnection to be used
-	 * @param signature
-	 *            the signature to be saved and which's id is to be returned
-	 * @param pubkey
-	 *            the pubkey's ID which the signature is connected with
-	 * @return the database id of the signature
-	 */
-	public long saveAndGetSigId(DatabaseConnection connection, byte[] signature, long pubkeyId) {
-		long signatureId = -1;
-
-		PreparedStatement insertStatement = connection.getPreparedStatement(INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION);
-
-		try {
-			insertStatement.setString(1, Utils.HEX.encode(signature));
-			insertStatement.setLong(2, pubkeyId);
-
-			insertStatement.execute();
-
-			ResultSet resultSet = insertStatement.getGeneratedKeys();
-			if (resultSet.next())
-				signatureId = resultSet.getLong(1);
-			else
-				throw new SQLException("No id for a newly inserted row was returned");
-
 			insertStatement.close();
 		} catch (SQLException e) {
 			logger.fatal("Unable to insert signature " + Utils.HEX.encode(signature), e);

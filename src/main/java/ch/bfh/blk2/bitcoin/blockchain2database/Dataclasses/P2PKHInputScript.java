@@ -52,7 +52,7 @@ public class P2PKHInputScript implements InputScript {
 		}
 
 		SigManager sm = SigManager.getInstance();
-		long signId = sm.saveAndGetSigId(connection, signature, pubkeyId);
+		long signId = sm.saveAndGetSigId(connection, signature);
 
 		try {
 
