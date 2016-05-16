@@ -2,6 +2,8 @@ package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,12 +25,19 @@ public class MultisigInputScript implements InputScript {
 	private int tx_index;
 	private Script script;
 	private int script_size;
+	private List<byte[]> signatures;
 
-	public MultisigInputScript(long tx_id, int tx_index, Script script, int script_size) {
+	private final static int MAX_SIG_LENGTH = 73;
+
+	public MultisigInputScript(long tx_id, int tx_index, Script script, int script_size) throws IllegalArgumentException {
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.script = script;
 		this.script_size = script_size;
+		
+		signatures = new ArrayList<>();
+		
+		parse();
 	}
 
 	@Override
@@ -56,16 +65,8 @@ public class MultisigInputScript implements InputScript {
 		SigManager sima = SigManager.getInstance();
 
 		int index = 0;
-		for (ScriptChunk chunk : script.getChunks()) {
-			if (chunk.opcode > 75) {
-				logger.warn("The script of input #"
-						+ tx_index
-						+ " of transaction w/ id "
-						+ tx_id
-						+ " is supposed to be of type multisig. But it looks like this:");
-				logger.warn(script.toString());
-			}
-			long sigId = sima.saveAndGetSigId(connection, chunk.data);
+		for (byte[] pkBytes: signatures ){
+			long sigId = sima.saveAndGetSigId(connection, pkBytes);
 
 			PreparedStatement connectionStatement = connection.getPreparedStatement(CONNECTION_QUERY);
 
@@ -92,4 +93,22 @@ public class MultisigInputScript implements InputScript {
 
 	}
 
+	private void parse() throws IllegalArgumentException{
+		for( ScriptChunk scriptChunk: script.getChunks()){
+			if( ! scriptChunk.isPushData())
+				throw new IllegalArgumentException("Multisig Input Scripts must consist of push operations only");
+
+			if( scriptChunk.data == null ){ // OP_N
+				byte[] arr = new byte[1];
+				arr[0] = (byte) scriptChunk.decodeOpN();
+				signatures.add(arr);
+				continue;
+			}
+			
+			if( scriptChunk.data.length > MAX_SIG_LENGTH)
+				throw new IllegalArgumentException("Data too long to be a real signature");
+			
+			signatures.add(scriptChunk.data);
+		}
+	}
 }

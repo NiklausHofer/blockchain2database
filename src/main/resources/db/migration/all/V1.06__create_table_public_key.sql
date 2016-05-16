@@ -1,7 +1,8 @@
+-- According to the Bitcoin Wiki, a public key is at most 65 Byte in size
 CREATE TABLE IF NOT EXISTS public_key(
   id BIGINT AUTO_INCREMENT,
   pubkey_hash VARCHAR(64),
-  pubkey VARCHAR(520),
+  pubkey VARCHAR(192),
   valid_pubkey BOOLEAN,
     PRIMARY KEY(id)
 )ENGINE = MEMORY;

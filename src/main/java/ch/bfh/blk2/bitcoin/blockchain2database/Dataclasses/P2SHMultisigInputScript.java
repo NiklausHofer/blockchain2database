@@ -1,6 +1,5 @@
 package ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses;
 
-import java.security.interfaces.ECPublicKey;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -8,7 +7,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bitcoinj.core.ECKey;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptChunk;
@@ -18,6 +16,9 @@ import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 public class P2SHMultisigInputScript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2SHMultisigInputScript");
+
+	private final static int MAX_KEY_LENGTH = 65;
+	private final static int MAX_SIG_LENGTH = 73;
 
 	private final String INPUT_QUERY = "INSERT INTO unlock_script_p2sh_multisig(tx_id, tx_index, script_size, redeem_script_size, min_keys, max_keys) VALUES( ?, ?, ?, ?, ?, ? );";
 	private final String CONNECT_PUBKEYS_QUERY = "INSERT INTO p2sh_multisig_pubkeys(tx_id, tx_index, public_key_id, idx) VALUES(?,?,?,?);";
@@ -35,14 +36,18 @@ public class P2SHMultisigInputScript implements InputScript {
 	private int max = -1;
 
 	private List<byte[]> publicKeys;
+	private List<byte[]> signatures;
 
-	public P2SHMultisigInputScript(long tx_id, int tx_index, Script script, int script_size) {
+	public P2SHMultisigInputScript(long tx_id, int tx_index, Script script, int script_size) throws IllegalArgumentException{
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;
 		this.script = script;
 		this.script_size = script_size;
 		
 		publicKeys = new ArrayList<byte[]>();
+		signatures = new ArrayList<byte[]>();
+		
+		parse();
 	}
 
 	@Override
@@ -52,8 +57,6 @@ public class P2SHMultisigInputScript implements InputScript {
 
 	@Override
 	public void writeInput(DatabaseConnection connection) {
-		parse();
-
 		PreparedStatement insertStatement = connection.getPreparedStatement(INPUT_QUERY);
 
 		try {
@@ -81,18 +84,11 @@ public class P2SHMultisigInputScript implements InputScript {
 	}
 
 	private void connect2signatures(DatabaseConnection connection) {
-		List<ScriptChunk> chunks = script.getChunks();
 		SigManager sima = SigManager.getInstance();
 
-		for (int i = 0; i < chunks.size() - 1; i++) {
-			ScriptChunk chunk = chunks.get(i);
-			byte[] chunkData = chunk.data;
-			if( chunkData == null ){
-				chunkData = new byte[0];
-				logger.debug("P2SH Multisig unlock script with 0 data push looks like so: " + script.toString());
-				System.exit(1);
-			}
-			long sigId = sima.saveAndGetSigId(connection, chunkData);
+		int i = 0;
+		for( byte[] signature: signatures ){
+			long sigId = sima.saveAndGetSigId(connection, signature);
 
 			PreparedStatement connectionStatement = connection.getPreparedStatement(CONNECTION_SIGNATURES_QUERY);
 
@@ -100,7 +96,7 @@ public class P2SHMultisigInputScript implements InputScript {
 				connectionStatement.setLong(1, tx_id);
 				connectionStatement.setInt(2, tx_index);
 				connectionStatement.setLong(3, sigId);
-				connectionStatement.setInt(4, i);
+				connectionStatement.setInt(4, i++);
 
 				connectionStatement.executeUpdate();
 
@@ -157,16 +153,7 @@ public class P2SHMultisigInputScript implements InputScript {
 			redeem_script_size = redeemScriptChunk.data.length;
 			redeem_script = new Script(redeemScriptChunk.data);
 
-			int scriptLenght = redeem_script.getChunks().size();
-			// We expect this to be a perfectly normal multisig script
-			int expectedNumOfPubKeys = scriptLenght - 3;
-				
-			for( int i=1; i <= expectedNumOfPubKeys; i++)
-				publicKeys.add(redeem_script.getChunks().get(i).data);
-
-			max = publicKeys.size();
-			//min = redeem_script.getNumberOfSignaturesRequiredToSpend();
-            min = redeem_script.getChunks().get(0).decodeOpN();
+			parseRedeemScript();
 		} catch (ScriptException e) {
 			logger.fatal("Multisig redeem Script for p2sh input #"
 					+ tx_index
@@ -176,6 +163,51 @@ public class P2SHMultisigInputScript implements InputScript {
 			logger.fatal(redeem_script.toString());
 			System.exit(1);
 		}
+		
+		// parse the unlock script
+		for(int i=0; i< chunks.size()-1; i++){
+			ScriptChunk scriptChunk = chunks.get(i);
+
+			if( ! scriptChunk.isPushData())
+				throw new IllegalArgumentException("P2SH Multisig Unlock Scripts must consist of push data operations only");
+
+			if( scriptChunk.data == null ){ // OP_N
+				byte[] arr = new byte[1];
+				arr[0] = (byte) scriptChunk.decodeOpN();
+				signatures.add(arr);
+				continue;
+			}
+			
+			if( scriptChunk.data.length > MAX_SIG_LENGTH)
+				throw new IllegalArgumentException("P2SH Multisig Unlock Script: Data too long to be a real signature");
+			
+			signatures.add(scriptChunk.data);
+		}
+	}
+	
+	private void parseRedeemScript() throws IllegalArgumentException{
+		int redeemScriptLenght = redeem_script.getChunks().size();
+		// We expect this to be a perfectly normal multisig script
+		int expectedNumOfPubKeys = redeemScriptLenght - 3;
+			
+		for( int i=1; i <= expectedNumOfPubKeys; i++){
+			ScriptChunk pkChunk = redeem_script.getChunks().get(i);
+			if( ! pkChunk.isPushData())
+				throw new IllegalArgumentException("Multisig Redeem Script contains non-pushdata operations in invalid positions!");
+			if( pkChunk.data == null ){ // OP_N
+				byte[] arr = new byte[1];
+				arr[0] = (byte) pkChunk.decodeOpN();
+				publicKeys.add(arr);
+				continue;
+			}
+			if( pkChunk.data.length > MAX_KEY_LENGTH)
+				throw new IllegalArgumentException("Multisig Redeem Script contains data that is clearly too long to be a public key.");
+
+			publicKeys.add(pkChunk.data);
+		}
+
+		max = publicKeys.size();
+        min = redeem_script.getChunks().get(0).decodeOpN();
 	}
 
 }
