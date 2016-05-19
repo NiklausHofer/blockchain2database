@@ -130,10 +130,13 @@
 			<div>
 			<a href="../" style="font-size:20px">
 			[Home]
-			</a>
-			<a target="_blank" href="../schema.png" style="font-size:20px">
-			[View Database Schema]
-			</a>
+                        <a target="_blank" href="../diag_alt_2.svg" style="font-size:20px">
+                        [View Database Schema]
+                        </a>
+                        <a target="_blank" href="../er_2.svg" style="font-size:20px">
+                        [View ER Diagram]
+                        </a>
+                        </div>
 			</div>
 
 			
