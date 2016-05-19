@@ -66,9 +66,9 @@ public class P2RawPubKeyInputscript implements InputScript {
 	
 	private void parse() throws IllegalArgumentException{
 		if( script.getChunks().size() != 1)
-			throw new IllegalArgumentException("Pay to Raw Pub Key unlock script must consist of exactly one pushdata operation.");
-		if(script.getChunks().get(0).isPushData())
-			throw new IllegalArgumentException("Pay to Raw Pub Key unlock script must consist of exactly one pushdata operation.");
+			throw new IllegalArgumentException("Pay to Raw Pub Key unlock script must consist of *exactly one* pushdata operation.");
+		if(!script.getChunks().get(0).isPushData())
+			throw new IllegalArgumentException("Pay to Raw Pub Key unlock script must consist of exactly one *pushdata* operation.");
 		if(script.getChunks().get(0).data == null)
 			throw new IllegalArgumentException("OP_N operation cannot possibly push a valid signature for anything.");
 		if(script.getChunks().get(0).data.length > MAX_SIG_LENGTH)

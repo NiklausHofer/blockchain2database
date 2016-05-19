@@ -79,7 +79,7 @@ public class PubKeyManager {
 			//String keyPrint = new String(pkBytes);
 			pkHex = Utils.HEX.encode(pkBytes);
 
-			logger.debug("Unable to create an ECKey from public key " + pkHex, e);
+			logger.debug("Unable to create an ECKey from public key " + pkHex + " : " + e.toString() );
 			logger.debug("Will write in a hex represenattion of the keybytes instead and mark the key as invalid.");
 
 			byte[] pubKeyHash = Utils.sha256hash160(pkBytes);
