@@ -47,7 +47,7 @@ public class InputScriptCreator {
 		}
 
 		// MULTISIG
-		if (prevOutType == ScriptType.OUT_MULTISIG){
+		if (prevOutType == ScriptType.OUT_MULTISIG || prevOutType == ScriptType.OUT_MULTISIG_SPEC){
 			InputScript inputScript;
 			try{
 				inputScript =  new MultisigInputScript(txId, txIndex, script, scriptSize);
@@ -61,7 +61,7 @@ public class InputScriptCreator {
 		}
 		
 		// RAW PUB KEY
-		if (prevOutType == ScriptType.OUT_P2RAWPUBKEY){
+		if (prevOutType == ScriptType.OUT_P2RAWPUBKEY || prevOutType == ScriptType.OUT_RAWPUBKEY_SPEC){
 			InputScript inputScript;
 			try{
 				inputScript= new P2RawPubKeyInputscript(txId, txIndex, script, scriptSize);
@@ -96,7 +96,7 @@ public class InputScriptCreator {
 			return new OtherInputScript(txId, txIndex, script, scriptSize);
 
 		// input script must be one of these types input script can't be invalid
-		logger.fatal("Invalid Inputscript");
+		logger.fatal("Invalid Inputscript of type " + prevOutType + " : " + script.toString());
 		System.exit(1);
 		return null;
 	}

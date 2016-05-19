@@ -93,16 +93,12 @@ public class BlockSorter {
 				return;
 			}
 
-		// Only do this one in 10 times. This is still fine as long as there are at
-		// most 10% orphan blocks (hint: there are not)
-		// Needed to navigate orphan chains
-		if (Math.random() < 0.1)
-			for (BlockIdentifier bli : unsortedBlocks)
-				if (blockMap.containsKey(bli.getParentHash())) {
-					unsortedBlocks.remove(bli);
-					insertBlock(bli);
-					break;
-				}
+		for (BlockIdentifier bli : unsortedBlocks)
+			if (blockMap.containsKey(bli.getParentHash())) {
+				unsortedBlocks.remove(bli);
+				insertBlock(bli);
+				break;
+			}
 	}
 
 	private void sort() {
