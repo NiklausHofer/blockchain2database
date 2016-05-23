@@ -114,7 +114,7 @@ public class InputScriptCreator {
 				return true;
 			
 			return false;
-		} catch (ScriptException e) {
+		} catch (ScriptException | IllegalArgumentException e) {
 			logger.debug("invalid redeem Script or data. Can't parse the script");
 			return false;
 		}
