@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class DatabaseConnection {
 
-	private static final String PROPERTIES_FILE = "src/resources/db.properties", DRIVER = "dbdriver", URL = "dburl",
+	private static final String PROPERTIES_FILE = "db.properties", DRIVER = "dbdriver", URL = "dburl",
 			USER = "user", PASSWORD = "password";
 
 	private String driver, url, user, password;
@@ -29,7 +29,7 @@ public class DatabaseConnection {
 	public DatabaseConnection(String propertiesFile) {
 		try {
 			Properties properties = new Properties();
-			properties.load(new FileInputStream(propertiesFile));
+			properties.load(this.getClass().getClassLoader().getResourceAsStream(propertiesFile));
 
 			driver = properties.getProperty(DRIVER);
 			url = properties.getProperty(URL);

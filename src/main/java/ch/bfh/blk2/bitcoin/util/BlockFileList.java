@@ -21,7 +21,7 @@ import ch.bfh.blk2.bitcoin.producer.FileMapSerializer;
 
 public class BlockFileList implements Iterable<File> {
 	private static final Logger logger = LogManager.getLogger("BlockFileList");
-	private static final String PROPERTIES_FILE = "src/resources/blockchain.properties", DIRECTORY = "directory";
+	private static final String PROPERTIES_FILE = "blockchain.properties", DIRECTORY = "directory";
 
 	private List<File> fileList;
 	private int startHeight = -1;
@@ -71,7 +71,7 @@ public class BlockFileList implements Iterable<File> {
 		Properties properties = new Properties();
 
 		try {
-			properties.load(new FileInputStream(PROPERTIES_FILE));
+			properties.load(this.getClass().getClassLoader().getResourceAsStream(PROPERTIES_FILE));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
