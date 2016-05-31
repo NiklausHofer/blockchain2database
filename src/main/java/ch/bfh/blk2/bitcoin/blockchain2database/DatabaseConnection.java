@@ -8,9 +8,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-public class DatabaseConnection {
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-	private static final String PROPERTIES_FILE = "db.properties", DRIVER = "dbdriver", URL = "dburl",
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
+
+public class DatabaseConnection {
+	
+	private static final Logger logger = LogManager.getLogger("DatabaseConnection");
+
+
+	private static final String  DRIVER = "dbdriver", URL = "dburl",
 			USER = "user", PASSWORD = "password";
 
 	private String driver, url, user, password;
@@ -18,7 +26,7 @@ public class DatabaseConnection {
 	private Connection connection;
 	
 	public DatabaseConnection(){
-		this(PROPERTIES_FILE);
+		this("db.properties");
 	}
 
 	/**
@@ -27,20 +35,16 @@ public class DatabaseConnection {
 	 * @param propertiesFile
 	 */
 	public DatabaseConnection(String propertiesFile) {
-		try {
-			Properties properties = new Properties();
-			properties.load(this.getClass().getClassLoader().getResourceAsStream(propertiesFile));
+		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
+		propertiesLoader.loadFromFile(propertiesFile);
 
-			driver = properties.getProperty(DRIVER);
-			url = properties.getProperty(URL);
-			user = properties.getProperty(USER);
-			password = properties.getProperty(PASSWORD);
+		driver = propertiesLoader.getProperty(DRIVER);
+		url = propertiesLoader.getProperty(URL);
+		user = propertiesLoader.getProperty(USER);
+		password = propertiesLoader.getProperty(PASSWORD);
+		logger.info("user: " + user + "\tpassword: " + password + "\tdriver: " + driver + "\turl: " + url);
 
-			connect();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		connect();
 	}
 
 	public PreparedStatement getPreparedStatement(String sql) {
