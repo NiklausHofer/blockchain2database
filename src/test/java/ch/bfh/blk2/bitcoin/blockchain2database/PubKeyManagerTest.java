@@ -38,7 +38,7 @@ public class PubKeyManagerTest {
 	@Before
 	public void initDB() {
 		dbManager.resetDB();
-		connection = new DatabaseConnection("src/resources/test_db.properties");
+		connection = new DatabaseConnection("test_db.properties");
 	}
 
 	@After

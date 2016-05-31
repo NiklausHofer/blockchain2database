@@ -21,7 +21,7 @@ public class DBManager {
 
 		// Load Database admin credentials form our flyway configuration file
 		try {
-			flywayConfig.load(new FileInputStream("flyway.properties"));
+			flywayConfig.load(this.getClass().getClassLoader().getResourceAsStream("flyway.properties"));
 		} catch (IOException e) {
 			logger.fatal("Unable to load flyway configuration", e);
 			System.exit(1);
