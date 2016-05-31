@@ -1,4 +1,4 @@
-package ch.bfh.blk2.bitcoin.blockchain2database;
+package ch.bfh.blk2.bitcoin.utilities;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import org.bitcoinj.core.Context;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.Transaction;
-import org.bitcoinj.core.TransactionInput;
+import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.params.TestNet3Params;
 import org.bitcoinj.script.Script;
@@ -20,7 +20,7 @@ import ch.bfh.blk2.bitcoin.util.BlockFileList;
 import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
-public class InputScriptStatistics {
+public class OutputScriptStatistics {
 	
 	private static final String PROP_TESTNET = "testnet",
 			
@@ -28,17 +28,18 @@ public class InputScriptStatistics {
 			
 			KEY_BLK = "blk",
 			KEY_TX = "tx",
-			KEY_IN = "in",
+			KEY_OUT = "out",
 			KEY_P2SCRIPT = "p2script",
 			KEY_OP_RETURN = "opreturn",
-			KEY_UNKNOWN_SCRIPT = "unknown script",
-			KEY_NULL_SCRIPT = "null script",
-			KEY_ILLEGAL_ARGUMENT_SCRIPT = "Illegal argument",
+			KEY_UNKNOWN_SCRIPT = "unknown_script",
+			KEY_NULL_SCRIPT = "null_script",
+			KEY_ILLEGAL_ARGUMENT_SCRIPT = "illegal_argument",
+			KEY_TOTAL_OP = "total_op",
 			
 			// script analysis
 			KEY_JUNK = "junk",
-			KEY_OP ="OP count",
-			KEY_DATA="total data";
+			KEY_OP ="op_count",
+			KEY_DATA="total_data";
 	
 	private Map<String, Long> blkEntCount = new HashMap<>(),
 			p2ScriptCount = new HashMap<>(),
@@ -46,7 +47,7 @@ public class InputScriptStatistics {
 			unknownScript = new HashMap<>();;
 	
 	public static void main(String [] args){
-		InputScriptStatistics outStat = new InputScriptStatistics();
+		OutputScriptStatistics outStat = new OutputScriptStatistics();
 		outStat.run();
 	}
 	
@@ -67,19 +68,18 @@ public class InputScriptStatistics {
 			
 			
 			for(Transaction tx : blk.getTransactions()){
-				addToCount(blkEntCount,KEY_IN, tx.getInputs().size());
+				addToCount(blkEntCount,KEY_OUT, tx.getOutputs().size());
 				
-				for(TransactionInput in : tx.getInputs()){
+				for(TransactionOutput out : tx.getOutputs()){
 					Script s = null;
 					try{
-						if(!in.isCoinBase())
-						s = in.getScriptSig();
-						
+						s = new Script(out.getScriptBytes());
 					}catch (ScriptException e){e.printStackTrace();}
 					
 					try{
 					if(s != null){
-						if( s.isSentToMultiSig()){
+						
+						if( s.isPayToScriptHash()){
 							addToCount(blkEntCount,KEY_P2SCRIPT, 1);
 							alalizeScript(p2ScriptCount,s);
 						}else if(s.isOpReturn()){
@@ -94,6 +94,9 @@ public class InputScriptStatistics {
 							addToCount(blkEntCount, KEY_UNKNOWN_SCRIPT, 1);
 							alalizeScript(unknownScript,s);
 						}
+						
+						addToCount(blkEntCount, KEY_TOTAL_OP, s.getChunks().size());
+						
 					}else{
 						addToCount(blkEntCount,KEY_NULL_SCRIPT, 1);
 					}
@@ -106,6 +109,7 @@ public class InputScriptStatistics {
 		
 		System.out.println("--- Blockchain entity count");
 		printCounter(blkEntCount);
+		
 		System.out.println("\n\r--- P2ScriptHasch analysis");
 		printCounter(p2ScriptCount);
 		System.out.println("\n\r--- Op Return analysis");
@@ -120,14 +124,14 @@ public class InputScriptStatistics {
 		
 		for (ScriptChunk sc : s.getChunks()){
 			
-			addToCount(map, "op_"+sc.opcode, 1);
+			addToCount(map, "op "+sc.opcode, 1);
 			addToCount(map, KEY_OP, 1);
 
 			if (sc.data != null){
-				addToCount(map, "dat_"+sc.opcode, sc.data.length);
+				addToCount(map, "dat "+sc.opcode, sc.data.length);
 				addToCount(map, KEY_DATA, sc.data.length);
 			}else{
-				addToCount(map, "op_no_data_"+sc.opcode, 1);
+				addToCount(map, "op_no_data "+sc.opcode, 1);
 			}
 		}
 	}

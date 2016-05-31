@@ -1,4 +1,4 @@
-package ch.bfh.blk2.bitcoin.blockchain2database;
+package ch.bfh.blk2.bitcoin.utilities;
 
 import java.util.List;
 

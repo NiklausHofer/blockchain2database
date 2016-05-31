@@ -1,4 +1,4 @@
-package ch.bfh.blk2.bitcoin.blockchain2database;
+package ch.bfh.blk2.bitcoin.utilities;
 
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.Context;
