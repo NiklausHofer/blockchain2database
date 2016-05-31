@@ -15,8 +15,8 @@ public class PropertiesLoader {
 	private static final Logger logger = LogManager.getLogger("PropertiesLoader");
 	
 	private final static String[] PROPERTIES_FILES = {
-		"target/classes/blockchain.properties",
-		"target/classes/db.properties"
+		"blockchain.properties",
+		"db.properties"
 	};
 	
 	private static PropertiesLoader propertiesLoader;
@@ -32,7 +32,7 @@ public class PropertiesLoader {
 		for(String fileName : PROPERTIES_FILES){
 			try {
 				Properties prop = new Properties();
-				prop.load(new FileInputStream(fileName));
+				prop.load(this.getClass().getClassLoader().getResourceAsStream(fileName));
 				for(Entry<Object,Object> entry : prop.entrySet()){
 					String key = (String) entry.getKey(),
 							value = (String) entry.getValue();
