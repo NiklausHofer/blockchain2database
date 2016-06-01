@@ -63,6 +63,21 @@ public class BlockDeleter {
 
 	private List<PreparedStatement> statements = new ArrayList<>();
 
+	/**
+	 * Removes a block and all elements from that block from the database. 
+	 * All transactions of that block and their corresponding scripts and signatures will be deleted as well.
+	 * 
+	 * There are a few known problems with the block deleter at the moment: <br />
+	 * <ul>
+	 *   <li> entries in the public key table don't get deleted</li>
+	 *   <li> when inputs get deleted, the corresponding previous outputs don't get updated </li>
+	 * </ul>
+	 * 
+	 * These problem only really matter when orphan blocks get removed. However, keep them in mind when working with the software.
+	 * 
+	 * @param blockHash the block hash of the block you want to be deleted
+	 * @param connection the Databaseconnection to be used to connect to the database
+	 */
 	public void deleteBlock(String blockHash, DatabaseConnection connection) {
 
 		// First, retrieve the Block ID

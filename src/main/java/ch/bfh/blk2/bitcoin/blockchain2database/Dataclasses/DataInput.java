@@ -12,6 +12,12 @@ import org.bitcoinj.core.TransactionInput;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents a Bitcoin transaction input. This is basically a wrapper with some added intelligence aroudn the bitcoinj Input object
+ * that writes the input and all corresponding data, such as the script, into the database.
+ *  
+ * @author niklaus
+ */
 public class DataInput {
 
 	private static final Logger logger = LogManager.getLogger("DataInput");
@@ -46,6 +52,15 @@ public class DataInput {
 			+ " WHERE tx_id = ?"
 			+ " AND tx_index = ?;";
 
+	/**
+	 * Creates a new DataInput object. No data will be written into the database until writeInput() is called.
+	 * 
+	 * @param input
+	 * @param tx_id
+	 * @param tx_index
+	 * @param date
+	 * @param con
+	 */
 	public DataInput(TransactionInput input, long tx_id, int tx_index, Date date, DatabaseConnection con) {
 		this.input = input;
 		this.tx_id = tx_id;
@@ -55,11 +70,21 @@ public class DataInput {
 
 	}
 
+	/**
+	 * Writes the input into the database. Make sure that the corresponding previous output is in the database before you call this method.
+	 * This is because the entry for the previous output will be read to retrieve some more information on the input and its script.
+	 */
 	public void writeInput() {
 		retrievePrevOutInformation();
 		dowriteInput();
 	}
 
+	/**
+	 * Use this to write coinbase inputs (aka Coinbase). Pass the amount of the input. No previous output will be searched and the 
+	 * type of the script will be fixed to represent Coinbase.
+	 * 
+	 * @param amount The amount of money coming from this Coinbase
+	 */
 	public void writeInput(long amount) {
 		this.amount = amount;
 		this.prev_script_type = ScriptType.NO_PREV_OUT;

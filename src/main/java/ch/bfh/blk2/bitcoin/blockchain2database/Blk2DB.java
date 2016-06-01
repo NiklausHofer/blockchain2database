@@ -44,11 +44,14 @@ public class Blk2DB {
 	private final static String GETBLOCKIDQUERY = "SELECT blk_id FROM block WHERE hash = ?;";
 
 	public static void main(String[] args) {
-
 		Blk2DB foo = new Blk2DB();
 		foo.start();
 	}
 
+	/**
+	 * Initializes the Blockchain 2 Database program. After this, call start() to
+	 * start the process of reading in the blockchain.
+	 */
 	public Blk2DB() {
 
 		// Init BitcoinJ
@@ -69,6 +72,30 @@ public class Blk2DB {
 		//blockProducer = new BlockProducer(Utility.getDefaultFileList(), 1);
 	}
 
+	/**
+	 * Starts the process of reading in the blockchain into the database.
+	 * 
+	 * Several things will be checked first:
+	 * <ul>
+	 *   <li> Are there blocks in the database already? </li>
+	 *   <ul>
+	 *     <li> if not, start from the start </li>
+	 *     <li> if yes, are there more than 32? </li>
+	 *     <ul>
+	 *       <li> if yes, check if there are any orphan blocks in the database </li>
+	 *       <ul>
+	 *         <li> if yes, delete the orphan blocks, then continue inserting </li>
+	 *         <li> if no, contineu inserting </li>
+	 *       </ul>
+	 *       <li> if no, delete all entries, then start inserting from the start </li>
+	 *     </ul>
+	 *   </ul>
+	 * </ul>
+	 * 
+	 * Also the program checks whether the dirty flag has been set. If so, it means that the software was not shutdown propperly
+	 * last time and that the database is probably in a dirty state. If that is the case, the highest block will be deleted and read in again
+	 * before any new blocks are read.
+	 */
 	public void start() {
 		// Find out if any blocks are in the database at all
 		try {

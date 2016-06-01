@@ -28,6 +28,16 @@ public class DataBlock {
 
 	//private String getPrevBlockIdQuery = "SELECT block_id FROM block WHERE block_hash = ?;";
 
+	/**
+	 * This only creates the object and initializes the values. Nothing will be parsed or inserted into the database until 
+	 * the writeBlock() method is called.
+	 * 
+	 * @param block The bitcoinj block object
+	 * @param params The network parameters (mainnetparams or testnet3params in most cases)
+	 * @param connection A Databaseconnection. Used to talk to the database
+	 * @param height The block's height Will be stored to the databaes
+	 * @param prevBlockId The databaseId of the previous block. Used to link them together (no prevBlkHash is stored)
+	 */
 	public DataBlock(Block block, NetworkParameters params, DatabaseConnection connection, int height,
 			long prevBlockId) {
 
@@ -38,10 +48,12 @@ public class DataBlock {
 	}
 
 	/**
-	 * Inserts the block into the database. Leaves the "amount" Fields empty.
+	 * Writes the information on this block into the database.
+	 * 
+	 * Note that only information on the block will be writte. The transactions
+	 * are not written, you have to initialize that yourself.
 	 */
 	public void writeBlock() {
-		// getData();
 
 		try {
 			PreparedStatement statement = (PreparedStatement) connection.getPreparedStatement(insertBlockQuery);
