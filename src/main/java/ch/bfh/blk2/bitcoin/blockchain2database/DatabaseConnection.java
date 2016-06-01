@@ -31,19 +31,14 @@ public class DatabaseConnection {
 	private String driver, url, user, password;
 
 	private Connection connection;
-	
-	public DatabaseConnection(){
-		this("db.properties");
-	}
 
 	/**
 	 * Unit tests might want to force the propertiesLoader to load in a non standard configuration file
 	 * 
 	 * @param propertiesFile An additional file of properties to be loaded. Will probably contain database configuration
 	 */
-	public DatabaseConnection(String propertiesFile) {
+	public DatabaseConnection(){
 		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();
-		propertiesLoader.loadFromFile(propertiesFile);
 
 		driver = propertiesLoader.getProperty(DRIVER);
 		url = propertiesLoader.getProperty(URL);

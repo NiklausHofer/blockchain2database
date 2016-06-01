@@ -20,6 +20,7 @@ import org.junit.*;
 import static org.junit.Assert.*;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.MultiSigScript;
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.ScriptType;
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 
 public class MultiSigScriptTest {
 
@@ -40,8 +41,9 @@ public class MultiSigScriptTest {
 
 	@Before
 	public void initDB() {
+		PropertiesLoader.getInstance().loadFromFile("test_db.properties");
 		dbManager.resetDB();
-		connection = new DatabaseConnection("test_db.properties");
+		connection = new DatabaseConnection();
 	}
 
 	@After

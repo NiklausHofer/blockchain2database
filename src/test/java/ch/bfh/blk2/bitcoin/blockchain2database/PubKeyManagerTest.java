@@ -18,6 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.Dataclasses.PubKeyManager;
+import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 
 public class PubKeyManagerTest {
 
@@ -37,8 +38,9 @@ public class PubKeyManagerTest {
 
 	@Before
 	public void initDB() {
+		PropertiesLoader.getInstance().loadFromFile("test_db.properties");
 		dbManager.resetDB();
-		connection = new DatabaseConnection("test_db.properties");
+		connection = new DatabaseConnection();
 	}
 
 	@After
