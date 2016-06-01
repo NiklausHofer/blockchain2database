@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Block;
 import org.bitcoinj.core.NetworkParameters;
+import org.bitcoinj.core.Transaction;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
@@ -78,7 +79,6 @@ public class DataBlock {
 			if (rs.next())
 				blockId = rs.getLong(1);
 			else {
-				blockId = -1;
 				logger.fatal("Bad generatedKeySet from Block " + block.getHashAsString());
 				connection.commit();
 				connection.closeConnection();
@@ -87,6 +87,14 @@ public class DataBlock {
 
 			rs.close();
 			statement.close();
+			
+			// Now that the block has been written, write all the transactions
+			int blk_index = 0;
+			for( Transaction transaction: block.getTransactions()){
+				DataTransaction dataTransaction = new DataTransaction(transaction, blockId, connection, block.getTime(), blk_index);
+				dataTransaction.writeTransaction();
+			}
+
 		} catch (SQLException e) {
 			logger.fatal("Failed to write Block " + block.getHashAsString());
 			logger.fatal(e);

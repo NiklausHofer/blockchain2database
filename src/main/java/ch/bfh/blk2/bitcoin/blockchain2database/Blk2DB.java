@@ -414,13 +414,6 @@ public class Blk2DB {
 		DataBlock dataBlock = new DataBlock(block, params, connection, height, prevId);
 		dataBlock.writeBlock();
 
-		for (int blk_index = 0; blk_index < block.getTransactions().size(); blk_index++) {
-			Transaction transaction = block.getTransactions().get(blk_index);
-			DataTransaction dataTransaction = new DataTransaction(transaction, dataBlock.getId(), connection,
-					block.getTime(), blk_index);
-			dataTransaction.writeTransaction();
-		}
-
 		logger.info("Inserted Block "
 				+ height
 				+ " with Hash "
