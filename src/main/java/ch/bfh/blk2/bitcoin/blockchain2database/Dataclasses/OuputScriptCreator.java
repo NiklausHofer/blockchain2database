@@ -6,11 +6,26 @@ import org.bitcoinj.core.ScriptException;
 import org.bitcoinj.core.TransactionOutput;
 import org.bitcoinj.script.Script;
 
+/**
+ * Used to turn output scripts into the correct OutputScript class. 
+ * 
+ * @author niklaus
+ */
 public class OuputScriptCreator {
 
 	private static final Logger logger = LogManager.getLogger("OutputScriptCreator");
 	private static final int MAX_OP_RETURN_SIZE = 80;
 
+	/**
+	 * From a passed output, returns a matching OutputScript for the output's script. Whenever possible, a
+	 * specific type is chosen, based on the type of the output. If no matching type can be found, a 
+	 * OtherScript is returned, if the script cannot be parsed, an InalidScript is returned.
+	 * 
+	 * @param out the transaction output holding the scrip
+	 * @param txId The id of the transaction which the output is part of in the database
+	 * @param txIndex the index of the transaction which the output is part of within the block
+	 * @return OutputScript, based on the type of script
+	 */
 	public static OutputScript parseScript(TransactionOutput out, long txId, int txIndex) {
 		try {
 			byte[] outputBytes = out.getScriptBytes();

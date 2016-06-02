@@ -5,6 +5,13 @@ import java.util.Comparator;
 
 import org.bitcoinj.core.Sha256Hash;
 
+/**
+ * Compare two Sha256Hash instances. Other than the compare method they provide themselves,
+ * which operates on the 32bit hashCode() generated from the 256bit Value, this actually
+ * compares the entire values, byte per byte.
+ * 
+ * @author niklaus
+ */
 public class Sha256HashComparator implements Comparator<Sha256Hash>,
 		Serializable {
 

@@ -50,8 +50,7 @@ public class BlockSorter {
 	private int virtBlockHeight = -1;
 
 	/**
-	 * @param blockChainFiles
-	 *            the files containing the unparsed blockchain
+	 * @param bflist the files containing the unparsed blockchain
 	 */
 	public BlockSorter(BlockFileList bflist) {
 		//Collections.sort(blockChainFiles);
@@ -134,6 +133,13 @@ public class BlockSorter {
 		return extractFileInformation(new TreeMap<String, Integer>());
 	}
 
+	/**
+	 * Stores a list of files and the highest block found in each file into the map.
+	 * If the map already had entries, it will be updated.
+	 * 
+	 * @param fileMap an older map already containing values
+	 * @return fileMap a map of all files and the height of the highest block inside that file
+	 */
 	public Map<String, Integer> extractFileInformation(Map<String, Integer> fileMap) {
 
 		for (BlockIdentifier bi : blockMap.values()) {
@@ -177,7 +183,11 @@ public class BlockSorter {
 		return branch;
 	}
 
-	// main method for testing
+	/**
+	 * Main method. Used for testing only.
+	 * 
+	 * @param args arguments / parameters
+	 */
 	public static void main(String[] args) {
 		Properties properties = new Properties();
 		try {

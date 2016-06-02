@@ -10,6 +10,11 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents and writes to the database an output script of type Pay to Raw Public Key.
+ * 
+ * @author niklaus
+ */
 public class P2RawPubKeyScript implements OutputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2RawPubKeyScript");
@@ -24,8 +29,17 @@ public class P2RawPubKeyScript implements OutputScript {
 	private long txId;
 	private byte[] pkBytes;
 
+	/**
+	 * Before the object is created, some additional checks are performed on the script. If any of them don't pass, an
+	 * IllegalArgumentException will be thrown. In particular, the pushed data must be of plausible size for a public key.
+	 * 
+	 * @param script The output script to bed used. Must be of type pay to raw public key
+	 * @param scriptSize The size of the script in byte
+	 * @param txId the database id of the transaction the script is part of
+	 * @param txIndex the index within the block of the transaction which the script is part of
+	 * @throws IllegalArgumentException Will be thrown if the script is not of the expected format
+	 */
 	public P2RawPubKeyScript(Script script, int scriptSize, long txId, int txIndex) throws IllegalArgumentException{
-
 		this.script = script;
 		this.scriptSize = scriptSize;
 		this.txId = txId;

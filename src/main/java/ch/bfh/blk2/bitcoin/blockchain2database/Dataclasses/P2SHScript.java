@@ -10,6 +10,11 @@ import org.bitcoinj.script.Script;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
+/**
+ * Represents output scripts of type Pay to Script Hash
+ * 
+ * @author niklaus
+ */
 public class P2SHScript implements OutputScript {
 
 	private static final Logger logger = LogManager.getLogger("OutputScript");
@@ -23,6 +28,12 @@ public class P2SHScript implements OutputScript {
 	private static final String INSERT_P2SHSCRIPT=
 			"INSERT INTO out_script_p2sh (tx_id,tx_index,script_size,script_hash) VALUES(?,?,?,?)";
 
+	/**
+	 * @param script The script. Must be of type Pay to Script Hash
+	 * @param scriptSize The size of the script in byte
+	 * @param txId the database id of the transaction which the output is part of
+	 * @param txIndex The output's index within the block 
+	 */
 	public P2SHScript(Script script,int scriptSize,long txId,int txIndex) {
 		if (!script.isPayToScriptHash())
 			throw new IllegalArgumentException("Script must be of type P2SH");

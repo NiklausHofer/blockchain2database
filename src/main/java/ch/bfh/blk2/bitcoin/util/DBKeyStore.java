@@ -10,6 +10,14 @@ import org.apache.logging.log4j.Logger;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Class to handle metadata in the database.
+ * 
+ * We have a key-value-store table in the databae that can hold various inforamation.
+ * For now, all it holds is the dirty flag though.
+ * 
+ * @author niklaus
+ */
 public class DBKeyStore {
 	
 	private static final Logger logger = LogManager.getLogger("DBKeyStore");
@@ -28,6 +36,13 @@ public class DBKeyStore {
 	// default keys
 	public static String DYRTY = "DIRTY";
 	
+	/**
+	 * Store a key-value pair into the metadata table 
+	 * 
+	 * @param connection the database connection to be used
+	 * @param key the key or identifier of the value to be stored
+	 * @param value the value associated with this key
+	 */
 	public void setParameter(DatabaseConnection connection,String key,String value){
 		
 		try{
@@ -47,6 +62,13 @@ public class DBKeyStore {
 		}
 	}
 	
+	/**
+	 * Read out a parameter that has previously been written to the metadata table.
+	 * 
+	 * @param connection The database connection to be used
+	 * @param key the key for which you want to know the associated value
+	 * @return the value associated with the given key
+	 */
 	public String getParameter(DatabaseConnection connection,String key){
 
 		try{

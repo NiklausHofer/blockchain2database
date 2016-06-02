@@ -13,6 +13,14 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * This class represents a very specific type of input script. The input which the script is part of, must refer a 
+ * previous output of type Pay to Script Hash. The script itself must thus contain a redeem script. We require this
+ * redeem script to be a script of type Multisig.
+ * 
+ * @author niklaus
+ *
+ */
 public class P2SHMultisigInputScript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2SHMultisigInputScript");
@@ -38,6 +46,28 @@ public class P2SHMultisigInputScript implements InputScript {
 	private List<byte[]> publicKeys;
 	private List<byte[]> signatures;
 
+	/**
+	 * The script needs to be of a very specific format. Here it is:
+	 * 
+	 * <ul>
+	 *   <li> The last script chunk itself must form a new script (called the redeem script)
+	 *   <ul>
+	 *     <li> That script must be of type Multisig </li>
+	 *     <li> All the keys pushed by the Multisig redeem script must be of plausible lenght </li>
+	 *     <li> No OP_N operations are permitted in the redeem script, since OP_N cannot possibly push a valid public key </li>
+	 *   </ul>
+	 *   </li>
+	 *   <li> The signatures pushed by the unlock script must be of plausible length </li>
+	 * </ul>
+	 * 
+	 * If any of these criteria is not matched, an IllegalArgumentException will be thrown.
+	 * 
+	 * @param tx_id The database id of the transaction which the script is part of
+	 * @param tx_index the index within the block of the transaction which the script is part of
+	 * @param script The input script. Must be of type Pay to script hash with a redeem script of type multisig
+	 * @param script_size The size of the script in Byte
+	 * @throws IllegalArgumentException If the script is not of the right format
+	 */
 	public P2SHMultisigInputScript(long tx_id, int tx_index, Script script, int script_size) throws IllegalArgumentException{
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;

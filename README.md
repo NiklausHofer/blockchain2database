@@ -67,22 +67,22 @@ have a quick look at all of them.
 This file is used by the software to connect to the database. Here are the
 values you should set in this file:
 
- * **dbdriver**: The driver to be used. You probably want to leave this at
+ * *dbdriver*: The driver to be used. You probably want to leave this at
    `org.mariadb.jdbc.Driver`
- * **dburl**: This is the JDBC URL to connect to the database, including both
+ * *dburl*: This is the JDBC URL to connect to the database, including both
    the host and the specific database
- * **user**: The database user. The user needs write access on the database
+ * *user*: The database user. The user needs write access on the database
    configured in the dburl parameter
- * **password**: The user's password
+ * *password*: The user's password
 
 #### blockchain.properties
 There are only two values here:
 
- * **directory**: The directory where the blockchain can be found. This is
+ * *directory*: The directory where the blockchain can be found. This is
   typically something like `/home/username/.bitcoin/blocks` or
   `/home/username/.bitcoin/testnet3/blocks`, depending on the network you're
   using
- * **testnet**: Boolean value, indicating wheter you want to operate on the
+ * *testnet*: Boolean value, indicating wheter you want to operate on the
    testnet3 Bitcoin network. This is important because certain network
    parameters (such as address prefixes) depend on this setting
 
@@ -91,8 +91,8 @@ This is, as you've probably guessed already, the configuration file for Flyway.
 You can configure Flyway's database user sepparately, since it will need to be
 able to create a new database.
 
-* **flyway.user**: The database user to be used by flyway
-* **flyway.password**: That user's password
+* *flyway.user*: The database user to be used by flyway
+* *flyway.password*: That user's password
 
 <!-- TODO: rest of parameters -->
 

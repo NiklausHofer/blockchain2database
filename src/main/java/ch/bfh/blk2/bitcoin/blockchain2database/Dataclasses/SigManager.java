@@ -11,11 +11,11 @@ import org.bitcoinj.core.Utils;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
 /**
- * Actually, we figured that the probability of two signatures within the
- * blockchain being idential is so low, that we don't check whether an entry for
- * the same signature exists already. The trade off between speed and duplicated
- * entries in the database then is so that we have decided to risk a duplicate
- * entry for what is probably every few hundret signatures.
+ * Manages the signatures in the database. For now it does not do a whole lot,
+ * other than just writing signatures into a table. It does not even deduplicate
+ * them because we figured that the probability of two signatures within the
+ * blockchain being identical is so low, that the additional time needet to
+ * search for duplicates is not worth it.
  *
  * @author niklaus
  *
@@ -33,9 +33,6 @@ public class SigManager {
 			instance = new SigManager();
 		return instance;
 	}
-
-	// Not needed any more...
-	//private final String SEARCH_SIGNATURE = "SELECT id FROM signature WHERE signature = ?";
 
 	private final String INSERT_SIGNATURE_WITH_PUBKEY_CONNECTION = "INSERT INTO signature(signature) VALUES( ? );";
 

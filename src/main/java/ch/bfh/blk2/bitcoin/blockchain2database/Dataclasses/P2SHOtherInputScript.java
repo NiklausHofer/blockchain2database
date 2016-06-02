@@ -9,6 +9,16 @@ import org.bitcoinj.script.Script;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Can represent any type of Pay to script Hash Input scrip, that is to say the script of an input which's previous output
+ * is of type Pay to Script Hash. The script's last ScriptChunk should form a new script, the redeem script.
+ * 
+ * This class can represent any input script of that format. However, most of them have a Multisig script for a redeem
+ * script and in that case, you should probably use P2SHMultisigInputScript instead.
+ * 
+ * @author niklaus
+ *
+ */
 public class P2SHOtherInputScript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2SHOtherInputScript");
@@ -21,13 +31,19 @@ public class P2SHOtherInputScript implements InputScript {
 	private long txId;
 	private Script script;
 
-	public P2SHOtherInputScript(Script script, long txId, int txIndex, int scriptSize) {
-
-		this.txId = txId;
-		this.txIndex = txIndex;
+	/**
+	 * No additiona checks are performed on the script.
+	 * 
+	 * @param script The script to be stored
+	 * @param tx_id The database id of the transaction which the script is part of
+	 * @param tx_index the index within the block of the transaction which the script is part of
+	 * @param scriptSize The size of the script in Byte
+	 */
+	public P2SHOtherInputScript(Script script, long tx_id, int tx_index, int scriptSize) {
+		this.txId = tx_id;
+		this.txIndex = tx_index;
 		this.scriptSize = scriptSize;
 		this.script = script;
-
 	}
 
 	@Override

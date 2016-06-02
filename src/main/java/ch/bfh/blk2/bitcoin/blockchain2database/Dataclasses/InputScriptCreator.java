@@ -9,6 +9,11 @@ import org.bitcoinj.core.TransactionInput;
 import org.bitcoinj.script.Script;
 import org.bitcoinj.script.ScriptChunk;
 
+/**
+ * Use this class to wrap transaction Input Scripts into the correct InputScript type to then be written to the database
+ * 
+ * @author niklaus
+ */
 public class InputScriptCreator {
 
 	private static final Logger logger = LogManager.getLogger("InputScriptCreator");
@@ -20,8 +25,21 @@ public class InputScriptCreator {
 	private final static int MAX_SIG_LENGTH = 73;
 	*/
 
-	public static InputScript parseScript(TransactionInput in, long txId, int txIndex, ScriptType prevOutType,
-			long prevTxId, int prevTxIndex) {
+	/**
+	 * Given a Bitcoinj Script, this will output the correct InputScript, which can then be used to write the input
+	 * into the database. The type of the input script is determined from the prevOutType. Depending on that, some further
+	 * checks are conducted on the script. If it meets all of them, an InputScript of the correct script type will be 
+	 * returned. If these additional tests fail, the script will instead be wrapped into a more generic OtherInputScript.
+	 * No matter what type of Script is returned, you can check the type by calling the getType() method.
+	 * If the prevOutType is an unknown type, then the application will stall.
+	 * 
+	 * @param in The transaction Input which's script is to be used
+	 * @param txId The corresponding transaction's database ID
+	 * @param txIndex The corresponding transaction's Index (within the block and the database)
+	 * @param prevOutType The previous output's (script) type
+	 * @return the InputScript representing the input script, used to write it into the database
+	 */
+	public static InputScript parseScript(TransactionInput in, long txId, int txIndex, ScriptType prevOutType){
 
 		byte[] inputBytes = in.getScriptBytes();
 		int scriptSize = inputBytes.length;

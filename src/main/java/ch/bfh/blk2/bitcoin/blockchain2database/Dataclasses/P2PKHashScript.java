@@ -10,6 +10,13 @@ import org.bitcoinj.script.Script;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
+/**
+ * This class represents Pay to Public Key Hash output scripts, by far the most common type of output script in Bitcoin.
+ * Since the structure of the script is well known, only the Public Key Hash (including the network prefix) aka the Bitcoin
+ * Address is stored to the database. The rest of the script is implied by the script type.
+ * 
+ * @author niklaus
+ */
 public class P2PKHashScript implements OutputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2PKHashScript");
@@ -20,6 +27,12 @@ public class P2PKHashScript implements OutputScript {
 
 	private final static String INSERT_P2PKH_SCRIPT = "INSERT INTO out_script_p2pkh (tx_id,tx_index,script_size,public_key_id) VALUES(?,?,?,?)";
 
+	/**
+	 * @param script the output script to be used
+	 * @param scriptSize the size of the output script in Byte
+	 * @param txId The database id of the transaction which the script is part of
+	 * @param txIndex the (database) index within the block of the transaction which the script is part of
+	 */
 	public P2PKHashScript(Script script, int scriptSize, long txId, int txIndex) {
 		if (!script.isSentToAddress())
 			throw new IllegalArgumentException("Script must be of type Pay to PubKeyHash");

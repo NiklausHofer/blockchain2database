@@ -17,6 +17,16 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * The fileMap is a map containing the .blk files and the height of the highest
+ * block that is to be found inside this file. With this information it is much
+ * quicker to to continue creating the list of blocks. The fileMap gets created
+ * by the BlockSorter. This class can serialize it to a file, so that it can 
+ * be used for the next run.
+ * 
+ * @author niklaus
+ *
+ */
 public class FileMapSerializer {
 	private static final Logger logger = LogManager.getLogger("FileMapSerializer");
 
@@ -42,6 +52,11 @@ public class FileMapSerializer {
 		}
 	}
 
+	/**
+	 * Reads the fileMap from it's serialized form on the disk.
+	 * 
+	 * @return the fileMap
+	 */
 	public static Map<String, Integer> read() {
 		File file = new File("fileMap.serial");
 		if (!file.exists())

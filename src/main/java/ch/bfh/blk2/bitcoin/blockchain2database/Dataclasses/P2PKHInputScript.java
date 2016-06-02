@@ -10,6 +10,13 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents an input script of type Pay to Public Key Hash. That is to say, the script of an input which's previous output is of type
+ * Pay to Public Key Hash
+ * 
+ * @author niklaus
+ *
+ */
 public class P2PKHInputScript implements InputScript {
 
 	private final static String INSERT_P2PK_SCRIPT = "INSERT INTO unlock_script_p2pkh(tx_id,tx_index,script_size,pubkey_id,signature_id) VALUES (?,?,?,?,?)";
@@ -25,8 +32,18 @@ public class P2PKHInputScript implements InputScript {
 	private byte[] pkBytes;
 	private byte[] sigBytes;
 
+	/**
+	 * Will check the speicific structure of the script. A valid input script of this type has to consist of two chunks.
+	 * One pushing the public key and the other the signature. The signature is not cryptgraphically verified but both
+	 * the public key and signature are checked to be within the size bounds.
+	 * 
+	 * @param script The script to be worked on
+	 * @param txId The database id of the transaction which the script is part of
+	 * @param txIndex the (database) index within the block of the transaction which the script is part of
+	 * @param scriptSize the size, in byte, of the script
+	 * @throws IllegalArgumentException if the script does not have exactly two chunks or if either the public key oder the signature are too long to be valid
+	 */
 	public P2PKHInputScript(Script script, long txId, int txIndex, int scriptSize) throws IllegalArgumentException {
-
 		this.script = script;
 		this.txId = txId;
 		this.txIndex = txIndex;

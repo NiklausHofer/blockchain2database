@@ -67,7 +67,7 @@ public class BlockDeleter {
 	 * Removes a block and all elements from that block from the database. 
 	 * All transactions of that block and their corresponding scripts and signatures will be deleted as well.
 	 * 
-	 * There are a few known problems with the block deleter at the moment: <br />
+	 * There are a few known problems with the block deleter at the moment:
 	 * <ul>
 	 *   <li> entries in the public key table don't get deleted</li>
 	 *   <li> when inputs get deleted, the corresponding previous outputs don't get updated </li>

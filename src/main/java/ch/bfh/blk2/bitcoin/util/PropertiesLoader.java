@@ -13,6 +13,14 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * This class reads and manages the settings for our application. Since we use
+ * java properties files to configure the application, this class is mostly handling
+ * java properties.
+ * 
+ * @author stefan
+ *
+ */
 public class PropertiesLoader {
 	
 	private static final Logger logger = LogManager.getLogger("PropertiesLoader");
@@ -37,6 +45,13 @@ public class PropertiesLoader {
 		}
 	}
 	
+	/**
+	 * Used to load in attributes from properties files. You can call this from another class
+	 * if you need any non-default configuration files to be read in. Note that already existing
+	 * values will be overwritten by new ones of the same key.
+	 * 
+	 * @param fileName The filename from which properties are to be read
+	 */
 	public void loadFromFile(String fileName){
 			Properties prop = new Properties();
 			if( loadConfigFile(prop, fileName)){
@@ -89,6 +104,11 @@ public class PropertiesLoader {
 		return false;
 	}
 	
+	/**
+	 * PropertiesLoader is a singleton. This funciton gives you access to the instance.
+	 * 
+	 * @return The one instance of PropertiesLoader
+	 */
 	public static PropertiesLoader getInstance(){
 		
 		if(propertiesLoader == null){
@@ -98,8 +118,14 @@ public class PropertiesLoader {
 		return propertiesLoader;
 	}	
 	
+	/**
+	 * Query the value of a property. If the propperty is not known, this will
+	 * terminate the application though, so be careful with what you do.
+	 * 
+	 * @param key the name of the property which's value you want to know
+	 * @return the value of that property
+	 */
 	public String getProperty(String key){
-		
 		if(properties.containsKey(key)){
 			return properties.get(key);
 		}else{

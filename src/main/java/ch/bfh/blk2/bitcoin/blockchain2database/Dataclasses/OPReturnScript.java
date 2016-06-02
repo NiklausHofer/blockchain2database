@@ -13,6 +13,11 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents OP_RETURN output scripts
+ * 
+ * @author niklaus
+ */
 public class OPReturnScript implements OutputScript {
 
 	private static final Logger logger = LogManager.getLogger("OPReturnScript");
@@ -24,7 +29,14 @@ public class OPReturnScript implements OutputScript {
 
 	private final String insertQuery = "INSERT INTO out_script_op_return(tx_id, tx_index, script_size, information) VALUES(?, ?, ?, ?);";
 
-	public OPReturnScript(Script script, int scriptSize, long tx_id, int tx_index) {
+	/**
+	 * @param script The output script. Must be of type bare OP_RETURN
+	 * @param scriptSize The size (in Byte) of the script
+	 * @param tx_id The database Id of the transaction which the script is part of
+	 * @param tx_index The index of the transaction which the script is part of within the block (and the database)
+	 * @throws IllegalArgumentException If the script is not of type OP_RETURN
+	 */
+	public OPReturnScript(Script script, int scriptSize, long tx_id, int tx_index) throws IllegalArgumentException {
 		if (!script.isOpReturn())
 			throw new IllegalArgumentException("Script must be of type OP_RETURN");
 

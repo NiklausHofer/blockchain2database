@@ -21,8 +21,8 @@ public class BlockIdentifier {
 
 	/**
 	 *
-	 * @param blk
-	 *            the Block from which this identifier should be built
+	 * @param blk the Block from which this identifier should be built
+	 * @param filename The .blk file where the block is stored
 	 */
 	public BlockIdentifier(Block blk, String filename) {
 		this.blockHash = blk.getHash();
@@ -30,6 +30,11 @@ public class BlockIdentifier {
 		this.file = filename;
 	}
 
+	/**
+	 * Creates a dummy block identifier with no real data associated.
+	 * 
+	 * @param hash The hash of this fake block
+	 */
 	public BlockIdentifier(Sha256Hash hash) {
 		blockHash = hash;
 	}

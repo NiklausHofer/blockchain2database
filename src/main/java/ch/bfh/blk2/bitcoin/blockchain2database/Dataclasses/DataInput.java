@@ -55,11 +55,11 @@ public class DataInput {
 	/**
 	 * Creates a new DataInput object. No data will be written into the database until writeInput() is called.
 	 * 
-	 * @param input
-	 * @param tx_id
-	 * @param tx_index
-	 * @param date
-	 * @param con
+	 * @param input The transaction input from which to create this object
+	 * @param tx_id The database id of the transaction the input is part of
+	 * @param tx_index The index within the block of the transaction the input is part of
+	 * @param date The block's timestamp
+	 * @param con A database connection to be used
 	 */
 	public DataInput(TransactionInput input, long tx_id, int tx_index, Date date, DatabaseConnection con) {
 		this.input = input;
@@ -73,6 +73,7 @@ public class DataInput {
 	/**
 	 * Writes the input into the database. Make sure that the corresponding previous output is in the database before you call this method.
 	 * This is because the entry for the previous output will be read to retrieve some more information on the input and its script.
+	 * Also, the previou output will be updated and marked as spent.
 	 */
 	public void writeInput() {
 		retrievePrevOutInformation();
@@ -103,8 +104,7 @@ public class DataInput {
 			statement.setLong(5, input.getSequenceNumber());
 			statement.setLong(6, amount);
 
-			InputScript inScript = InputScriptCreator.parseScript(input, tx_id, tx_index, prev_script_type, prev_tx_id,
-					(int) input.getOutpoint().getIndex());
+			InputScript inScript = InputScriptCreator.parseScript(input, tx_id, tx_index, prev_script_type);
 			statement.setInt(7, inScript.getType().getValue());
 
 			statement.executeUpdate();

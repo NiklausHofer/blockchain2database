@@ -12,6 +12,11 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents a Multisig input script. That is to say, the script of an input which's previous output was of type multisig.
+ * 
+ * @author niklaus
+ */
 public class MultisigInputScript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("MultisigInputScript");

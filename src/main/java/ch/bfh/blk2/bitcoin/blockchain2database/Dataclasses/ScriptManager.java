@@ -12,6 +12,11 @@ import org.bitcoinj.script.ScriptChunk;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Manages the script table in the database. Allows to easily write new scripts.
+ * 
+ * @author niklaus
+ */
 public class ScriptManager {
 
 	private static final Logger logger = LogManager.getLogger("ScriptManager");
@@ -19,13 +24,12 @@ public class ScriptManager {
 	private final String currentScriptIdQuery = "SELECT MAX(script_id) FROM script;";
 	private final String insertInstruction = "INSERT INTO script (script_id, script_index, op_code, data) VALUES(?, ?, ?, ?);";
 
-	public ScriptManager() {
-	}
-
 	/**
-	 * Writes the script into the database and returns the id of the script
-	 *
-	 * @return
+	 * Writes the script into the database.
+	 * 
+	 * @param connection the connection to the database to be used
+	 * @param script The script to be written to the database
+	 * @return The new script's database ID
 	 */
 	public long writeScript(DatabaseConnection connection, Script script) {
 		long scriptId = -2;

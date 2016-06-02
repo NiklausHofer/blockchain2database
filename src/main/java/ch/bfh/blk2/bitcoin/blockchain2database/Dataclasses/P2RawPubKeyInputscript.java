@@ -9,6 +9,13 @@ import org.bitcoinj.script.Script;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Represents and writes into the database Pay to Raw Public Key input script. That is to say the script of an input which's previous
+ * output is of type pay to Raw Public Key.
+ * 
+ * @author niklaus
+ *
+ */
 public class P2RawPubKeyInputscript implements InputScript {
 
 	private static final Logger logger = LogManager.getLogger("P2RawPubKeyInputscript");
@@ -24,6 +31,18 @@ public class P2RawPubKeyInputscript implements InputScript {
 	
 	private byte[] sigBytes;
 
+	/**
+	 * The constructor also involves checking the structure of the script. A script of this type must consist of exactly
+	 * one operation, which must be a pushdata operation. Also the pushdata operation cannot be an OP_N operation, since
+	 * OP_N cannot possibly push a valid signature. Lastly, the pushed signature needs to be of a plausible length. If any
+	 * of these criteria are not matched, an IllegalArgumentException will be thrown.
+	 * 
+	 * @param tx_id The database id of the transaction the script is part of
+	 * @param tx_index The index within the block of the transaction which the script is part of
+	 * @param script The script to be looked at
+	 * @param script_size The size of the script in byte
+	 * @throws IllegalArgumentException If the script is not of the right format
+	 */
 	public P2RawPubKeyInputscript(long tx_id, int tx_index, Script script, int script_size) throws IllegalArgumentException{
 		this.tx_id = tx_id;
 		this.tx_index = tx_index;

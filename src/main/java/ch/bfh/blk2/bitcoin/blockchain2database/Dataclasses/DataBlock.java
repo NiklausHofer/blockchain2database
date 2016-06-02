@@ -12,6 +12,36 @@ import org.bitcoinj.core.Transaction;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * Used to write Blocks into the database.
+ * 
+ * This is what will be written when writeBlock() is called, in order:
+ * 
+ * <ul>
+ *   <li> The block </li>
+ *   <li> For each transaction within the block:
+ *   <ul>
+ *     <li> The transaction itself </li>
+ *     <li> For each output in the transaction
+ *     <ul>
+ *       <li> The output itself </li>
+ *       <li> The output script (including further needed information, such as public keys and script information, depending on the type of script)</li>
+ *     </ul>
+ *     </li>
+ *     <li> For each input in the transaction
+ *     <ul>
+ *       <li> The input itself </li>
+ *       <li> The output script (including further needed information, such as signatures, public keys and script information, depending on the type of script)</li>
+ *       <li> Updates to the previous output </li>
+ *     </ul>
+ *     </li>
+ *   </ul>
+ *   </li>
+ * </ul>
+ * 
+ * Of course, not all of this is handled by the DataBlock itself though.
+ * 
+ */
 public class DataBlock {
 
 	private static final Logger logger = LogManager.getLogger("DataBlock");
@@ -50,9 +80,6 @@ public class DataBlock {
 
 	/**
 	 * Writes the information on this block into the database.
-	 * 
-	 * Note that only information on the block will be writte. The transactions
-	 * are not written, you have to initialize that yourself.
 	 */
 	public void writeBlock() {
 

@@ -13,6 +13,12 @@ import org.bitcoinj.core.Utils;
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
+/**
+ * Manages the public_key table in the database. If makes sure no duplicate entries are written and makes
+ * it easy to add and / or update entries without risk of damaging the data.
+ * 
+ * @author niklaus
+ */
 public class PubKeyManager {
 
 	private static final Logger logger = LogManager.getLogger("PubKeyManager");
@@ -61,6 +67,17 @@ public class PubKeyManager {
 		return pkId;
 	}
 
+	/**
+	 * This inserts a raw public key. If the key is already inserted, you will just get it's ID back.
+	 * If the key's Hash is in the database already but not the key itself, the entry will be updated 
+	 * accordingly. If the public key's hash is not in the database yet, it will be formed and also 
+	 * inserted together with the public key. If the passed byte sequence is not a valid public key, it
+	 * will be written into the database just like that.
+	 * 
+	 * @param connection DB Connection to be used
+	 * @param pkBytes Byte representation of the public key, as read from the Blockchain by Bitcoinj
+	 * @return The public key's database id
+	 */
 	public long insertRawPK(DatabaseConnection connection, byte[] pkBytes) {
 		String pkHash = null;
 		String pkHex = null;
@@ -138,6 +155,15 @@ public class PubKeyManager {
 		return pkId;
 	}
 
+	/**
+	 * Inserts the public key hash (aka Bitcoin Address) into the public key table.
+	 * If an entry for that address already exists, it's ID will be returned and the
+	 * data in the database will not be change.
+	 * 
+	 * @param connection Connection to be used
+	 * @param pkHash The Base58 encoded Hash of the public key, including the network specific prefix - Aka the Bitcoin address
+	 * @return the publickeyhash's database id
+	 */
 	public long insertPubkeyHash(DatabaseConnection connection, String pkHash) {
 		long id = -1;
 		id = getPKIdFromPubKeyHash(connection, pkHash);

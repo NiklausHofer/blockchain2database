@@ -27,6 +27,33 @@ import ch.bfh.blk2.bitcoin.util.DBKeyStore;
 import ch.bfh.blk2.bitcoin.util.PropertiesLoader;
 import ch.bfh.blk2.bitcoin.util.Utility;
 
+/**
+ * Used to write the blockchain into the database. If there is already data in the database, 
+ * it will be updated. To do this Several things will be checked first:
+ * 
+ * <ul>
+ *   <li> Are there blocks in the database already?
+ *   <ul>
+ *     <li> if not, start from the start </li>
+ *     <li> if yes, are there more than 32?
+ *     <ul>
+ *       <li> if yes, check if there are any orphan blocks in the database
+ *       <ul>
+ *         <li> if yes, delete the orphan blocks, then continue inserting </li>
+ *         <li> if no, contineu inserting </li>
+ *       </ul>
+ *       </li>
+ *       <li> if no, delete all entries, then start inserting from the start </li>
+ *     </ul>
+ *     </li>
+ *   </ul>
+ *   </li>
+ * </ul>
+ * 
+ * Also the program checks whether the dirty flag has been set. If so, it means that the software was not shutdown propperly
+ * last time and that the database is probably in a dirty state. If that is the case, the highest block will be deleted and read in again
+ * before any new blocks are read.
+ */
 public class Blk2DB {
 	private static final Logger logger = LogManager.getLogger("FooClass");
 
@@ -74,27 +101,6 @@ public class Blk2DB {
 
 	/**
 	 * Starts the process of reading in the blockchain into the database.
-	 * 
-	 * Several things will be checked first:
-	 * <ul>
-	 *   <li> Are there blocks in the database already? </li>
-	 *   <ul>
-	 *     <li> if not, start from the start </li>
-	 *     <li> if yes, are there more than 32? </li>
-	 *     <ul>
-	 *       <li> if yes, check if there are any orphan blocks in the database </li>
-	 *       <ul>
-	 *         <li> if yes, delete the orphan blocks, then continue inserting </li>
-	 *         <li> if no, contineu inserting </li>
-	 *       </ul>
-	 *       <li> if no, delete all entries, then start inserting from the start </li>
-	 *     </ul>
-	 *   </ul>
-	 * </ul>
-	 * 
-	 * Also the program checks whether the dirty flag has been set. If so, it means that the software was not shutdown propperly
-	 * last time and that the database is probably in a dirty state. If that is the case, the highest block will be deleted and read in again
-	 * before any new blocks are read.
 	 */
 	public void start() {
 		// Find out if any blocks are in the database at all

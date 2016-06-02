@@ -47,23 +47,18 @@ public class BlockProducer implements Iterable<Block> {
 	/**
 	 * Uses the default minimum block depth 6
 	 *
-	 * @param blockChainFiles
-	 *            a list of unparsed Blockchain Files
-	 * @param filters
-	 *            a list of block filters
+	 * @param bflist a list of unparsed Blockchain Files
 	 */
 	public BlockProducer(BlockFileList bflist) {
 		this(bflist, DEFAULT_MIN_BLOCK_DEPTH);
 	}
 
 	/**
+	 * Constructs a new Blockproducer. It will use BlockSorter to get a sorted list
+	 * of blocks to work on.
 	 *
-	 * @param blockChainFiles
-	 *            a list of unparsed Blockchain Files
-	 * @param minBlockDepth
-	 *            the number of blocks at the end of the blockchain to be
-	 *            ignored a number defining the minimal depth a block must have
-	 *            to be accepted
+	 * @param bflist a list of unparsed Blockchain Files
+	 * @param minBlockDepth the number of blocks at the end of the blockchain to be ignored a number defining the minimal depth a block must have to be accepted
 	 */
 	public BlockProducer(BlockFileList bflist, int minBlockDepth) {
 		this.fileList = bflist;
@@ -81,6 +76,14 @@ public class BlockProducer implements Iterable<Block> {
 		logger.debug("Got a chain of " + this.orderedBlockHashes.size() + "blocks");
 	}
 
+	/**
+	 * Constructs a blockproducer from a preexisting list of blocks. This saves the BlockProducer
+	 * from having to retrieve it from the BlockSorter, which can be a slow process.
+	 * 
+	 * @param bflist a list of unparsed Blockchain Files
+	 * @param validChain an ordered list of hashes, representing the order of blocks inside the blockchain
+	 * @param minBlockDepth the number of blocks at the end of the blockchain to be ignored a number defining the minimal depth a block must have to be accepted
+	 */
 	public BlockProducer(BlockFileList bflist, List<Sha256Hash> validChain, int minBlockDepth) {
 		this.fileList = bflist;
 		orderedBlockHashes = validChain;
@@ -90,7 +93,7 @@ public class BlockProducer implements Iterable<Block> {
 				orderedBlockHashes.remove(orderedBlockHashes.size() - 1);
 
 		if (this.orderedBlockHashes.size() < 1) {
-			logger.fatal("BlockSorter is malfunctioning or an invalid list of files was provided");
+			logger.fatal("The provided list of Hashes was emtpy");
 			System.exit(1);
 		}
 		logger.debug("Got a chain of " + this.orderedBlockHashes.size() + "blocks");

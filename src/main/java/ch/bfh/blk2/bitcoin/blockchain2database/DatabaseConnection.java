@@ -34,8 +34,6 @@ public class DatabaseConnection {
 
 	/**
 	 * Unit tests might want to force the propertiesLoader to load in a non standard configuration file
-	 * 
-	 * @param propertiesFile An additional file of properties to be loaded. Will probably contain database configuration
 	 */
 	public DatabaseConnection(){
 		PropertiesLoader propertiesLoader = PropertiesLoader.getInstance();

@@ -13,6 +13,11 @@ import org.bitcoinj.core.TransactionOutput;
 
 import ch.bfh.blk2.bitcoin.blockchain2database.DatabaseConnection;
 
+/**
+ * This class wrapps Bitcoinj's Transaction class and writes it into the database.
+ * 
+ * @author niklaus
+ */
 public class DataTransaction {
 
 	private static final Logger logger = LogManager.getLogger("DataTransaction");
@@ -27,6 +32,16 @@ public class DataTransaction {
 			+ " (version, lock_time, blk_time, blk_id, tx_hash, blk_index) "
 			+ " VALUES (?, ?, ?, ?, ?, ?);";
 
+	/**
+	 * Instantiating a DataTransaction will not automatically trigger writing the data to the database.
+	 * Once you have the object, call writeTransaction() on it to write the data to the database.
+	 * 
+	 * @param transaction Bitcoinj Transaction representation of the transaction to be written to the database
+	 * @param blockId The databaseID of the block which this transaction is part of
+	 * @param connection A connection to the database
+	 * @param date The date of the block of which this transaction is part of (blocktime)
+	 * @param blk_index The index of the transaction whithin the block (This is the blk_index-th transaction of the block)
+	 */
 	public DataTransaction(Transaction transaction, long blockId, DatabaseConnection connection, Date date,
 			long blk_index) {
 		this.transaction = transaction;
@@ -36,6 +51,10 @@ public class DataTransaction {
 		this.blk_index = blk_index;
 	}
 
+	/**
+	 * Writes the transaction into the database. This does not only write the transaction itself, but also triggers
+	 * the writing of all inputs and outputs of that transaction.
+	 */
 	public void writeTransaction() {
 
 		tx_id = -1;
