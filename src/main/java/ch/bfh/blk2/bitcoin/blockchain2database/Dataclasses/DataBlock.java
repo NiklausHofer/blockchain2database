@@ -91,7 +91,7 @@ public class DataBlock {
 			// Now that the block has been written, write all the transactions
 			int blk_index = 0;
 			for( Transaction transaction: block.getTransactions()){
-				DataTransaction dataTransaction = new DataTransaction(transaction, blockId, connection, block.getTime(), blk_index);
+				DataTransaction dataTransaction = new DataTransaction(transaction, blockId, connection, block.getTime(), blk_index++);
 				dataTransaction.writeTransaction();
 			}
 
