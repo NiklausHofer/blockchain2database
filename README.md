@@ -136,4 +136,103 @@ simply add @testnet3 to the end of the command:
 ### Configuring MariaDB
 
 Without any change, our scripts will create the database with the MEMORY storage
-engine. 
+engine. Default MariaDB configurations do not allow large in-memory databases.
+So you will need to edit `/etc/mysql/my.cnf` and set at least these variables:
+```
+max_heap_table_size=256G
+tmp_table_size=256G
+```
+
+Whilest you are at it, you will probably also want to optimize some other
+settings such as `key_buffer_size`, `sort_buffer_size` and others. General
+optimization of a MariaDB instance is out of the scope of this REAME though.
+Please consult a MariaDB optimization guide for that instead.
+
+#### WARNING
+
+Changing MariaDB configuration might require you to restart the service. The
+MEMORY tables will get deleted on each restart of MariaDB. If you want to avoid
+data loss, you have to create a Dump of the data first. If you have to regularly
+restart the service or if you can't trust your MEMORY (for example, if you don't
+have ECC Memory), you should probably use a different storage engine.
+
+In our experience, it's a good idea, to use the MEMORY storage engine for the
+initial readin of the data which can take a long time and causes high load on
+the DBMS and then switch over to InnoDB for daily use.
+
+### Using InnoDB instead
+
+If you don't have the necessary amount of memory in your system, you can switch
+to another MariaDB storage engine. We have tested the software to work with
+InnoDB. If you do this, you will want your InnoDB database to be stored on an
+SSD or similarly fast storage backend.
+
+To change the storage engine, you have to edit the SQL files, since the used
+storage engine is specified explicitly in each file. Note that you need to do
+that *before* the first run of Flyway, otherwise you will confuse it.
+
+You can change all the storage engine definitions with something like the
+command below. Keep in mind, that this example is specific to [GNU
+find](https://www.gnu.org/software/findutils/) and [GNU
+sed](https://www.gnu.org/software/sed/) and the arguments might be different for
+different implementations of these utilities (such as under BSD).
+```
+~$ find src/main/resources/db/migration/ -name "*.sql" -exec sed -i -e's/ENGINE\s*=\s*MEMORY/ENGINE = InnoDB/g' {} \
+```
+
+### Compiling and running the software
+
+You can compile the software using the usual Maven workflow. For the Unit tests
+to work, the `test_db.properties` needs to be configured. The unit tests have
+most of their Flyway configuration hardcoded in the
+[DBManager.java](src/test/java/ch/bfh/blk2/bitcoin/blockchain2database/DBManager.java)
+class, however, they still load the username and password used to administrate
+the database from the flyway.properties. If you don't want to build the software
+without running the tests in the process, use Maven like this:
+```
+mvn -Dmaven.test.skip=true clean package
+```
+
+Compiling the software with Maven will also produce an executable JAR.
+
+You can use Maven to directly run the software. If you do that, you will
+probably don't want to run the tests either. Once you have written all the
+configuration files and readied the database, you can run the Blockchain to
+Database software with this Maven command:
+```
+mvn -Dmaven.test.skip=true clean package exec:java -Dexec.mainClass="ch.bfh.blk2.bitcoin.blockchain2database.Blk2DB"
+
+```
+
+
+## Production use
+
+To use the software in a production environment where you will want to run it in
+regular intervals to update the database, we recommend you use an executable
+JAR. The JAR gets created when you compile the software using Maven. It contains
+all the configuration files, so you could edit them before compiling the
+software. This however, is probably undesireable. To give you more flexibility,
+we allow overriding the config files from the outside. To do that, either put
+the configuration files, with the same name, in either
+`/etc/blockchain2database` or in the current working directory. Blk2DB will
+prefer configuration files in these locations over the one it has compiled in.
+It also prefers those configuration files over the ones found in the classpath,
+so you will want to keep your development environment and production environment
+separate to avoid undesired effects when your development instance uses the
+stable configuration.
+
+### fileMap
+
+### Flyway
+
+### Cronjob
+
+
+## Webinterface
+
+
+## License
+
+This software is published under the [GNU PGL
+v3](https://www.gnu.org/licenses/gpl-3.0.en.html). All copyright remains with
+the original authors.
