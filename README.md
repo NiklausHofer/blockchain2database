@@ -8,6 +8,22 @@ Note that this software is not a Bitcoin client. It can not retrieve the
 blockchain on it's own, so you will need a Bitcoin client and an up-to-date topy
 of the blockchain.
 
+## Live Demo
+
+We have a live demo at [BlkChnQrs.org](https://blkchnqrs.org) where you can try
+out the database. There are instances for both [mainnet](https://mainnet.blkchnqrs.org)
+and [testnet3](https://testnet3.blkchnqrs.org). Use these credentials to login:
+
+ * **username:** pubweb
+ * **password:** privweb
+
+## Database Schema
+
+If you're looking at the database and feeling lost, have a look at the database
+schema.
+
+![Database diagram](diagram.svg)
+
 ## Requirements
 
 To run the software, you will need a couple of software components, that you can
@@ -40,14 +56,7 @@ You will probably also want
 
 However, if you'll be using Maven, you won't necessarily need Flyway.
 
-## Testing / Development setup
-
-If you want to develop Blk2DB or if you just want to check it out and toy
-around, you can use Maven for pretty much anything. However, if you plan on
-using the software for more serious purposes, you should probably get an
-executable version and write propper configuration files.
-
-### Configuration
+## Configuration
 
 There are a couple of important configuration files for Blk2DB: 
 
@@ -60,10 +69,15 @@ And then there are also these:
  * Configuration for Unit tests [test_db.properties](src/main/resources/test_db.properties)
  * Log4j connfiguration [log4j2.xml](src/main/resources/log4j2.xml)
 
-All of them can be found in [src/main/resources/](src/main/resources). Let's
-have a quick look at all of them.
+All of them can be found in [src/main/resources/](src/main/resources). If you're
+working with the [Development setup](#testing--development-setup) you can edit
+them in place. If, however, you're working in a [production
+environment](#production-use) you will probably want to copy them out either to
+`/etc/blockchain2database/` or into the current working directory.
 
-#### db.properties
+Let's have a quick look at each of the configuration files and their content.
+
+### db.properties
 This file is used by the software to connect to the database. Here are the
 values you should set in this file:
 
@@ -75,7 +89,7 @@ values you should set in this file:
    configured in the dburl parameter
  * *password*: The user's password
 
-#### blockchain.properties
+### blockchain.properties
 There are only two values here:
 
  * *directory*: The directory where the blockchain can be found. This is
@@ -86,7 +100,7 @@ There are only two values here:
    testnet3 Bitcoin network. This is important because certain network
    parameters (such as address prefixes) depend on this setting
 
-#### flyway.properties
+### flyway.properties
 This is, as you've probably guessed already, the configuration file for Flyway.
 You can configure Flyway's database user sepparately, since it will need to be
 able to create a new database.
@@ -94,14 +108,25 @@ able to create a new database.
 * *flyway.user*: The database user to be used by flyway
 * *flyway.password*: That user's password
 
+Note that in a production use, the variables `flyway.url` and `flyway.schemas`
+are required whereas in the development setup, they are configured through
+Maven's `pom.xml`.
+
 <!-- TODO: rest of parameters -->
 
-#### test_db.properties
+### test_db.properties
 You will want to configure a different database for the unit tests than for the
 rest of the program. This database will be whiped an recreated several times
 during unit tests, so be careful with this setting.
 
 Other than that, it is exactly the same as db.properties.
+
+## Testing / Development setup
+
+If you want to develop Blk2DB or if you just want to check it out and toy
+around, you can use Maven for pretty much anything. However, if you plan on
+using the software for more serious purposes, you should probably get an
+executable version and write propper configuration files.
 
 ### Flyway
 
@@ -204,7 +229,6 @@ mvn -Dmaven.test.skip=true clean package exec:java -Dexec.mainClass="ch.bfh.blk2
 
 ```
 
-
 ## Production use
 
 To use the software in a production environment where you will want to run it in
@@ -213,7 +237,7 @@ JAR. The JAR gets created when you compile the software using Maven. It contains
 all the configuration files, so you could edit them before compiling the
 software. This however, is probably undesireable. To give you more flexibility,
 we allow overriding the config files from the outside. To do that, either put
-the configuration files, with the same name, in either
+the [configuration files](#configuration), with the same name, in either
 `/etc/blockchain2database` or in the current working directory. Blk2DB will
 prefer configuration files in these locations over the one it has compiled in.
 It also prefers those configuration files over the ones found in the classpath,
@@ -221,15 +245,107 @@ so you will want to keep your development environment and production environment
 separate to avoid undesired effects when your development instance uses the
 stable configuration.
 
+### Flyway
+
+After placing the configuration file in `/etc/blockchain2database` you will
+want to edit it. Both `flyway.url` and `flyway.schemas` need to be set.
+
+You should also pick a location to store the migration files. The migration
+files for testnet3 and mainnet might interfere, so you need to make sure that
+flyway only uses one set of migration files at a time. This is easiest when you
+only use one schema. In that case, you can copy the files from the folders or
+the entire folders
+[mainnet](src/main/resources/db/migration/mainnet) or
+[testnet3](src/main/resources/db/migration/testnet3) (depending on which schema
+you want) and
+[all](src/main/resources/db/migration/all) into one and the same directory, say
+`/var/lib/blockchain2database/migration` and then specify this directory on the
+flyway command line using the `-locations` option.
+
+If however, you want both schemas, copy all three folders to the lodation and
+then specify the ones you need on the command line. Since this last one is the
+most complicated option, the example below shows how to call flyway with such a
+configuration for the mainnet schema.
+
+
+```
+~$ flyway -configFile=/etc/blockchain2database/flyway.properties \
+  -locations="filesystem:/var/lib/blockchain2database/migration/mainnet/,filesystem:/var/lib/blockchain2database/migration/all/" \
+  migrate
+```
+
+### Running the software
+
+### Migration from MEMORY to InnoDB storage engine
+
+We consider this a typical usecase:
+
+ 1. You create the database using the MEMORY storage engine
+ 2. You perform the initial readin of the blockchain into the MEMORY engine
+    backed database
+ 3. You dump the database and reload it into an InnoDB
+ 4. You continue using the database on the InnoDB
+
+The trick when doing that is to only run a subset of the flyway migrations for
+the initial database setup.
+
+```
+# Initial run of flyway
+~$ flyway -configFile=/etc/blockchain2database/flyway.properties \
+  -locations="filesystem:/var/lib/blockchain2database/migration/" \
+  -target=1.99 \
+  migrate
+```
+
+```
+# Init the database
+```
+
+```
+# Dump the database
+```
+
+```
+# Read in the dump into InnoDB backed tables
+```
+
+```
+# Run the rest of the flyway migrations
+~$ flyway -configFile=/etc/blockchain2database/flyway.properties \
+  -locations="filesystem:/var/lib/blockchain2database/migration/" \
+  migrate
+```
+
+```
+# Subsequential runs of the software to update the database
+```
+
 ### fileMap
 
-### Flyway
+Inside the current working directory, the software will create a file called
+`fileMap.serial`. This file contains serialized information on the blockchain
+inside the .blk files. On every run after the initial one, having this file
+around makes the software a lot faster.
+
+If you delete the file, the software will continue working, however the next run
+will take a lot longer. You should only delete the file when either you
+cancelled readin of the database in an early state or when the .blk files got
+replaced (instead of just getting updated).
 
 ### Cronjob
 
 
 ## Webinterface
 
+In the webinterface branch, there is a simple webfrontend for the database. It
+is based on [MyWebSQL](http://mywebsql.net/). All copyright for that software
+stays with the original authors. The copyright stays the same (GPLv2 / GPLv3)
+and our changes are released under the same license.
+
+Our version of the software contains some minor changes. Particularly, it can
+load .sql files from a directory on the server. We use this to present the user
+some example queries. The setup procedure stays the same as for the original
+software.
 
 ## License
 
