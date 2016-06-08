@@ -42,6 +42,17 @@ public class DataInput {
 	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount, output.script_type_id"
 			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
 			+ " WHERE transaction.tx_hash = ? AND output.tx_index = ?;";
+	
+	/*
+	 *  According to BIP 30, there can be multiple transactions with idential tx_hashes. 
+	 * However, of transactions with identical hash, only one at a time can be unspent.
+	 * Once such transactions appear on the blockchain, use the query below instead of 
+	 * the one above, to make sure the correct previous output gets refered in the input
+	 * and marked as spent.
+	 */
+//	private String inputAmountQuery = "SELECT transaction.tx_id, output.amount, output.script_type_id"
+//			+ " FROM transaction RIGHT JOIN output ON transaction.tx_id = output.tx_id"
+//			+ " WHERE transaction.tx_hash = ? AND transaction.spent_at is NULL AND output.tx_index = ?;";
 
 	private String dataInputQuery = "INSERT INTO input "
 			+ " (tx_id,tx_index,prev_tx_id,prev_output_index,sequence_number,amount, script_type_id)"
