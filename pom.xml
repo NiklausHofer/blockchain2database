@@ -4,7 +4,7 @@
 
   <groupId>ch.bfh.blk2.bitcoin</groupId>
   <artifactId>blockchain2database</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.98</version>
   <packaging>jar</packaging>
 
   <name>blockchain2database</name>
