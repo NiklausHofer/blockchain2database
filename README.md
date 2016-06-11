@@ -24,6 +24,35 @@ schema.
 
 ![Database diagram](diagram.png)
 
+## User manual
+
+This README is supposed to be a manual for both users and developers. Here's a
+table of content:
+
+ * [Requirements](#requirements)
+   * [Software components](#software-components)
+   * [Compile requirements](#compile-requirements)
+ * [Configuration](#configuration)
+   * [db.properties](#dbproperties)
+   * [blockchain.properties](#blockchainproperties)
+   * [flyway.properties](#flywayproperties)
+   * [test_db.properties](#test_dbproperties)
+   * [Configuring MariaDB](#configuring-mariadb)
+     * [WARNING](#warning)
+   * [Using InnoDB instead](#using-innodb-instead)
+ * [Testing / Development setup](#testing--development-setup)
+   * [Flyway](#flyway)
+   * [Compiling and running the software](#compiling-and-running-the-software)
+ * [Production use](#production-use)
+   * [Flyway](#flyway)
+   * [Running the software](#running-the-software)
+   * [Migration from MEMORY to InnoDB storage engine](#migration-from-memory-to-innodb-storage-engine)
+   * [fileMap](#filemap)
+   * [Cronjob](#cronjob)
+ * [Policy of crashing](#policy-of-crashing)
+ * [Webinterface](#webinterface)
+ * [License](#license)
+
 ## Requirements
 
 To run the software, you will need a couple of software components, that you can
