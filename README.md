@@ -276,6 +276,12 @@ configuration for the mainnet schema.
 
 ### Running the software
 
+Once all the configuration files are in place and the database has been intialized, running the software is as simple as typing
+
+```
+java -jar blockchain2database-1.0.jar
+```
+
 ### Migration from MEMORY to InnoDB storage engine
 
 We consider this a typical usecase:
@@ -299,14 +305,24 @@ the initial database setup.
 
 ```
 # Init the database
+java -jar blockchain2database-1.0.jar
 ```
 
 ```
 # Dump the database
+mysqldump -h localhost -u root -p --databases mainnet > mainnet_$(date +%Ft%R).dmp
+```
+
+```
+# Delete the database
+~$ mysql -h localhost -u root -p 
+...
+> DROP DATABASE mainnet;
 ```
 
 ```
 # Read in the dump into InnoDB backed tables
+cat mainnet_2016-06-11t02\:38.dmp | sed -e's/ENGINE=MEMORY/ENGINE=InnoDB/g' | mysql -h localhost -u root -p
 ```
 
 ```
@@ -318,6 +334,7 @@ the initial database setup.
 
 ```
 # Subsequential runs of the software to update the database
+java -jar blockchain2database-1.0.jar
 ```
 
 ### fileMap
