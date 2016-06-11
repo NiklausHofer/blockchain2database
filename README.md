@@ -22,7 +22,7 @@ and [testnet3](https://testnet3.blkchnqrs.org). Use these credentials to login:
 If you're looking at the database and feeling lost, have a look at the database
 schema.
 
-![Database diagram](diagram.svg)
+![Database diagram](diagram.png)
 
 ## Requirements
 
