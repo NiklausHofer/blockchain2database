@@ -121,43 +121,6 @@ during unit tests, so be careful with this setting.
 
 Other than that, it is exactly the same as db.properties.
 
-## Testing / Development setup
-
-If you want to develop Blk2DB or if you just want to check it out and toy
-around, you can use Maven for pretty much anything. However, if you plan on
-using the software for more serious purposes, you should probably get an
-executable version and write propper configuration files.
-
-### Flyway
-
-Once you have written the flyway config file, you can run Flyway straight from
-Maven. Please note, that Flyway is *not* run during any of the regular Maven
-build phases. This means that every time you want to run Flyway, you have to
-specifically tell Maven to do so.
-
-You can read details on the usage of Flyway on their
-[website](https://flywaydb.org/), but for now, it will do if you can create and
-delete the database:
-
-```
-# Initialize the database
-~$ mvn flyway:migrate
-
-# Delete the database
-~$ mvn flyway:clean
-```
-
-If you want to do this on the testnet3 database rather than the mainnet databae,
-simply add @testnet3 to the end of the command:
-
-```
-# Initialize the database
-~$ mvn flyway:migrate@testnet3
-
-# Delete the database
-~$ flyway:clean@testnet3
-```
-
 ### Configuring MariaDB
 
 Without any change, our scripts will create the database with the MEMORY storage
@@ -203,6 +166,43 @@ sed](https://www.gnu.org/software/sed/) and the arguments might be different for
 different implementations of these utilities (such as under BSD).
 ```
 ~$ find src/main/resources/db/migration/ -name "*.sql" -exec sed -i -e's/ENGINE\s*=\s*MEMORY/ENGINE = InnoDB/g' {} \
+```
+
+## Testing / Development setup
+
+If you want to develop Blk2DB or if you just want to check it out and toy
+around, you can use Maven for pretty much anything. However, if you plan on
+using the software for more serious purposes, you should probably get an
+executable version and write propper configuration files.
+
+### Flyway
+
+Once you have written the flyway config file, you can run Flyway straight from
+Maven. Please note, that Flyway is *not* run during any of the regular Maven
+build phases. This means that every time you want to run Flyway, you have to
+specifically tell Maven to do so.
+
+You can read details on the usage of Flyway on their
+[website](https://flywaydb.org/), but for now, it will do if you can create and
+delete the database:
+
+```
+# Initialize the database
+~$ mvn flyway:migrate
+
+# Delete the database
+~$ mvn flyway:clean
+```
+
+If you want to do this on the testnet3 database rather than the mainnet databae,
+simply add @testnet3 to the end of the command:
+
+```
+# Initialize the database
+~$ mvn flyway:migrate@testnet3
+
+# Delete the database
+~$ flyway:clean@testnet3
 ```
 
 ### Compiling and running the software
@@ -351,6 +351,16 @@ replaced (instead of just getting updated).
 
 ### Cronjob
 
+
+## Policy of crashing
+
+It is important to us that the resulting database contains valid data. To ensure
+this, we don't try to do anything fancy when we hit a problem while parsing the
+blockchain. Instead, the application will just crash. On crash, the application
+prints (hopefully) helpful information on where exactly the application crashed.
+This allows a user to figure out what happened, fix the software (or file a bug
+report) and then continue reading in the blockchain once the problem has been
+resolved.
 
 ## Webinterface
 
