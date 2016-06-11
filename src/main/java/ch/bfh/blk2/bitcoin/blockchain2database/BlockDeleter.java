@@ -54,6 +54,9 @@ public class BlockDeleter {
 	// delete the inputs and outputs
 	private static final String DELETE_OUTPUTS = "DELETE FROM output WHERE tx_id = ?;";
 	private static final String DELETE_INPUTS = "DELETE FROM input WHERE tx_id = ?;";
+	
+	// update / reset the previou outputs
+	private static final String UPDATE_PREV_OUTPUTS = "UPDATE output SET spent_at = ?, spent_by_tx = ?, spent_by_index = ? WHERE spent_by_tx = ?";
 
 	// delete the transactions
 	private static final String DELETE_TRANSACTIONS = "DELETE FROM transaction WHERE blk_id = ?;";
@@ -100,12 +103,17 @@ public class BlockDeleter {
 			// ... delete the scripts themselves
 			deleteScripts(tx_id, connection);
 
+			// Update the previous outputs
+			updatePrevOutputs(tx_id, connection);
+
 			// ... delete all the input- and output scripts
 			deleteInputOutputScripts(tx_id, connection);
 
 			// ... delete the outputs, the inputs
 			deleteInputsAndOutputsOfTransaction(tx_id, connection);
+
 		}
+		
 
 		// Delete all transactions linked to the block
 		deleteTransactions(blk_id, connection);
@@ -294,6 +302,20 @@ public class BlockDeleter {
 			deleteStatement.executeUpdate();
 		} catch (SQLException e) {
 			logger.fatal("Unable to delete transactions for block " + blk_id, e);
+			System.exit(1);
+		}
+	}
+	
+	private void updatePrevOutputs( long tx_id, DatabaseConnection connection){
+		PreparedStatement updateStatement = connection.getPreparedStatement(UPDATE_PREV_OUTPUTS);
+		try {
+			updateStatement.setNull( 1, java.sql.Types.DATE );
+			updateStatement.setNull( 2, java.sql.Types.BIGINT);
+			updateStatement.setNull( 3, java.sql.Types.INTEGER);
+			updateStatement.setLong(4, tx_id);
+			updateStatement.executeUpdate();
+		} catch (SQLException e) {
+			logger.fatal("Unable to update the previous outputs of " + tx_id, e);
 			System.exit(1);
 		}
 	}
