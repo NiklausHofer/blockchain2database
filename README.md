@@ -339,7 +339,7 @@ java -jar blockchain2database-1.0.jar
 
 ```
 # Dump the database
-mysqldump -h localhost -u root -p --databases mainnet > mainnet_$(date +%Ft%R).dmp
+mysqldump --default-character-set=utf8 -h localhost -u root -p --databases mainnet > mainnet_$(date +%Ft%R).dmp
 ```
 
 ```
@@ -351,7 +351,7 @@ mysqldump -h localhost -u root -p --databases mainnet > mainnet_$(date +%Ft%R).d
 
 ```
 # Read in the dump into InnoDB backed tables
-cat mainnet_2016-06-11t02\:38.dmp | sed -e's/ENGINE=MEMORY/ENGINE=InnoDB/g' | mysql -h localhost -u root -p
+cat mainnet_2016-06-11t02\:38.dmp | sed -e's/ENGINE=MEMORY/ENGINE=InnoDB/g' | mysql --default-character-set=utf8 -h localhost -u root -p
 ```
 
 ```
@@ -380,6 +380,20 @@ replaced (instead of just getting updated).
 
 ### Cronjob
 
+To keep your database up to date, you should run the Blockchain 2 Database
+software regularly, say once every hour. The way to do that is probably via a
+cronjob. You also want to make sure that no two instances of the software are
+running at the same time.
+
+Here is an example for a simple cronjob to run the software once every 30
+minutes, using the `cronjob.sh` file from the [resources](src/main/resources)
+folder (it has to be located in the same folder as the executable jar).
+
+```
+~$ crontabl -l
+# m h  dom mon dow   command
+5,35 * * * * cd /home/mainnet/blockchain2database/ && ./cronjob.sh
+```
 
 ## Policy of crashing
 
