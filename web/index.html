@@ -1,30 +1,56 @@
 <html>
 <head>
-  <title>Blockchain Explorer</title>
+  <title>Blockchain Query Tool</title>
+  <meta charset="UTF-8">
+  <style>
+	#center {
+		width: 60%;
+		margin: 0 auto;
+	}
+	dl {
+		display: block;
+	}
+	dt {
+		float: left;
+		clear: left;
+		text-align: right;
+		width: 100px;
+		font-weight: bold;
+	}
+	dt:after {
+		content: ":";
+	}
+	dd {
+		margin: 0 0 0 110px;
+		padding: 0 0 0.5em 0;
+	}
+  </style>
 </head>
 <body>
 
-  <h1>Blockchain explorer</h1>
-  
-  Explore the Bitcoin Blockchain.
-  
-  <h3>Login as Guest</h3>
-  NAME: websql
-  </br>
-  PW: foobar123
-  </br>
-  <a href="myWebSql/index.php"> Query the Database </a>
-  </br>
-  </br>
-  <a href="diag_alt_2.svg" target="blank"> View our Database Schema</a>
-  </br>
-    <a href="er_2.svg" target="blank"> View our ER Diagram</a>
-  </br>
-  <hr>
-  <img src="http://en.bitcoinwiki.org/images/5/50/Bitcoin.png" 
-    alt="Bitcoin Logo" 
-    style="width:160px;max-height:160px;"
-  >
+  <div id="center" align="left">
+	  <h1 align="center">Blockchain Query Tool</h1>
+	  
+		<p>Blockchain Explorers are Great - until you need to find something very specific. They are powerful, but they limit you to certain queries that you can make. We don't! We provide you with full read access to our database. Our database design allows you to query virtually all the information contained in the blochain.</p>
+
+		<p>To get started, have a look at our <a href="diag_alt_2.svg" target="blank">Database Schema</a> to see what is what.</p>
+		<p>You can also checkout our <a href="er_2.svg" target="blank">ER Diagram</a> which is the basis of our database deisgn.</p>
+
+	  
+	  <h2 align="center">Login</h2>
+		<p>Use the credentials below to Login on our <a href="myWebSql/index.php">Web interface</a>. Access either the <a href="testnet3/">testnet3</a> or the <a href="mainnet/">mainnet</a></p>
+		<dl>
+			<dt>User</dt>
+			<dd>pubweb</dd>
+			<dt>Password</dt>
+			<dd>foobar</dd>
+		</dl>
+	  <a href="myWebSql/index.php"> Query the Database </a>
+	  <hr>
+  </div>
+	<div id="center" align="center">
+	  <img src="http://en.bitcoinwiki.org/images/5/50/Bitcoin.png" alt="Bitcoin Logo" style="width:160px;max-height:160px;" align="center" />
+	</div>
   
 </body>
 </html>
